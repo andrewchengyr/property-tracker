@@ -4,13 +4,14 @@ on:
   schedule:
     # Actions cron is UTC — Sun 20:00 UTC = Mon 04:00 SGT.
     - cron: "0 20 * * 0"
-  workflow_dispatch:
+  workflow_dispatch:      # Actions tab → Run workflow, for an on-demand refresh
 
 permissions:
-  contents: write   # to commit the refreshed db + data.json
-  pages: write      # to publish the site
-  id-token: write
+  contents: write   # commit the refreshed db + data.json
+  pages: write      # publish the site
+  id-token: write   # deploy-pages uses OIDC
 
+# Never let a manual run and the cron fight over the same push.
 concurrency:
   group: refresh
   cancel-in-progress: false
@@ -18,6 +19,9 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      pull_failed: ${{ steps.pull.outcome == 'failure' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +32,12 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      # continue-on-error so that a failed source still deploys the last good
+      # data and still commits whatever did succeed; the run is failed at the
+      # end instead, via the job output above.
       - name: Pull latest transactions
+        id: pull
+        continue-on-error: true
         env:
           URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
           ONEMAP_EMAIL: ${{ secrets.ONEMAP_EMAIL }}
@@ -44,6 +53,9 @@ jobs:
             echo "No new transactions."
           else
             git commit -m "chore: refresh transactions ($(date -u +%Y-%m-%d))"
+            # Rebase first: a push of your own between runs would otherwise
+            # make this job fail on a non-fast-forward.
+            git pull --rebase --autostash
             git push
           fi
 
@@ -63,3 +75,12 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # Last, so the site is already live. Turns the run red when a source
+      # broke — the only signal you get that a credential needs attention.
+      - name: Surface ingestion failures
+        if: needs.refresh.outputs.pull_failed == 'true'
+        run: |
+          echo "::error::A data source failed — see the 'Pull latest transactions' step. \
+          The site was still deployed from the last good data."
+          exit 1

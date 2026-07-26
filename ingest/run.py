@@ -110,7 +110,10 @@ def _year_or_none(value: Any) -> int | None:
 # ---------------------------------------------------------------------------
 
 def collect_private(
-    entries: list[dict[str, str]], store: Store, from_fixtures: bool
+    entries: list[dict[str, str]],
+    store: Store,
+    from_fixtures: bool,
+    errors: list[str] | None = None,
 ) -> list[Transaction]:
     if not entries:
         return []
@@ -125,6 +128,8 @@ def collect_private(
             projects = client.fetch_all()
     except Exception as exc:  # noqa: BLE001 — HDB can still succeed
         log.error("URA pull failed, continuing without private data: %s", exc)
+        if errors is not None:
+            errors.append(f"URA pull failed: {exc}")
         return []
 
     txns = ura_mod.normalize(projects, wanted, svy21_to_wgs84)
@@ -135,7 +140,10 @@ def collect_private(
 
 
 def collect_hdb(
-    entries: list[dict[str, str]], store: Store, from_fixtures: bool
+    entries: list[dict[str, str]],
+    store: Store,
+    from_fixtures: bool,
+    errors: list[str] | None = None,
 ) -> list[Transaction]:
     if not entries:
         return []
@@ -162,6 +170,8 @@ def collect_hdb(
                 fetched = client.fetch(entry["town"], entry["flat_type"])
             except Exception as exc:  # noqa: BLE001 — skip this entry only
                 log.error("HDB pull failed for %s / %s: %s", entry["town"], entry["flat_type"], exc)
+                if errors is not None:
+                    errors.append(f"HDB pull failed for {entry['town']} / {entry['flat_type']}: {exc}")
                 continue
             narrowed = hdb_mod.filter_records(fetched, entry["block"], entry["street_name"])
             if not narrowed:
@@ -304,12 +314,13 @@ def main(argv: list[str] | None = None) -> int:
 
     watchlist = load_watchlist(args.watchlist)
     txns: list[Transaction] = []
+    errors: list[str] = []
 
     with Store(args.db) as store:
         if not args.skip_ura:
-            txns.extend(collect_private(watchlist["private"], store, args.from_fixtures))
+            txns.extend(collect_private(watchlist["private"], store, args.from_fixtures, errors))
         if not args.skip_hdb:
-            txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures))
+            txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures, errors))
 
         added, updated = store.upsert_many(txns)
         top_years = {
@@ -321,6 +332,16 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_csv:
             store.export_csv()
         summarize(txns, added, updated, store)
+
+    # Export and commit still happened above — the site keeps the last good
+    # data. But a source that failed outright must not pass as a green run:
+    # under a weekly cron, a revoked key or expired OneMap password would
+    # otherwise go unnoticed until the numbers were badly stale.
+    if errors:
+        print("SOURCE FAILURES (exiting non-zero):", file=sys.stderr)
+        for err in errors:
+            print(f"  - {err}", file=sys.stderr)
+        return 1
 
     return 0
 
