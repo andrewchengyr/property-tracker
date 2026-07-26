@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# THE CONTROL PANEL
+#
+# Add or remove properties here and re-run the ingestion — no code changes.
+#   python -m ingest.run
+#
+# Entries are forgiving: whitespace is trimmed, HDB fields are uppercased to
+# match the dataset. An entry that matches nothing logs a warning and the rest
+# of the run continues.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Private residential (URA caveats).
+# Matched against URA "project" names, case-insensitive "contains".
+# So "trevista" matches "TREVISTA". Partial names are fine.
+#
+# top_year is optional: URA caveats carry the lease commencement year but not
+# the completion date, so TOP has to be supplied here if you want it shown.
+# Everything else (tenure, lease start, years remaining) is derived.
+private:
+  - project: "TREVISTA"
+    top_year: 2011        # lease commenced 2008; TOP 2011
+
+# HDB resale (data.gov.sg).
+# town + flat_type are required. block / street_name are optional and narrow
+# the match down to a single street or building.
+#
+# The dataset abbreviates street names ("LOR 1A TOA PAYOH", "BISHAN ST 13",
+# "UPP SERANGOON RD"). You can write either form here — both are canonicalised
+# before matching. Blocks on this street: 138A, 138B, 138C, 139A, 139B.
+hdb:
+  - town: "TOA PAYOH"
+    flat_type: "5 ROOM"
+    street_name: "LORONG 1A TOA PAYOH"

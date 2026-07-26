@@ -1,0 +1,87 @@
+{
+ "138A LOR 1A TOA PAYOH": {
+  "found": 1,
+  "totalNumPages": 1,
+  "pageNum": 1,
+  "results": [
+   {
+    "SEARCHVAL": "BLK 138A LOR 1A TOA PAYOH",
+    "BLK_NO": "138A",
+    "ROAD_NAME": "LOR 1A TOA PAYOH",
+    "BUILDING": "NIL",
+    "ADDRESS": "138A LOR 1A TOA PAYOH SINGAPORE 3138A",
+    "POSTAL": "3138A",
+    "LATITUDE": "1.3367100",
+    "LONGITUDE": "103.8454700"
+   }
+  ]
+ },
+ "138B LOR 1A TOA PAYOH": {
+  "found": 1,
+  "totalNumPages": 1,
+  "pageNum": 1,
+  "results": [
+   {
+    "SEARCHVAL": "BLK 138B LOR 1A TOA PAYOH",
+    "BLK_NO": "138B",
+    "ROAD_NAME": "LOR 1A TOA PAYOH",
+    "BUILDING": "NIL",
+    "ADDRESS": "138B LOR 1A TOA PAYOH SINGAPORE 3138B",
+    "POSTAL": "3138B",
+    "LATITUDE": "1.3369900",
+    "LONGITUDE": "103.8456380"
+   }
+  ]
+ },
+ "138C LOR 1A TOA PAYOH": {
+  "found": 1,
+  "totalNumPages": 1,
+  "pageNum": 1,
+  "results": [
+   {
+    "SEARCHVAL": "BLK 138C LOR 1A TOA PAYOH",
+    "BLK_NO": "138C",
+    "ROAD_NAME": "LOR 1A TOA PAYOH",
+    "BUILDING": "NIL",
+    "ADDRESS": "138C LOR 1A TOA PAYOH SINGAPORE 3138C",
+    "POSTAL": "3138C",
+    "LATITUDE": "1.3372700",
+    "LONGITUDE": "103.8458060"
+   }
+  ]
+ },
+ "139A LOR 1A TOA PAYOH": {
+  "found": 1,
+  "totalNumPages": 1,
+  "pageNum": 1,
+  "results": [
+   {
+    "SEARCHVAL": "BLK 139A LOR 1A TOA PAYOH",
+    "BLK_NO": "139A",
+    "ROAD_NAME": "LOR 1A TOA PAYOH",
+    "BUILDING": "NIL",
+    "ADDRESS": "139A LOR 1A TOA PAYOH SINGAPORE 3139A",
+    "POSTAL": "3139A",
+    "LATITUDE": "1.3375500",
+    "LONGITUDE": "103.8459740"
+   }
+  ]
+ },
+ "139B LOR 1A TOA PAYOH": {
+  "found": 1,
+  "totalNumPages": 1,
+  "pageNum": 1,
+  "results": [
+   {
+    "SEARCHVAL": "BLK 139B LOR 1A TOA PAYOH",
+    "BLK_NO": "139B",
+    "ROAD_NAME": "LOR 1A TOA PAYOH",
+    "BUILDING": "NIL",
+    "ADDRESS": "139B LOR 1A TOA PAYOH SINGAPORE 3139B",
+    "POSTAL": "3139B",
+    "LATITUDE": "1.3378300",
+    "LONGITUDE": "103.8461420"
+   }
+  ]
+ }
+}

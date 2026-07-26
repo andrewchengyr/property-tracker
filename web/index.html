@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SG Property Tracker</title>
+<meta name="description" content="Transacted prices for a watchlist of Singapore properties, mapped over time.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🏙️</text></svg>">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
+     Pages CDN edge) can serve a stale script against fresh markup, which fails
+     in confusing ways rather than cleanly. -->
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>SG Property Tracker</h1>
+    <p class="meta" id="meta">Loading…</p>
+  </div>
+
+  <!-- One filter row, scoping everything below it. -->
+  <div class="filters">
+    <div class="filter">
+      <span class="filter-label" id="sourceLabel">Type</span>
+      <div class="chips" role="group" aria-labelledby="sourceLabel">
+        <button type="button" class="chip is-on" data-source="ALL" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-source="URA" aria-pressed="false">Private</button>
+        <button type="button" class="chip" data-source="HDB" aria-pressed="false">HDB</button>
+      </div>
+    </div>
+
+    <div class="filter filter--range">
+      <span class="filter-label">Period <output id="rangeLabel" class="range-readout"></output></span>
+      <div class="dual-range" id="dualRange">
+        <div class="dr-track" aria-hidden="true"><div class="dr-fill" id="drFill"></div></div>
+        <input type="range" id="rangeStart" min="0" max="1" value="0" step="1" aria-label="Start month">
+        <input type="range" id="rangeEnd" min="0" max="1" value="1" step="1" aria-label="End month">
+      </div>
+    </div>
+
+    <div class="filter filter--actions">
+      <button type="button" class="btn" id="play" aria-label="Animate the period forward">
+        <span class="btn-glyph" id="playGlyph">▶</span><span class="btn-text" id="playText">Play</span>
+      </button>
+      <button type="button" class="btn btn--ghost" id="moreToggle"
+              aria-expanded="true" aria-controls="moreFilters">
+        Filters<span class="btn-badge" id="filterCount" hidden>0</span>
+      </button>
+      <button type="button" class="btn btn--ghost" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- Size and price narrow the transactions themselves; lease remaining is a
+       property of the building, so it hides whole properties. -->
+  <div class="filters filters--more" id="moreFilters">
+    <div class="filter">
+      <span class="filter-label">Size <span class="filter-unit">sqft</span></span>
+      <div class="pair">
+        <input type="number" id="minSqft" class="num-input" min="0" step="50"
+               placeholder="Any" inputmode="numeric" aria-label="Minimum floor area, sqft">
+        <span class="pair-dash" aria-hidden="true">–</span>
+        <input type="number" id="maxSqft" class="num-input" min="0" step="50"
+               placeholder="Any" inputmode="numeric" aria-label="Maximum floor area, sqft">
+      </div>
+    </div>
+
+    <div class="filter">
+      <span class="filter-label">Price <span class="filter-unit">SGD</span></span>
+      <div class="pair">
+        <input type="number" id="minPrice" class="num-input num-input--wide" min="0" step="50000"
+               placeholder="Any" inputmode="numeric" aria-label="Minimum transacted price">
+        <span class="pair-dash" aria-hidden="true">–</span>
+        <input type="number" id="maxPrice" class="num-input num-input--wide" min="0" step="50000"
+               placeholder="Any" inputmode="numeric" aria-label="Maximum transacted price">
+      </div>
+    </div>
+
+    <div class="filter filter--lease">
+      <span class="filter-label">
+        Lease left <output id="leaseLabel" class="range-readout">Any</output>
+      </span>
+      <div class="solo-range">
+        <div class="dr-track" aria-hidden="true"><div class="dr-fill" id="leaseFill"></div></div>
+        <input type="range" id="minLease" min="0" max="99" value="0" step="1"
+               aria-label="Minimum years remaining on lease">
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="stage">
+  <div id="map" role="application" aria-label="Map of watched Singapore properties"></div>
+
+  <div class="legend" id="legend" hidden>
+    <p class="legend-title">Median price per sqft</p>
+    <div class="legend-scale" id="legendScale"></div>
+    <div class="legend-shapes">
+      <span class="legend-shape"><i class="mk mk--ura" aria-hidden="true"></i>Private</span>
+      <span class="legend-shape"><i class="mk mk--hdb" aria-hidden="true"></i>HDB</span>
+    </div>
+  </div>
+
+  <!-- Lives in the stage rather than the map pane: Leaflet tooltips are
+       clipped by the map container and never flip when space runs out. -->
+  <div class="hover-card" id="hoverCard" hidden aria-hidden="true"></div>
+
+  <p class="empty-note" id="emptyNote" hidden></p>
+
+  <button type="button" class="scrim" id="scrim" hidden aria-label="Close details"></button>
+
+  <aside class="panel" id="panel" hidden aria-live="polite">
+    <div class="panel-grab" aria-hidden="true"></div>
+    <button type="button" class="panel-close" id="panelClose" aria-label="Close details">&times;</button>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+</main>
+
+<noscript><p class="noscript">This map needs JavaScript to render.</p></noscript>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js?v=4"></script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+"""Offline tests — every one runs against saved fixtures, no keys, no network."""
+
+from __future__ import annotations
+
+import json
+from datetime import date
+from pathlib import Path
+
+import pytest
+
+from ingest import hdb as hdb_mod
+from ingest import ura as ura_mod
+from ingest.geocode import Geocoder, first_latlng, svy21_to_wgs84
+from ingest.models import (
+    SOURCE_HDB,
+    SOURCE_URA,
+    lease_facts,
+    parse_hdb_month,
+    parse_ura_contract_date,
+)
+from ingest.run import load_watchlist
+from ingest.store import Store, slugify
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture
+def ura_projects():
+    return json.loads((FIXTURES / "ura_transactions.json").read_text())["Result"]
+
+
+@pytest.fixture
+def hdb_records():
+    return json.loads((FIXTURES / "hdb_resale.json").read_text())["result"]["records"]
+
+
+@pytest.fixture
+def store(tmp_path):
+    with Store(tmp_path / "test.db") as s:
+        yield s
+
+
+# --------------------------------------------------------------- dates -----
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [("0324", date(2024, 3, 1)), ("0125", date(2025, 1, 1)), ("1221", date(2021, 12, 1))],
+)
+def test_ura_contract_date_is_mmyy_not_yymm(raw, expected):
+    assert parse_ura_contract_date(raw) == expected
+
+
+@pytest.mark.parametrize("bad", ["3024", "abcd", "324", "", "0013"])
+def test_malformed_contract_date_raises(bad):
+    with pytest.raises(ValueError):
+        parse_ura_contract_date(bad)
+
+
+def test_hdb_month_parses():
+    assert parse_hdb_month("2025-03") == date(2025, 3, 1)
+
+
+# --------------------------------------------------------------- lease -----
+
+@pytest.mark.parametrize(
+    "tenure,label,start,years",
+    [
+        ("99 yrs lease commencing from 2008", "99-year leasehold", 2008, 99),
+        ("999 yrs lease commencing from 1875", "999-year leasehold", 1875, 999),
+        ("Freehold", "Freehold", None, None),
+        ("freehold", "Freehold", None, None),
+        ("99 yrs from 2008", "99 yrs from 2008", None, None),   # unparseable: verbatim
+        ("", "", None, None),
+    ],
+)
+def test_ura_tenure_parsing(tenure, label, start, years):
+    f = lease_facts(SOURCE_URA, tenure)
+    assert f["tenure_label"] == label
+    assert f["lease_start"] == start
+    assert f["lease_years"] == years
+
+
+def test_hdb_lease_comes_from_commencement_not_remaining():
+    """`remaining_lease` is only true as of that caveat; the start year is the
+    stable fact the frontend counts down from."""
+    f = lease_facts(
+        SOURCE_HDB,
+        "84 years 11 months",
+        {"lease_commence_date": "2012", "flat_model": "DBSS"},
+    )
+    assert f == {
+        "tenure_label": "99-year leasehold",
+        "lease_start": 2012,
+        "lease_years": 99,
+        "flat_model": "DBSS",
+    }
+
+
+def test_hdb_lease_survives_a_missing_commencement_date():
+    f = lease_facts(SOURCE_HDB, "70 years", {})
+    assert f["lease_start"] is None and f["lease_years"] == 99
+
+
+def test_export_carries_lease_facts_and_top_year(store, hdb_records, tmp_path):
+    store.upsert_many(
+        hdb_mod.normalize(
+            hdb_mod.filter_records(hdb_records, street_name="LOR 1A TOA PAYOH")))
+    payload = store.export_json(tmp_path / "d.json")
+    prop = payload["properties"][0]
+    assert prop["tenure_label"] == "99-year leasehold"
+    assert prop["lease_years"] == 99
+    # HDB leases commence on completion, so TOP falls out of the lease start.
+    assert prop["top_year"] == prop["lease_start"]
+
+
+def test_watchlist_top_year_reaches_the_export(store, ura_projects, tmp_path):
+    store.upsert_many(ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84))
+    payload = store.export_json(tmp_path / "d.json", top_years={"trevista": 2011})
+    prop = [p for p in payload["properties"] if p["source"] == SOURCE_URA][0]
+    assert prop["top_year"] == 2011
+    assert prop["lease_start"] == 2007      # from the fixture's tenure string
+
+
+# ------------------------------------------------------------ projection ----
+
+def test_svy21_converts_into_singapore():
+    # Trevista's approximate SVY21 easting/northing.
+    lat, lng = svy21_to_wgs84(30599.0, 34405.0)
+    assert 1.20 < lat < 1.48
+    assert 103.6 < lng < 104.1
+
+
+# ----------------------------------------------------------------- URA ------
+
+def test_normalize_keeps_only_watchlist_projects(ura_projects):
+    txns = ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84)
+    assert txns
+    assert {t.property_name for t in txns} == {"TREVISTA"}
+
+
+def test_project_match_is_case_insensitive_substring(ura_projects):
+    lower = ura_mod.normalize(ura_projects, ["trevista"], svy21_to_wgs84)
+    partial = ura_mod.normalize(ura_projects, ["trevis"], svy21_to_wgs84)
+    assert len(lower) == len(partial) > 0
+
+
+def test_empty_watchlist_yields_nothing(ura_projects):
+    assert ura_mod.normalize(ura_projects, [], svy21_to_wgs84) == []
+
+
+def test_ura_rows_are_fully_normalized(ura_projects):
+    t = ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84)[0]
+    assert t.source == SOURCE_URA
+    assert t.address == "LORONG 1 TOA PAYOH"
+    assert t.segment == "RCR"
+    assert t.price > 0 and t.area_sqm > 0
+    assert t.area_sqft == pytest.approx(t.area_sqm * 10.7639)
+    assert t.price_psf == pytest.approx(t.price / t.area_sqft)
+    assert 1.20 < t.lat < 1.48 and 103.6 < t.lng < 104.1
+
+
+def test_one_malformed_record_does_not_lose_the_rest():
+    projects = [{
+        "project": "TREVISTA", "street": "LORONG 1 TOA PAYOH", "marketSegment": "RCR",
+        "transaction": [
+            {"contractDate": "NOPE", "price": "1", "area": "100"},          # bad date
+            {"contractDate": "0324", "price": "2000000", "area": "100",
+             "propertyType": "Condominium", "district": "12",
+             "floorRange": "06-10", "tenure": "99 yrs", "x": "30599", "y": "34405"},
+        ],
+    }]
+    txns = ura_mod.normalize(projects, ["TREVISTA"], svy21_to_wgs84)
+    assert len(txns) == 1
+    assert txns[0].txn_date == date(2024, 3, 1)
+
+
+def test_missing_coords_leave_row_intact_without_latlng():
+    projects = [{
+        "project": "TREVISTA", "street": "X", "marketSegment": "RCR",
+        "transaction": [{"contractDate": "0324", "price": "2000000", "area": "100",
+                         "propertyType": "Condominium", "district": "12",
+                         "floorRange": "06-10", "tenure": "99 yrs"}],
+    }]
+    txns = ura_mod.normalize(projects, ["TREVISTA"], svy21_to_wgs84)
+    assert len(txns) == 1 and txns[0].lat is None
+
+
+# ----------------------------------------------------------------- HDB ------
+
+def test_street_filter_narrows_to_one_street(hdb_records):
+    subset = [r for r in hdb_records
+              if r["town"] == "TOA PAYOH" and r["flat_type"] == "5 ROOM"]
+    narrowed = hdb_mod.filter_records(subset, street_name="LORONG 1A TOA PAYOH")
+    assert narrowed and len(narrowed) < len(subset)
+    assert {r["street_name"] for r in narrowed} == {"LOR 1A TOA PAYOH"}
+
+
+def test_filters_are_case_insensitive(hdb_records):
+    a = hdb_mod.filter_records(hdb_records, street_name="lorong 1a toa payoh")
+    b = hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH")
+    assert len(a) == len(b) > 0
+
+
+def test_block_filter_narrows_further(hdb_records):
+    street = hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH")
+    block = hdb_mod.filter_records(street, block="138A")
+    assert block and len(block) < len(street)
+    assert {r["block"] for r in block} == {"138A"}
+
+
+def test_spelled_out_street_matches_the_datasets_abbreviation(hdb_records):
+    """The dataset says "LOR 1A TOA PAYOH"; nobody writes that in a watchlist."""
+    spelled = hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH")
+    abbrev = hdb_mod.filter_records(hdb_records, street_name="LOR 1A TOA PAYOH")
+    assert len(spelled) == len(abbrev) > 0
+
+
+@pytest.mark.parametrize(
+    "written,dataset",
+    [
+        ("LORONG 1A TOA PAYOH", "LOR 1A TOA PAYOH"),
+        ("BISHAN STREET 13", "BISHAN ST 13"),
+        ("ANG MO KIO AVENUE 3", "ANG MO KIO AVE 3"),
+        ("UPPER SERANGOON ROAD", "UPP SERANGOON RD"),
+        ("JALAN BUKIT MERAH", "JLN BT MERAH"),
+        ("TOA PAYOH NORTH", "TOA PAYOH NTH"),
+    ],
+)
+def test_street_abbreviations_canonicalize_to_the_same_key(written, dataset):
+    assert hdb_mod.canonical_street(written) == hdb_mod.canonical_street(dataset)
+
+
+def test_street_filter_still_rejects_a_genuinely_different_street(hdb_records):
+    assert hdb_mod.filter_records(hdb_records, street_name="LOR 2 TOA PAYOH") == []
+
+
+def test_hdb_property_name_is_block_plus_street(hdb_records):
+    txns = hdb_mod.normalize(
+        hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH"))
+    t = txns[0]
+    assert t.source == SOURCE_HDB
+    assert t.property_name.endswith("LOR 1A TOA PAYOH")
+    assert t.district_town == "TOA PAYOH"
+    assert t.property_type == "5 ROOM"
+
+
+# --------------------------------------------------------------- store ------
+
+def _sample(hdb_records):
+    return hdb_mod.normalize(
+        hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH"))
+
+
+def test_upsert_is_idempotent(store, hdb_records):
+    txns = _sample(hdb_records)
+    added, updated = store.upsert_many(txns)
+    assert added == len(txns) and updated == 0
+    first_count = store.count()
+
+    added2, updated2 = store.upsert_many(txns)      # same data, second run
+    assert added2 == 0
+    assert updated2 == len(txns)
+    assert store.count() == first_count             # no duplicates
+
+
+def test_three_runs_still_no_duplicates(store, hdb_records):
+    txns = _sample(hdb_records)
+    for _ in range(3):
+        store.upsert_many(txns)
+    assert store.count() == len(txns)
+
+
+def test_duplicates_within_one_batch_collapse(store, hdb_records):
+    txns = _sample(hdb_records)
+    added, _ = store.upsert_many(txns + txns)
+    assert added == len(txns)
+    assert store.count() == len(txns)
+
+
+def test_rows_that_gain_coordinates_later_do_not_duplicate(store, ura_projects):
+    """URA rows arrive with no coordinates and are geocoded afterwards. If the
+    dedup key included lat/lng, the next run would re-insert every one."""
+    txns = ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84)
+    for t in txns:
+        t.lat = t.lng = None
+    added, _ = store.upsert_many(txns)
+    assert added == len(txns)
+
+    for t in txns:                       # geocoded on a later pass
+        t.lat, t.lng = 1.33509, 103.84662
+    added2, updated2 = store.upsert_many(txns)
+    assert added2 == 0
+    assert updated2 == len(txns)
+    assert store.count() == len(txns)
+    assert all(r["lat"] == 1.33509 for r in store.all_rows())
+
+
+def test_ura_and_hdb_rows_coexist(store, hdb_records, ura_projects):
+    store.upsert_many(_sample(hdb_records))
+    store.upsert_many(ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84))
+    sources = {r["source"] for r in store.all_rows()}
+    assert sources == {SOURCE_URA, SOURCE_HDB}
+
+
+def test_late_geocode_backfills_existing_rows(store, hdb_records):
+    txns = _sample(hdb_records)
+    store.upsert_many(txns)
+    name = txns[0].property_name
+    n = store.backfill_coords(name, SOURCE_HDB, 1.3385, 103.8455)
+    assert n > 0
+    rows = [r for r in store.all_rows() if r["property_name"] == name]
+    assert all(r["lat"] == 1.3385 for r in rows)
+
+
+def test_upsert_never_nulls_a_known_coordinate(store, hdb_records):
+    txns = _sample(hdb_records)
+    for t in txns:
+        t.lat, t.lng = 1.3385, 103.8455
+    store.upsert_many(txns)
+    for t in txns:                      # a later run without a geocode
+        t.lat = t.lng = None
+    store.upsert_many(txns)
+    assert all(r["lat"] == 1.3385 for r in store.all_rows())
+
+
+# -------------------------------------------------------------- export ------
+
+def test_export_json_shape(store, hdb_records, ura_projects, tmp_path):
+    store.upsert_many(_sample(hdb_records))
+    store.upsert_many(ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84))
+    payload = store.export_json(tmp_path / "data.json")
+
+    assert payload["generated_at"].endswith("Z")
+    assert payload["properties"]
+    for prop in payload["properties"]:
+        assert {"id", "name", "source", "lat", "lng", "latest_psf", "txns"} <= set(prop)
+        assert prop["txn_count"] == len(prop["txns"])
+        dates = [t["date"] for t in prop["txns"]]
+        assert dates == sorted(dates)               # chart expects date order
+
+
+def test_export_csv_has_a_row_per_transaction(store, hdb_records, tmp_path):
+    txns = _sample(hdb_records)
+    store.upsert_many(txns)
+    out = store.export_csv(tmp_path)
+    lines = out.read_text().strip().splitlines()
+    assert len(lines) == len(txns) + 1              # + header
+
+
+def test_slugify():
+    assert slugify("Sky Habitat") == "sky-habitat"
+    assert slugify("138A LOR 1A TOA PAYOH") == "138a-lor-1a-toa-payoh"
+
+
+# ------------------------------------------------------------ geocoder ------
+
+class _CountingClient:
+    def __init__(self, result=(1.3385, 103.8455)):
+        self.result = result
+        self.calls = 0
+
+    def search(self, address):
+        self.calls += 1
+        return self.result
+
+
+def test_geocode_cache_prevents_a_second_lookup(store):
+    client = _CountingClient()
+    geo = Geocoder(store, client)
+    assert geo.lookup("138A LOR 1A TOA PAYOH") == (1.3385, 103.8455)
+    assert geo.lookup("138A LOR 1A TOA PAYOH") == (1.3385, 103.8455)
+    assert client.calls == 1                        # second came from SQLite
+
+
+def test_geocode_failure_returns_none_without_raising(store):
+    class Failing:
+        def search(self, address):
+            raise RuntimeError("onemap down")
+
+    assert Geocoder(store, Failing()).lookup("nowhere") is None
+
+
+def test_first_latlng_reads_onemap_shape():
+    payload = json.loads((FIXTURES / "onemap_search.json").read_text())
+    lat, lng = first_latlng(payload["138A LOR 1A TOA PAYOH"])
+    assert 1.20 < lat < 1.48 and 103.6 < lng < 104.1
+
+
+def test_first_latlng_on_empty_results():
+    assert first_latlng({"found": 0, "results": []}) is None
+
+
+# ----------------------------------------------------------- watchlist ------
+
+def test_watchlist_loader_normalizes_and_forgives(tmp_path):
+    path = tmp_path / "w.yaml"
+    path.write_text(
+        """
+private:
+  - project: "  trevista  "
+  - project: ""
+hdb:
+  - town: " toa payoh "
+    flat_type: "5 room"
+    street_name: "lorong 1a toa payoh"
+  - town: "QUEENSTOWN"
+  - "not a mapping"
+"""
+    )
+    wl = load_watchlist(path)
+    assert wl["private"] == [                                # trimmed, empty dropped
+        {"project": "trevista", "top_year": None}
+    ]
+    assert len(wl["hdb"]) == 1                               # incomplete entries dropped
+    assert wl["hdb"][0]["town"] == "TOA PAYOH"               # uppercased for the API
+    assert wl["hdb"][0]["flat_type"] == "5 ROOM"
+    assert wl["hdb"][0]["street_name"] == "LORONG 1A TOA PAYOH"
+
+
+def test_missing_watchlist_does_not_crash(tmp_path):
+    assert load_watchlist(tmp_path / "nope.yaml") == {"private": [], "hdb": []}
+
+
+def test_real_watchlist_loads():
+    wl = load_watchlist(Path(__file__).parent.parent / "config" / "watchlist.yaml")
+    assert any("TREVISTA" in e["project"].upper() for e in wl["private"])
+    assert any(e["town"] == "TOA PAYOH" for e in wl["hdb"])

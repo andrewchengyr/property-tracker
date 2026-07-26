@@ -1,0 +1,938 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   SG Property Tracker
+
+   Colour roles below are the only place hex lives — light and dark are both
+   selected sets (dark is stepped for the dark surface, not an auto-flip).
+   Sequential psf ramp: one hue, light→dark, validated in both modes.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light;
+
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --gridline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.10);
+  --shadow: 0 1px 2px rgba(11, 11, 11, .06), 0 8px 24px rgba(11, 11, 11, .10);
+
+  --accent: #2a78d6;
+  --accent-soft: rgba(42, 120, 214, .12);
+  --delta-up: #006300;
+  --delta-down: #d03b3b;
+
+  /* Sequential psf ramp — 5 steps, blue, light→dark */
+  --psf-1: #86b6ef;
+  --psf-2: #5598e7;
+  --psf-3: #2a78d6;
+  --psf-4: #1c5cab;
+  --psf-5: #104281;
+  --psf-none: #b8b7b0;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --topbar-h: 116px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --gridline: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.10);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .55);
+
+    --accent: #3987e5;
+    --accent-soft: rgba(57, 135, 229, .18);
+    --delta-up: #0ca30c;
+    --delta-down: #e66767;
+
+    --psf-1: #9ec5f4;
+    --psf-2: #6da7ec;
+    --psf-3: #3987e5;
+    --psf-4: #256abf;
+    --psf-5: #184f95;
+    --psf-none: #55544f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--page);
+  color: var(--text-primary);
+  font: 400 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────── */
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding: 14px 20px 14px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  z-index: 1200;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.meta {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex: 1 1 520px;
+  flex-wrap: wrap;
+}
+
+/* Second filter row — a disclosure, so the map keeps the space when unused.
+   The default is expressed in CSS rather than set from JS at boot: the
+   viewport isn't final when the script first runs, so a one-shot matchMedia
+   there resolves against the wrong width. Explicit toggling wins over the
+   default via the body classes below. */
+.filters--more {
+  display: none;
+  flex: 1 1 100%;
+  gap: 22px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid var(--gridline);
+}
+
+/* Open by default where there's room, collapsed where the map is scarce. */
+@media (min-width: 721px) {
+  .filters--more { display: flex; }
+}
+
+body.filters-open .filters--more { display: flex; }
+body.filters-closed .filters--more { display: none; }
+
+.filter { display: flex; flex-direction: column; gap: 7px; }
+.filter--range { flex: 1 1 320px; min-width: 240px; }
+.filter--actions { flex-direction: row; align-items: flex-end; gap: 8px; }
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.range-readout {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-unit {
+  font-weight: 400;
+  letter-spacing: .03em;
+  color: var(--baseline);
+}
+
+/* ── Numeric min/max pairs ───────────────────────────────────────────── */
+
+.pair { display: flex; align-items: center; gap: 6px; }
+
+.pair-dash { color: var(--text-muted); font-size: 12px; }
+
+.num-input {
+  width: 76px;
+  min-height: 32px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.num-input--wide { width: 100px; }
+
+.num-input::placeholder { color: var(--text-muted); font-variant-numeric: normal; }
+
+.num-input:hover { border-color: var(--baseline); }
+
+.num-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+/* Spinners crowd an already-small box and are useless for these steps. */
+.num-input::-webkit-outer-spin-button,
+.num-input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+.num-input[type="number"] { -moz-appearance: textfield; }
+
+/* ── Single-thumb slider (lease) ─────────────────────────────────────── */
+
+.filter--lease { flex: 1 1 210px; max-width: 300px; }
+
+.solo-range { position: relative; height: 26px; }
+
+.solo-range input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  appearance: none;
+  background: none;
+}
+
+.solo-range input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  cursor: grab;
+}
+
+.solo-range input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  cursor: grab;
+}
+
+.solo-range input[type="range"]::-moz-range-track { background: none; }
+
+/* ── Filter count badge ──────────────────────────────────────────────── */
+
+.btn-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  margin-left: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-badge[hidden] { display: none; }
+
+/* ── Chips ───────────────────────────────────────────────────────────── */
+
+.chips { display: flex; gap: 4px; }
+
+.chip {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 13px;
+  min-height: 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+
+.chip:hover { background: var(--accent-soft); }
+
+.chip.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  padding: 7px 14px;
+  min-height: 34px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+
+.btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+.btn--ghost { color: var(--text-secondary); }
+.btn-glyph { font-size: 11px; line-height: 1; }
+
+:where(.btn, .chip, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Dual range slider ───────────────────────────────────────────────── */
+
+.dual-range { position: relative; height: 26px; }
+
+.dr-track {
+  position: absolute;
+  inset: 11px 0 auto;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--gridline);
+}
+
+.dr-fill {
+  position: absolute;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.dual-range input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  appearance: none;
+  background: none;
+  pointer-events: none;   /* only the thumbs are grabbable */
+}
+
+.dual-range input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  cursor: grab;
+}
+
+.dual-range input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+  cursor: grab;
+}
+
+.dual-range input[type="range"]::-moz-range-track { background: none; }
+
+/* ── Stage ───────────────────────────────────────────────────────────── */
+
+.stage { position: relative; flex: 1 1 auto; min-height: 0; }
+#map { position: absolute; inset: 0; background: var(--page); }
+
+.leaflet-container { font: inherit; background: var(--page); }
+
+/* Keep OSM tiles from glaring in dark mode without recolouring the markers. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(1.08) contrast(.86) saturate(.55);
+  }
+}
+
+/* ── Markers ─────────────────────────────────────────────────────────── */
+
+.mk {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--surface-1);   /* surface ring, not an outline */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+  background: var(--psf-none);
+  transition: transform .12s;
+}
+
+.mk--ura { border-radius: 50%; }
+.mk--hdb { border-radius: 5px; }
+.mk:hover { transform: scale(1.14); }
+
+.mk-wrap { background: none; border: 0; }
+.mk-wrap.no-label .mk-label { display: none; }
+.mk-wrap.is-selected .mk {
+  border-color: var(--accent);
+  transform: scale(1.2);
+}
+
+.mk-label {
+  position: absolute;
+  left: 50%;
+  top: 27px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* ── Hover card ──────────────────────────────────────────────────────── */
+
+.hover-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 950;
+  width: 212px;
+  padding: 11px 13px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
+  pointer-events: none;      /* must not steal the hover from the marker */
+  will-change: transform;
+}
+
+.hover-card[hidden] { display: none; }
+
+.hc-head { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.hc-head .mk { width: 12px; height: 12px; border-width: 1.5px; box-shadow: none; flex: 0 0 auto; }
+.hc-head .mk--hdb { border-radius: 3px; }
+
+.hc-name {
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.hc-hero { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+
+.hc-psf { font-size: 21px; font-weight: 640; letter-spacing: -0.02em; line-height: 1; }
+.hc-psf-unit { font-size: 10.5px; color: var(--text-muted); }
+
+.hc-growth {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.hc-growth.is-up { color: var(--delta-up); }
+.hc-growth.is-down { color: var(--delta-down); }
+.hc-growth.is-flat { color: var(--text-muted); }
+.hc-growth-unit { font-size: 9.5px; font-weight: 500; color: var(--text-muted); }
+
+.hc-spark { color: var(--accent); margin: 9px 0 2px; }
+.hc-spark .spark { display: block; width: 100%; height: 38px; }
+
+.hc-spark--empty {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.hc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 9px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--gridline);
+}
+
+.hc-stats dt {
+  font-size: 9px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hc-stats dd {
+  margin: 1px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.hc-hint {
+  margin: 9px 0 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────── */
+
+.legend {
+  position: absolute;
+  left: 14px;
+  bottom: 22px;
+  z-index: 900;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  padding: 11px 13px 10px;
+  max-width: 230px;
+}
+
+.legend-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.legend-scale { display: flex; gap: 2px; }
+
+.legend-step { flex: 1; text-align: center; }
+
+.legend-swatch {
+  height: 10px;
+  border-radius: 2px;
+  margin-bottom: 4px;
+}
+
+.legend-tick {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-shapes {
+  display: flex;
+  gap: 14px;
+  margin-top: 11px;
+  padding-top: 9px;
+  border-top: 1px solid var(--gridline);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend-shape { display: flex; align-items: center; gap: 6px; }
+
+.legend-shape .mk {
+  width: 13px;
+  height: 13px;
+  border-width: 1.5px;
+  background: var(--psf-3);
+  box-shadow: none;
+}
+
+/* The corner radius has to shrink with the swatch, or the square reads round. */
+.legend-shape .mk--hdb,
+.p-eyebrow .mk--hdb { border-radius: 3px; }
+
+/* ── Panel / bottom sheet ────────────────────────────────────────────── */
+
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 396px;
+  z-index: 1000;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px 22px 32px;
+  animation: slide-in .18s ease-out;
+}
+
+@keyframes slide-in { from { transform: translateX(16px); opacity: 0; } }
+
+.panel[hidden] { display: none; }
+.panel-grab { display: none; }
+
+.panel-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.panel-close:hover { background: var(--accent-soft); color: var(--text-primary); }
+
+.scrim { display: none; }
+
+/* Panel content */
+
+.p-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.p-eyebrow .mk { width: 12px; height: 12px; border-width: 1.5px; box-shadow: none; }
+
+.p-name {
+  margin: 0 0 3px;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  padding-right: 28px;
+}
+
+.p-sub { margin: 0 0 18px; font-size: 13px; color: var(--text-secondary); }
+
+.p-hero { display: flex; align-items: baseline; gap: 9px; }
+
+.p-hero-value {
+  font-size: 38px;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.p-hero-unit { font-size: 13px; color: var(--text-secondary); }
+
+.p-hero-label {
+  margin: 5px 0 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.p-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--gridline);
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.p-stat { background: var(--surface-1); padding: 9px 10px; }
+.p-stat-k { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.p-stat-v { font-size: 15px; font-weight: 600; margin-top: 2px; }
+
+/* ── Growth (CAGR) ───────────────────────────────────────────────────── */
+
+.p-growth {
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  padding: 11px 13px 10px;
+  margin-bottom: 20px;
+}
+
+.p-growth-main { display: flex; align-items: baseline; gap: 7px; }
+
+.p-growth-value {
+  font-size: 24px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Direction is carried by the sign and the wording too — never colour alone. */
+.p-growth.is-up   .p-growth-value { color: var(--delta-up); }
+.p-growth.is-down .p-growth-value { color: var(--delta-down); }
+
+.p-growth-unit { font-size: 12px; color: var(--text-secondary); }
+
+.p-growth-note {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.p-growth--empty {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  padding: 13px;
+}
+
+/* ── Property facts ──────────────────────────────────────────────────── */
+
+.p-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0;
+  margin: 0 0 22px;
+  font-size: 13px;
+}
+
+.p-facts dt {
+  color: var(--text-muted);
+  padding: 6px 16px 6px 0;
+  border-bottom: 1px solid var(--gridline);
+  white-space: nowrap;
+}
+
+.p-facts dd {
+  margin: 0;
+  padding: 6px 0;
+  text-align: right;
+  border-bottom: 1px solid var(--gridline);
+  font-variant-numeric: tabular-nums;
+}
+
+.p-facts dt:last-of-type,
+.p-facts dd:last-of-type { border-bottom: 0; }
+
+.p-fact-sub { color: var(--text-muted); font-weight: 400; }
+
+.p-h3 {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.p-h3-sub { margin: 0 0 10px; font-size: 11px; color: var(--text-muted); }
+
+.chart-box { height: 188px; margin-bottom: 22px; }
+
+.p-table-wrap { overflow-x: auto; }
+
+table.p-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.p-table th {
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0 8px 5px 0;
+  border-bottom: 1px solid var(--gridline);
+  white-space: nowrap;
+}
+
+.p-table td {
+  padding: 6px 8px 6px 0;
+  border-bottom: 1px solid var(--gridline);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.p-table td:first-child { color: var(--text-primary); }
+.p-table .num { text-align: right; }
+.p-table tr:last-child td { border-bottom: 0; }
+
+.p-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 22px 0;
+  text-align: center;
+}
+
+.empty-note {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 880;
+  max-width: min(440px, calc(100% - 32px));
+  margin: 0;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+}
+
+.empty-note[hidden] { display: none; }
+
+.noscript { padding: 24px; }
+
+/* ── Mobile: panel becomes a bottom sheet ────────────────────────────── */
+
+@media (max-width: 720px) {
+  .topbar {
+    gap: 12px;
+    padding: 10px 14px 12px;
+    align-items: stretch;
+  }
+
+  /* Title and summary share one line, and the summary truncates rather than
+     wrapping — otherwise the header swallows most of a phone screen. */
+  .brand { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .brand h1 { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
+
+  .meta {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .filters { gap: 10px 12px; flex: 1 1 100%; align-items: center; }
+  .filter--actions { margin-left: auto; }
+  .filter--range { order: 3; flex: 1 1 100%; }   /* full-width row of its own */
+
+  .btn { padding: 6px 11px; min-height: 32px; }
+
+  /* Two per row rather than one long column, so the disclosure stays short. */
+  body.filters-open .filters--more {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 11px 12px;
+    margin-top: 11px;
+    padding-top: 11px;
+  }
+
+  .num-input, .num-input--wide { width: 100%; min-width: 0; }
+  .pair { min-width: 0; }
+  .filter--lease { grid-column: 1 / -1; max-width: none; }
+
+  .legend {
+    left: 10px;
+    right: 10px;
+    bottom: 24px;                                 /* clear of the attribution */
+    max-width: none;
+    padding: 8px 11px 9px;
+    /* Title and the shape key share the first row; the scale spans below. */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 7px 10px;
+  }
+
+  .legend-title { margin: 0; }
+  .legend-scale { grid-column: 1 / -1; }
+
+  .legend-shapes {
+    grid-row: 1;
+    grid-column: 2;
+    margin: 0;
+    padding: 0;
+    border-top: 0;
+    gap: 11px;
+  }
+
+  .scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 999;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, .34);
+    animation: fade-in .18s ease-out;
+  }
+
+  .scrim[hidden] { display: none; }
+
+  @keyframes fade-in { from { opacity: 0; } }
+
+  .panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 74%;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    padding: 8px 18px calc(26px + env(safe-area-inset-bottom));
+    animation: sheet-up .22s ease-out;
+  }
+
+  @keyframes sheet-up { from { transform: translateY(28px); opacity: .4; } }
+
+  .panel-grab {
+    display: block;
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--baseline);
+    margin: 2px auto 12px;
+  }
+
+  .panel-close { top: 6px; }
+  .p-hero-value { font-size: 33px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

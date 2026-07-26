@@ -1,0 +1,15 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# Cached OneMap bearer token (short-lived, machine-local)
+.onemap_token.json
