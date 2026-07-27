@@ -252,6 +252,44 @@ def test_yesterdays_cached_token_is_not_reused(tmp_path):
     assert session.calls == 1
 
 
+def test_expired_token_reported_in_the_body_triggers_a_remint(tmp_path):
+    """URA answers an expired token with HTTP 200 and the failure in the body,
+    so checking the status code alone silently loses every batch."""
+    expired = _FakeResponse(200, {
+        "Status": "Error",
+        "Message": "Token is valid for one day only. Your token exceed that. "
+                   "Please try for new token to access the URA data service",
+    })
+    session = _FakeSession([
+        expired,                                                  # batch rejected
+        _FakeResponse(200),                                       # re-mint
+        _FakeResponse(200, {"Status": "Success", "Result": [{"project": "X"}]}),
+    ])
+    cache = tmp_path / "t.json"
+    cache.write_text(json.dumps({"token": "stale", "date": "2099-01-01"}))
+    client = ura_mod.URAClient("key", session=session, token_cache=cache)
+    client._token = "stale"
+
+    assert client.fetch_batch(1) == [{"project": "X"}]
+    assert session.calls == 3
+    # The stale token is replaced, not merely dropped, so the next run starts
+    # from a working one.
+    assert json.loads(cache.read_text())["token"] == "tok-123"
+    assert client._token == "tok-123"
+
+
+def test_a_non_token_body_error_is_not_retried(tmp_path):
+    """Only token failures should re-mint; anything else must surface."""
+    session = _FakeSession([
+        _FakeResponse(200, {"Status": "Error", "Message": "Invalid service name"}),
+    ])
+    client = ura_mod.URAClient("key", session=session, token_cache=tmp_path / "t.json")
+    client._token = "tok"
+    with pytest.raises(ura_mod.URAError, match="Invalid service name"):
+        client.fetch_batch(1)
+    assert session.calls == 1
+
+
 def test_a_rejected_cached_token_is_reminted_once(tmp_path):
     """A token cached earlier today can still expire mid-run."""
     cache = tmp_path / "t.json"

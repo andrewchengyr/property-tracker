@@ -140,15 +140,31 @@ class URAClient:
         # Re-mint once rather than failing the whole pull on a stale cache.
         if r.status_code in (401, 403) and not _retried:
             log.warning("batch %d rejected with %d — re-minting token", batch, r.status_code)
-            self._token = None
-            self.mint_token()
-            return self.fetch_batch(batch, _retried=True)
+            return self._remint_and_retry(batch)
 
         r.raise_for_status()
         payload = r.json()
         if payload.get("Status") != "Success":
-            raise URAError(f"batch {batch} rejected: {payload.get('Message', payload)!r}")
+            message = str(payload.get("Message", ""))
+            # URA reports an expired token as HTTP 200 with the failure in the
+            # body ("Token is valid for one day only…"), so a status-code check
+            # alone never catches it. Minting a new token also invalidates the
+            # previous one, so a cached token dies whenever anything else — a
+            # scheduled run, another machine — mints with the same key.
+            if not _retried and "token" in message.lower():
+                log.warning("batch %d: %s — re-minting token", batch, message)
+                return self._remint_and_retry(batch)
+            raise URAError(f"batch {batch} rejected: {message or payload!r}")
         return payload.get("Result") or []
+
+    def _remint_and_retry(self, batch: int) -> list[dict[str, Any]]:
+        self._token = None
+        try:
+            self.token_cache.unlink()     # don't hand the dead token to the next run
+        except OSError:
+            pass
+        self.mint_token()
+        return self.fetch_batch(batch, _retried=True)
 
     def fetch_all(self) -> list[dict[str, Any]]:
         """All 4 batches. A single failing batch logs and is skipped rather

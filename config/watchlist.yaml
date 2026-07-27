@@ -20,6 +20,14 @@ private:
   - project: "TREVISTA"
     top_year: 2011        # lease commenced 2008; TOP 2011
 
+  # Both on Bishan Street 15, next to Bishan MRT. Matching is "contains", and
+  # neither name is a prefix of another URA project, so these pull only
+  # themselves — "SKY" alone would drag in a dozen unrelated developments.
+  - project: "SKY VUE"
+    top_year: 2016        # lease commenced 2013
+  - project: "SKY HABITAT"
+    top_year: 2015        # lease commenced 2011
+
 # HDB resale (data.gov.sg).
 #
 # town + flat_type are required. All other keys are optional narrowing:
@@ -51,4 +59,14 @@ hdb:
   # Maisonette + Apartment are the only models present, so a single call
   # fetches both and keeps them as separate properties automatically.
   - town: "TOA PAYOH"
+    flat_type: "EXECUTIVE"
+
+  # Bishan, whole town, no lease bound — 1,223 five-room transactions across
+  # 126 blocks and 421 executive across 58. Much larger than the Toa Payoh
+  # entries above, so the map is correspondingly busier; add `street_name` or
+  # `lease_from` here to narrow it.
+  - town: "BISHAN"
+    flat_type: "5 ROOM"
+
+  - town: "BISHAN"
     flat_type: "EXECUTIVE"
