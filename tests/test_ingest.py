@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from datetime import date
 from pathlib import Path
 
@@ -384,6 +385,72 @@ def test_one_block_with_two_flat_types_stays_two_properties(store, tmp_path):
     assert len(payload["properties"]) == 2
     assert {p["type"] for p in payload["properties"]} == {"5 ROOM", "EXECUTIVE"}
     assert len({p["id"] for p in payload["properties"]}) == 2   # ids stay distinct
+
+
+def test_one_block_with_two_flat_models_stays_two_properties(store, tmp_path):
+    """236 Lor 1 Toa Payoh holds executive maisonettes AND apartments — very
+    different products (~166 vs ~142 sqm). Merging them would report a blended
+    psf under whichever model label sorted last."""
+    base = {
+        "month": "2025-03", "town": "TOA PAYOH", "block": "236",
+        "street_name": "LOR 1 TOA PAYOH", "flat_type": "EXECUTIVE",
+        "storey_range": "04 TO 06", "lease_commence_date": "1988",
+        "remaining_lease": "62 years",
+    }
+    recs = [
+        {**base, "flat_model": "Maisonette", "floor_area_sqm": "166", "resale_price": "1100000"},
+        {**base, "flat_model": "Apartment", "floor_area_sqm": "142", "resale_price": "900000"},
+    ]
+    store.upsert_many(hdb_mod.normalize(recs))
+    payload = store.export_json(tmp_path / "d.json")
+
+    assert len(payload["properties"]) == 2
+    assert {p["flat_model"] for p in payload["properties"]} == {"Maisonette", "Apartment"}
+    assert len({p["id"] for p in payload["properties"]}) == 2
+    # Each keeps its own psf rather than a blend of the two.
+    psfs = {p["flat_model"]: p["latest_psf"] for p in payload["properties"]}
+    assert psfs["Maisonette"] != psfs["Apartment"]
+
+
+def test_flat_model_is_stored_and_exported(store, hdb_records, tmp_path):
+    txns = hdb_mod.normalize(
+        hdb_mod.filter_records(hdb_records, street_name="LOR 1A TOA PAYOH"))
+    assert all(t.flat_model for t in txns)
+    store.upsert_many(txns)
+    assert all(r["flat_model"] for r in store.all_rows())
+
+
+def test_migration_adds_flat_model_to_an_older_database(tmp_path):
+    """The db is committed, so CI checks out one written by an earlier version.
+    CREATE TABLE IF NOT EXISTS won't add a column to an existing table."""
+    path = tmp_path / "old.db"
+    con = sqlite3.connect(path)
+    con.executescript(
+        """
+        CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY, dedup_key TEXT NOT NULL UNIQUE,
+            source TEXT NOT NULL, property_name TEXT NOT NULL, property_type TEXT,
+            segment TEXT, address TEXT, district_town TEXT, txn_date TEXT NOT NULL,
+            price REAL NOT NULL, area_sqm REAL, area_sqft REAL, price_psf REAL,
+            storey_range TEXT, tenure TEXT, lat REAL, lng REAL, raw_json TEXT,
+            first_seen TEXT, last_seen TEXT
+        );
+        """
+    )
+    con.commit()
+    con.close()
+
+    with Store(path) as s:                       # must not raise
+        cols = {r["name"] for r in s.conn.execute("PRAGMA table_info(transactions)")}
+        assert "flat_model" in cols
+        s.upsert_many(hdb_mod.normalize([{
+            "month": "2025-01", "town": "TOA PAYOH", "block": "1",
+            "street_name": "LOR 1 TOA PAYOH", "flat_type": "EXECUTIVE",
+            "flat_model": "Maisonette", "storey_range": "01 TO 03",
+            "floor_area_sqm": "146", "resale_price": "1000000",
+            "lease_commence_date": "1988", "remaining_lease": "62 years",
+        }]))
+        assert s.all_rows()[0]["flat_model"] == "Maisonette"
 
 
 def test_export_json_shape(store, hdb_records, ura_projects, tmp_path):

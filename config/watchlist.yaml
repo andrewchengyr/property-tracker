@@ -42,17 +42,13 @@ hdb:
     flat_type: "5 ROOM"
     lease_from: 2000
 
-  # Executive maisonettes and apartments, same lease bound. Toa Payoh's
-  # executive stock all predates 2000 (HDB stopped building them in the
-  # 1990s), so these currently match nothing — kept so the watchlist states
-  # the intent, and they cost one API call each. Drop `lease_from` to pull
-  # the 139 maisonette / 44 apartment transactions from the 1980s instead.
+  # Every executive flat in Toa Payoh — 139 maisonettes + 44 apartments
+  # across 23 blocks. Deliberately NO lease_from here: HDB stopped building
+  # executive flats in the mid-90s, so this stock is all 1984-1995 and any
+  # lease bound at 2000 would exclude all of it.
+  #
+  # One entry rather than two: flat_model narrows client-side, and
+  # Maisonette + Apartment are the only models present, so a single call
+  # fetches both and keeps them as separate properties automatically.
   - town: "TOA PAYOH"
     flat_type: "EXECUTIVE"
-    flat_model: "Maisonette"
-    lease_from: 2000
-
-  - town: "TOA PAYOH"
-    flat_type: "EXECUTIVE"
-    flat_model: "Apartment"
-    lease_from: 2000

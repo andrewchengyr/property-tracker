@@ -32,6 +32,10 @@ class Transaction:
     area_sqm: float
     storey_range: str
     tenure: str
+    # HDB only: Maisonette / Apartment / DBSS / Improved / … One block can hold
+    # more than one model, and they are different products at different sizes,
+    # so this is part of a property's identity rather than a display detail.
+    flat_model: str = ""
     lat: float | None = None
     lng: float | None = None
     raw: dict[str, Any] = field(default_factory=dict)

@@ -1,8 +1,167 @@
 {
-  "generated_at": "2026-07-27T14:14:49Z",
+  "generated_at": "2026-07-27T14:44:01Z",
   "properties": [
     {
-      "id": "hdb-105a-bidadari-pk-dr-5-room",
+      "id": "hdb-101a-lor-2-toa-payoh-executive-apartment",
+      "name": "101A LOR 2 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "101A LOR 2 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33974126719163,
+      "lng": 103.847264187382,
+      "txns": [
+        {
+          "date": "2017-04-01",
+          "price": 940888.0,
+          "area_sqft": 1560.8,
+          "psf": 602.8,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2017-08-01",
+          "price": 850000.0,
+          "area_sqft": 1571.5,
+          "psf": 540.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2017-08-01",
+          "price": 930000.0,
+          "area_sqft": 1560.8,
+          "psf": 595.9,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2017-12-01",
+          "price": 958888.0,
+          "area_sqft": 1560.8,
+          "psf": 614.4,
+          "storey": "16 TO 18"
+        },
+        {
+          "date": "2020-09-01",
+          "price": 870000.0,
+          "area_sqft": 1582.3,
+          "psf": 549.8,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2020-12-01",
+          "price": 870000.0,
+          "area_sqft": 1571.5,
+          "psf": 553.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-08-01",
+          "price": 1000000.0,
+          "area_sqft": 1582.3,
+          "psf": 632.0,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-10-01",
+          "price": 898000.0,
+          "area_sqft": 1560.8,
+          "psf": 575.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-01-01",
+          "price": 950000.0,
+          "area_sqft": 1528.5,
+          "psf": 621.5,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2022-11-01",
+          "price": 1100000.0,
+          "area_sqft": 1582.3,
+          "psf": 695.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2023-02-01",
+          "price": 913000.0,
+          "area_sqft": 1582.3,
+          "psf": 577.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-09-01",
+          "price": 1180000.0,
+          "area_sqft": 1560.8,
+          "psf": 756.0,
+          "storey": "10 TO 12"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1993,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1993,
+      "latest_psf": 756.0,
+      "txn_count": 12
+    },
+    {
+      "id": "hdb-101b-lor-2-toa-payoh-executive-apartment",
+      "name": "101B LOR 2 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "101B LOR 2 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33959884500115,
+      "lng": 103.847605414427,
+      "txns": [
+        {
+          "date": "2020-08-01",
+          "price": 901000.0,
+          "area_sqft": 1550.0,
+          "psf": 581.3,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-06-01",
+          "price": 980000.0,
+          "area_sqft": 1560.8,
+          "psf": 627.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-12-01",
+          "price": 850000.0,
+          "area_sqft": 1582.3,
+          "psf": 537.2,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-08-01",
+          "price": 1250000.0,
+          "area_sqft": 1550.0,
+          "psf": 806.5,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-03-01",
+          "price": 1225000.0,
+          "area_sqft": 1560.8,
+          "psf": 784.9,
+          "storey": "07 TO 09"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1993,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1993,
+      "latest_psf": 784.9,
+      "txn_count": 5
+    },
+    {
+      "id": "hdb-105a-bidadari-pk-dr-5-room-improved",
       "name": "105A BIDADARI PK DR",
       "source": "HDB",
       "type": "5 ROOM",
@@ -71,7 +230,7 @@
       "txn_count": 7
     },
     {
-      "id": "hdb-105b-bidadari-pk-dr-5-room",
+      "id": "hdb-105b-bidadari-pk-dr-5-room-improved",
       "name": "105B BIDADARI PK DR",
       "source": "HDB",
       "type": "5 ROOM",
@@ -175,7 +334,7 @@
       "txn_count": 12
     },
     {
-      "id": "hdb-106a-bidadari-pk-dr-5-room",
+      "id": "hdb-106a-bidadari-pk-dr-5-room-improved",
       "name": "106A BIDADARI PK DR",
       "source": "HDB",
       "type": "5 ROOM",
@@ -272,7 +431,7 @@
       "txn_count": 11
     },
     {
-      "id": "hdb-106b-bidadari-pk-dr-5-room",
+      "id": "hdb-106b-bidadari-pk-dr-5-room-improved",
       "name": "106B BIDADARI PK DR",
       "source": "HDB",
       "type": "5 ROOM",
@@ -320,7 +479,7 @@
       "txn_count": 4
     },
     {
-      "id": "hdb-121-lor-2-toa-payoh-5-room",
+      "id": "hdb-121-lor-2-toa-payoh-5-room-improved",
       "name": "121 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -452,7 +611,438 @@
       "txn_count": 16
     },
     {
-      "id": "hdb-138a-lor-1a-toa-payoh-5-room",
+      "id": "hdb-123-potong-pasir-ave-1-executive-maisonette",
+      "name": "123 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "123 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33521063790069,
+      "lng": 103.865776268967,
+      "txns": [
+        {
+          "date": "2018-01-01",
+          "price": 948000.0,
+          "area_sqft": 1733.0,
+          "psf": 547.0,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 547.0,
+      "txn_count": 1
+    },
+    {
+      "id": "hdb-124-potong-pasir-ave-1-executive-maisonette",
+      "name": "124 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "124 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.3353470224763,
+      "lng": 103.865451584255,
+      "txns": [
+        {
+          "date": "2020-09-01",
+          "price": 822000.0,
+          "area_sqft": 1625.3,
+          "psf": 505.7,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-01-01",
+          "price": 900000.0,
+          "area_sqft": 1733.0,
+          "psf": 519.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-11-01",
+          "price": 1008000.0,
+          "area_sqft": 1786.8,
+          "psf": 564.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-09-01",
+          "price": 1088888.0,
+          "area_sqft": 1733.0,
+          "psf": 628.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-07-01",
+          "price": 1035000.0,
+          "area_sqft": 1625.3,
+          "psf": 636.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-02-01",
+          "price": 1260000.0,
+          "area_sqft": 1733.0,
+          "psf": 727.1,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 727.1,
+      "txn_count": 6
+    },
+    {
+      "id": "hdb-125-potong-pasir-ave-1-executive-maisonette",
+      "name": "125 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "125 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33541493957748,
+      "lng": 103.865168758339,
+      "txns": [
+        {
+          "date": "2022-01-01",
+          "price": 985000.0,
+          "area_sqft": 1733.0,
+          "psf": 568.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-03-01",
+          "price": 1010000.0,
+          "area_sqft": 1625.3,
+          "psf": 621.4,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 621.4,
+      "txn_count": 2
+    },
+    {
+      "id": "hdb-126-potong-pasir-ave-1-executive-maisonette",
+      "name": "126 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "126 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33497246267555,
+      "lng": 103.865234309552,
+      "txns": [
+        {
+          "date": "2019-12-01",
+          "price": 935000.0,
+          "area_sqft": 1733.0,
+          "psf": 539.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-04-01",
+          "price": 910000.0,
+          "area_sqft": 1625.3,
+          "psf": 559.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-01-01",
+          "price": 950000.0,
+          "area_sqft": 1625.3,
+          "psf": 584.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-05-01",
+          "price": 1000000.0,
+          "area_sqft": 1733.0,
+          "psf": 577.0,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 577.0,
+      "txn_count": 4
+    },
+    {
+      "id": "hdb-127-potong-pasir-ave-1-executive-maisonette",
+      "name": "127 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "127 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33503445523376,
+      "lng": 103.865505631737,
+      "txns": [
+        {
+          "date": "2017-07-01",
+          "price": 935000.0,
+          "area_sqft": 1786.8,
+          "psf": 523.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2018-09-01",
+          "price": 865000.0,
+          "area_sqft": 1733.0,
+          "psf": 499.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-02-01",
+          "price": 940000.0,
+          "area_sqft": 1733.0,
+          "psf": 542.4,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 542.4,
+      "txn_count": 3
+    },
+    {
+      "id": "hdb-128-potong-pasir-ave-1-executive-maisonette",
+      "name": "128 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "128 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33480397745816,
+      "lng": 103.86578784298,
+      "txns": [
+        {
+          "date": "2019-12-01",
+          "price": 863000.0,
+          "area_sqft": 1733.0,
+          "psf": 498.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-08-01",
+          "price": 1120000.0,
+          "area_sqft": 1786.8,
+          "psf": 626.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-09-01",
+          "price": 1260000.0,
+          "area_sqft": 1733.0,
+          "psf": 727.1,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 727.1,
+      "txn_count": 3
+    },
+    {
+      "id": "hdb-129-potong-pasir-ave-1-executive-maisonette",
+      "name": "129 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "129 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33476150529936,
+      "lng": 103.865542602944,
+      "txns": [
+        {
+          "date": "2017-01-01",
+          "price": 905000.0,
+          "area_sqft": 1733.0,
+          "psf": 522.2,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-02-01",
+          "price": 1090000.0,
+          "area_sqft": 1733.0,
+          "psf": 629.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2024-02-01",
+          "price": 1160000.0,
+          "area_sqft": 1733.0,
+          "psf": 669.4,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 669.4,
+      "txn_count": 3
+    },
+    {
+      "id": "hdb-131-potong-pasir-ave-1-executive-maisonette",
+      "name": "131 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "131 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33438327081307,
+      "lng": 103.865312115136,
+      "txns": [
+        {
+          "date": "2019-08-01",
+          "price": 850000.0,
+          "area_sqft": 1786.8,
+          "psf": 475.7,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2020-08-01",
+          "price": 850000.0,
+          "area_sqft": 1733.0,
+          "psf": 490.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-11-01",
+          "price": 870000.0,
+          "area_sqft": 1625.3,
+          "psf": 535.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-10-01",
+          "price": 1050000.0,
+          "area_sqft": 1625.3,
+          "psf": 646.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-08-01",
+          "price": 1090000.0,
+          "area_sqft": 1625.3,
+          "psf": 670.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-07-01",
+          "price": 1260000.0,
+          "area_sqft": 1733.0,
+          "psf": 727.1,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 727.1,
+      "txn_count": 6
+    },
+    {
+      "id": "hdb-132-potong-pasir-ave-1-executive-maisonette",
+      "name": "132 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "132 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33417548310927,
+      "lng": 103.865610687284,
+      "txns": [
+        {
+          "date": "2017-02-01",
+          "price": 925000.0,
+          "area_sqft": 1733.0,
+          "psf": 533.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-02-01",
+          "price": 950000.0,
+          "area_sqft": 1625.3,
+          "psf": 584.5,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 584.5,
+      "txn_count": 2
+    },
+    {
+      "id": "hdb-133-potong-pasir-ave-1-executive-maisonette",
+      "name": "133 POTONG PASIR AVE 1",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "133 POTONG PASIR AVE 1",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33431718995826,
+      "lng": 103.865879504187,
+      "txns": [
+        {
+          "date": "2018-01-01",
+          "price": 960000.0,
+          "area_sqft": 1733.0,
+          "psf": 554.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-03-01",
+          "price": 900000.0,
+          "area_sqft": 1603.8,
+          "psf": 561.2,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2024-08-01",
+          "price": 1240000.0,
+          "area_sqft": 1733.0,
+          "psf": 715.5,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1984,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1984,
+      "latest_psf": 715.5,
+      "txn_count": 3
+    },
+    {
+      "id": "hdb-138a-lor-1a-toa-payoh-5-room-dbss",
       "name": "138A LOR 1A TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -864,7 +1454,7 @@
       "txn_count": 56
     },
     {
-      "id": "hdb-138b-lor-1a-toa-payoh-5-room",
+      "id": "hdb-138b-lor-1a-toa-payoh-5-room-dbss",
       "name": "138B LOR 1A TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -1283,7 +1873,7 @@
       "txn_count": 57
     },
     {
-      "id": "hdb-138c-lor-1a-toa-payoh-5-room",
+      "id": "hdb-138c-lor-1a-toa-payoh-5-room-dbss",
       "name": "138C LOR 1A TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -1828,7 +2418,7 @@
       "txn_count": 75
     },
     {
-      "id": "hdb-139a-lor-1a-toa-payoh-5-room",
+      "id": "hdb-139a-lor-1a-toa-payoh-5-room-dbss",
       "name": "139A LOR 1A TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -2450,7 +3040,7 @@
       "txn_count": 86
     },
     {
-      "id": "hdb-139b-lor-1a-toa-payoh-5-room",
+      "id": "hdb-139b-lor-1a-toa-payoh-5-room-dbss",
       "name": "139B LOR 1A TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -2981,7 +3571,7 @@
       "txn_count": 73
     },
     {
-      "id": "hdb-141-lor-2-toa-payoh-5-room",
+      "id": "hdb-141-lor-2-toa-payoh-5-room-improved",
       "name": "141 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3099,7 +3689,7 @@
       "txn_count": 14
     },
     {
-      "id": "hdb-142-lor-2-toa-payoh-5-room",
+      "id": "hdb-142-lor-2-toa-payoh-5-room-improved",
       "name": "142 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3224,7 +3814,7 @@
       "txn_count": 15
     },
     {
-      "id": "hdb-143-lor-2-toa-payoh-5-room",
+      "id": "hdb-143-lor-2-toa-payoh-5-room-improved",
       "name": "143 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3370,7 +3960,7 @@
       "txn_count": 18
     },
     {
-      "id": "hdb-144-lor-2-toa-payoh-5-room",
+      "id": "hdb-144-lor-2-toa-payoh-5-room-improved",
       "name": "144 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3509,7 +4099,7 @@
       "txn_count": 17
     },
     {
-      "id": "hdb-145-lor-2-toa-payoh-5-room",
+      "id": "hdb-145-lor-2-toa-payoh-5-room-improved",
       "name": "145 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3620,7 +4210,7 @@
       "txn_count": 13
     },
     {
-      "id": "hdb-146-lor-2-toa-payoh-5-room",
+      "id": "hdb-146-lor-2-toa-payoh-5-room-improved",
       "name": "146 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3654,7 +4244,7 @@
       "txn_count": 2
     },
     {
-      "id": "hdb-147-lor-2-toa-payoh-5-room",
+      "id": "hdb-147-lor-2-toa-payoh-5-room-improved",
       "name": "147 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3786,7 +4376,7 @@
       "txn_count": 16
     },
     {
-      "id": "hdb-152-lor-2-toa-payoh-5-room",
+      "id": "hdb-152-lor-2-toa-payoh-5-room-improved",
       "name": "152 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -3911,7 +4501,7 @@
       "txn_count": 15
     },
     {
-      "id": "hdb-154-lor-2-toa-payoh-5-room",
+      "id": "hdb-154-lor-2-toa-payoh-5-room-improved",
       "name": "154 LOR 2 TOA PAYOH",
       "source": "HDB",
       "type": "5 ROOM",
@@ -4008,7 +4598,957 @@
       "txn_count": 11
     },
     {
-      "id": "hdb-79a-toa-payoh-ctrl-5-room",
+      "id": "hdb-20-joo-seng-rd-executive-maisonette",
+      "name": "20 JOO SENG RD",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "20 JOO SENG RD",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33405760108197,
+      "lng": 103.881366182682,
+      "txns": [
+        {
+          "date": "2018-02-01",
+          "price": 650000.0,
+          "area_sqft": 1571.5,
+          "psf": 413.6,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-07-01",
+          "price": 600000.0,
+          "area_sqft": 1571.5,
+          "psf": 381.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2020-01-01",
+          "price": 630000.0,
+          "area_sqft": 1668.4,
+          "psf": 377.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2020-08-01",
+          "price": 640000.0,
+          "area_sqft": 1571.5,
+          "psf": 407.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-07-01",
+          "price": 700000.0,
+          "area_sqft": 1571.5,
+          "psf": 445.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-09-01",
+          "price": 712000.0,
+          "area_sqft": 1571.5,
+          "psf": 453.1,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-09-01",
+          "price": 718000.0,
+          "area_sqft": 1668.4,
+          "psf": 430.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-12-01",
+          "price": 700000.0,
+          "area_sqft": 1571.5,
+          "psf": 445.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-09-01",
+          "price": 775000.0,
+          "area_sqft": 1571.5,
+          "psf": 493.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-10-01",
+          "price": 830000.0,
+          "area_sqft": 1571.5,
+          "psf": 528.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-11-01",
+          "price": 850000.0,
+          "area_sqft": 1571.5,
+          "psf": 540.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2024-06-01",
+          "price": 925000.0,
+          "area_sqft": 1668.4,
+          "psf": 554.4,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1988,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1988,
+      "latest_psf": 554.4,
+      "txn_count": 12
+    },
+    {
+      "id": "hdb-21-joo-seng-rd-executive-maisonette",
+      "name": "21 JOO SENG RD",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "21 JOO SENG RD",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33396073218978,
+      "lng": 103.880581831155,
+      "txns": [
+        {
+          "date": "2017-10-01",
+          "price": 665000.0,
+          "area_sqft": 1571.5,
+          "psf": 423.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-01-01",
+          "price": 688000.0,
+          "area_sqft": 1668.4,
+          "psf": 412.4,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2019-06-01",
+          "price": 645000.0,
+          "area_sqft": 1571.5,
+          "psf": 410.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-06-01",
+          "price": 696000.0,
+          "area_sqft": 1571.5,
+          "psf": 442.9,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2020-12-01",
+          "price": 668000.0,
+          "area_sqft": 1571.5,
+          "psf": 425.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-01-01",
+          "price": 690000.0,
+          "area_sqft": 1571.5,
+          "psf": 439.1,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2022-04-01",
+          "price": 810000.0,
+          "area_sqft": 1668.4,
+          "psf": 485.5,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2023-07-01",
+          "price": 838000.0,
+          "area_sqft": 1571.5,
+          "psf": 533.2,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2023-11-01",
+          "price": 880000.0,
+          "area_sqft": 1571.5,
+          "psf": 560.0,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2024-11-01",
+          "price": 1200000.0,
+          "area_sqft": 1636.1,
+          "psf": 733.5,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2025-01-01",
+          "price": 1030000.0,
+          "area_sqft": 1571.5,
+          "psf": 655.4,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2025-02-01",
+          "price": 930000.0,
+          "area_sqft": 1571.5,
+          "psf": 591.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-03-01",
+          "price": 875000.0,
+          "area_sqft": 1625.3,
+          "psf": 538.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 980000.0,
+          "area_sqft": 1571.5,
+          "psf": 623.6,
+          "storey": "07 TO 09"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1988,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1988,
+      "latest_psf": 623.6,
+      "txn_count": 14
+    },
+    {
+      "id": "hdb-236-lor-1-toa-payoh-executive-maisonette",
+      "name": "236 LOR 1 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "236 LOR 1 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.34027351637589,
+      "lng": 103.852085014347,
+      "txns": [
+        {
+          "date": "2017-04-01",
+          "price": 782000.0,
+          "area_sqft": 1560.8,
+          "psf": 501.0,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2017-05-01",
+          "price": 850000.0,
+          "area_sqft": 1571.5,
+          "psf": 540.9,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2018-05-01",
+          "price": 758000.0,
+          "area_sqft": 1571.5,
+          "psf": 482.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2018-11-01",
+          "price": 740000.0,
+          "area_sqft": 1571.5,
+          "psf": 470.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2019-03-01",
+          "price": 700000.0,
+          "area_sqft": 1571.5,
+          "psf": 445.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2019-08-01",
+          "price": 755000.0,
+          "area_sqft": 1571.5,
+          "psf": 480.4,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2019-09-01",
+          "price": 728000.0,
+          "area_sqft": 1571.5,
+          "psf": 463.2,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-10-01",
+          "price": 640000.0,
+          "area_sqft": 1571.5,
+          "psf": 407.2,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2020-10-01",
+          "price": 755000.0,
+          "area_sqft": 1571.5,
+          "psf": 480.4,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2020-12-01",
+          "price": 838000.0,
+          "area_sqft": 1571.5,
+          "psf": 533.2,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-03-01",
+          "price": 818000.0,
+          "area_sqft": 1571.5,
+          "psf": 520.5,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-08-01",
+          "price": 866000.0,
+          "area_sqft": 1571.5,
+          "psf": 551.1,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-09-01",
+          "price": 852000.0,
+          "area_sqft": 1646.9,
+          "psf": 517.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-12-01",
+          "price": 865000.0,
+          "area_sqft": 1571.5,
+          "psf": 550.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-03-01",
+          "price": 1078666.0,
+          "area_sqft": 1571.5,
+          "psf": 686.4,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2023-01-01",
+          "price": 1018000.0,
+          "area_sqft": 1571.5,
+          "psf": 647.8,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2023-11-01",
+          "price": 1040000.0,
+          "area_sqft": 1625.3,
+          "psf": 639.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2024-10-01",
+          "price": 1069000.0,
+          "area_sqft": 1571.5,
+          "psf": 680.2,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2024-12-01",
+          "price": 1100000.0,
+          "area_sqft": 1571.5,
+          "psf": 700.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-03-01",
+          "price": 1135000.0,
+          "area_sqft": 1571.5,
+          "psf": 722.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-06-01",
+          "price": 980000.0,
+          "area_sqft": 1571.5,
+          "psf": 623.6,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1986,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1986,
+      "latest_psf": 623.6,
+      "txn_count": 21
+    },
+    {
+      "id": "hdb-236-lor-1-toa-payoh-executive-apartment",
+      "name": "236 LOR 1 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "236 LOR 1 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.34027351637589,
+      "lng": 103.852085014347,
+      "txns": [
+        {
+          "date": "2020-10-01",
+          "price": 742000.0,
+          "area_sqft": 1603.8,
+          "psf": 462.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-11-01",
+          "price": 1038000.0,
+          "area_sqft": 1539.2,
+          "psf": 674.4,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1986,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1986,
+      "latest_psf": 674.4,
+      "txn_count": 2
+    },
+    {
+      "id": "hdb-237-lor-1-toa-payoh-executive-maisonette",
+      "name": "237 LOR 1 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "237 LOR 1 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33977315087539,
+      "lng": 103.852242265569,
+      "txns": [
+        {
+          "date": "2017-02-01",
+          "price": 750000.0,
+          "area_sqft": 1571.5,
+          "psf": 477.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2017-03-01",
+          "price": 768000.0,
+          "area_sqft": 1571.5,
+          "psf": 488.7,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2017-06-01",
+          "price": 735000.0,
+          "area_sqft": 1571.5,
+          "psf": 467.7,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2018-02-01",
+          "price": 750000.0,
+          "area_sqft": 1571.5,
+          "psf": 477.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2018-04-01",
+          "price": 750000.0,
+          "area_sqft": 1560.8,
+          "psf": 480.5,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2018-07-01",
+          "price": 750000.0,
+          "area_sqft": 1571.5,
+          "psf": 477.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2018-10-01",
+          "price": 650000.0,
+          "area_sqft": 1571.5,
+          "psf": 413.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2019-05-01",
+          "price": 620000.0,
+          "area_sqft": 1571.5,
+          "psf": 394.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2019-05-01",
+          "price": 718000.0,
+          "area_sqft": 1571.5,
+          "psf": 456.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-12-01",
+          "price": 680000.0,
+          "area_sqft": 1571.5,
+          "psf": 432.7,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-06-01",
+          "price": 848000.0,
+          "area_sqft": 1571.5,
+          "psf": 539.6,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-02-01",
+          "price": 808000.0,
+          "area_sqft": 1571.5,
+          "psf": 514.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-05-01",
+          "price": 900888.0,
+          "area_sqft": 1571.5,
+          "psf": 573.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2024-10-01",
+          "price": 1050000.0,
+          "area_sqft": 1571.5,
+          "psf": 668.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-05-01",
+          "price": 1095000.0,
+          "area_sqft": 1571.5,
+          "psf": 696.8,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2025-07-01",
+          "price": 950000.0,
+          "area_sqft": 1571.5,
+          "psf": 604.5,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1986,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1986,
+      "latest_psf": 604.5,
+      "txn_count": 16
+    },
+    {
+      "id": "hdb-240-lor-1-toa-payoh-executive-maisonette",
+      "name": "240 LOR 1 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "240 LOR 1 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.34087644567662,
+      "lng": 103.850829960636,
+      "txns": [
+        {
+          "date": "2020-08-01",
+          "price": 760000.0,
+          "area_sqft": 1571.5,
+          "psf": 483.6,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-07-01",
+          "price": 938000.0,
+          "area_sqft": 1571.5,
+          "psf": 596.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-02-01",
+          "price": 988888.0,
+          "area_sqft": 1571.5,
+          "psf": 629.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2022-04-01",
+          "price": 968000.0,
+          "area_sqft": 1571.5,
+          "psf": 616.0,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-07-01",
+          "price": 955000.0,
+          "area_sqft": 1571.5,
+          "psf": 607.7,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2023-04-01",
+          "price": 900000.0,
+          "area_sqft": 1571.5,
+          "psf": 572.7,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-05-01",
+          "price": 913000.0,
+          "area_sqft": 1571.5,
+          "psf": 581.0,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-06-01",
+          "price": 1050000.0,
+          "area_sqft": 1571.5,
+          "psf": 668.1,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2024-02-01",
+          "price": 1068888.0,
+          "area_sqft": 1571.5,
+          "psf": 680.2,
+          "storey": "07 TO 09"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1986,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1986,
+      "latest_psf": 680.2,
+      "txn_count": 9
+    },
+    {
+      "id": "hdb-254-kim-keat-ave-executive-maisonette",
+      "name": "254 KIM KEAT AVE",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "254 KIM KEAT AVE",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33173315408576,
+      "lng": 103.858329268353,
+      "txns": [
+        {
+          "date": "2017-06-01",
+          "price": 765000.0,
+          "area_sqft": 1571.5,
+          "psf": 486.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2019-05-01",
+          "price": 720000.0,
+          "area_sqft": 1571.5,
+          "psf": 458.1,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2019-08-01",
+          "price": 718000.0,
+          "area_sqft": 1571.5,
+          "psf": 456.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-11-01",
+          "price": 740000.0,
+          "area_sqft": 1571.5,
+          "psf": 470.9,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2019-12-01",
+          "price": 730000.0,
+          "area_sqft": 1571.5,
+          "psf": 464.5,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-03-01",
+          "price": 755000.0,
+          "area_sqft": 1571.5,
+          "psf": 480.4,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-09-01",
+          "price": 775000.0,
+          "area_sqft": 1571.5,
+          "psf": 493.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-11-01",
+          "price": 868000.0,
+          "area_sqft": 1571.5,
+          "psf": 552.3,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2021-12-01",
+          "price": 788000.0,
+          "area_sqft": 1571.5,
+          "psf": 501.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2022-02-01",
+          "price": 868000.0,
+          "area_sqft": 1571.5,
+          "psf": 552.3,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-04-01",
+          "price": 850000.0,
+          "area_sqft": 1571.5,
+          "psf": 540.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2023-06-01",
+          "price": 960000.0,
+          "area_sqft": 1571.5,
+          "psf": 610.9,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2023-08-01",
+          "price": 990000.0,
+          "area_sqft": 1646.9,
+          "psf": 601.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2023-09-01",
+          "price": 930000.0,
+          "area_sqft": 1571.5,
+          "psf": 591.8,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2024-12-01",
+          "price": 1038888.0,
+          "area_sqft": 1571.5,
+          "psf": 661.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2025-02-01",
+          "price": 1002000.0,
+          "area_sqft": 1571.5,
+          "psf": 637.6,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2025-04-01",
+          "price": 1100000.0,
+          "area_sqft": 1571.5,
+          "psf": 700.0,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2025-07-01",
+          "price": 1000000.0,
+          "area_sqft": 1571.5,
+          "psf": 636.3,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2025-09-01",
+          "price": 905000.0,
+          "area_sqft": 1571.5,
+          "psf": 575.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-12-01",
+          "price": 950000.0,
+          "area_sqft": 1571.5,
+          "psf": 604.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-06-01",
+          "price": 988000.0,
+          "area_sqft": 1571.5,
+          "psf": 628.7,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1989,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1989,
+      "latest_psf": 628.7,
+      "txn_count": 21
+    },
+    {
+      "id": "hdb-254-kim-keat-ave-executive-apartment",
+      "name": "254 KIM KEAT AVE",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "254 KIM KEAT AVE",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33173315408576,
+      "lng": 103.858329268353,
+      "txns": [
+        {
+          "date": "2024-01-01",
+          "price": 968888.0,
+          "area_sqft": 1571.5,
+          "psf": 616.5,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-05-01",
+          "price": 960000.0,
+          "area_sqft": 1571.5,
+          "psf": 610.9,
+          "storey": "10 TO 12"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1989,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1989,
+      "latest_psf": 610.9,
+      "txn_count": 2
+    },
+    {
+      "id": "hdb-257-kim-keat-ave-executive-maisonette",
+      "name": "257 KIM KEAT AVE",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "257 KIM KEAT AVE",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33260688502861,
+      "lng": 103.857270508532,
+      "txns": [
+        {
+          "date": "2017-06-01",
+          "price": 710000.0,
+          "area_sqft": 1571.5,
+          "psf": 451.8,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2019-10-01",
+          "price": 759000.0,
+          "area_sqft": 1646.9,
+          "psf": 460.9,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2020-07-01",
+          "price": 726888.0,
+          "area_sqft": 1571.5,
+          "psf": 462.5,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2021-06-01",
+          "price": 810000.0,
+          "area_sqft": 1571.5,
+          "psf": 515.4,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2023-04-01",
+          "price": 1050000.0,
+          "area_sqft": 1646.9,
+          "psf": 637.6,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2024-05-01",
+          "price": 1000888.0,
+          "area_sqft": 1571.5,
+          "psf": 636.9,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2024-07-01",
+          "price": 1080000.0,
+          "area_sqft": 1571.5,
+          "psf": 687.2,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2024-10-01",
+          "price": 1010000.0,
+          "area_sqft": 1571.5,
+          "psf": 642.7,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2025-05-01",
+          "price": 1075000.0,
+          "area_sqft": 1646.9,
+          "psf": 652.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2025-06-01",
+          "price": 1088000.0,
+          "area_sqft": 1571.5,
+          "psf": 692.3,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2025-11-01",
+          "price": 1200000.0,
+          "area_sqft": 1571.5,
+          "psf": 763.6,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-01-01",
+          "price": 950888.0,
+          "area_sqft": 1571.5,
+          "psf": 605.1,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-06-01",
+          "price": 1138000.0,
+          "area_sqft": 1571.5,
+          "psf": 724.1,
+          "storey": "10 TO 12"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1988,
+      "lease_years": 99,
+      "flat_model": "Maisonette",
+      "top_year": 1988,
+      "latest_psf": 724.1,
+      "txn_count": 13
+    },
+    {
+      "id": "hdb-79a-toa-payoh-ctrl-5-room-improved",
       "name": "79A TOA PAYOH CTRL",
       "source": "HDB",
       "type": "5 ROOM",
@@ -4070,7 +5610,7 @@
       "txn_count": 6
     },
     {
-      "id": "hdb-79c-toa-payoh-ctrl-5-room",
+      "id": "hdb-79c-toa-payoh-ctrl-5-room-improved",
       "name": "79C TOA PAYOH CTRL",
       "source": "HDB",
       "type": "5 ROOM",
@@ -4214,6 +5754,247 @@
       "top_year": 2009,
       "latest_psf": 1064.2,
       "txn_count": 18
+    },
+    {
+      "id": "hdb-8-joo-seng-rd-executive-apartment",
+      "name": "8 JOO SENG RD",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "8 JOO SENG RD",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33520143444299,
+      "lng": 103.878702994487,
+      "txns": [
+        {
+          "date": "2017-10-01",
+          "price": 838000.0,
+          "area_sqft": 1700.7,
+          "psf": 492.7,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2018-08-01",
+          "price": 826000.0,
+          "area_sqft": 1571.5,
+          "psf": 525.6,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2021-03-01",
+          "price": 790000.0,
+          "area_sqft": 1571.5,
+          "psf": 502.7,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2024-06-01",
+          "price": 1000000.0,
+          "area_sqft": 1571.5,
+          "psf": 636.3,
+          "storey": "16 TO 18"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1995,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1995,
+      "latest_psf": 636.3,
+      "txn_count": 4
+    },
+    {
+      "id": "hdb-99a-lor-2-toa-payoh-executive-apartment",
+      "name": "99A LOR 2 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "99A LOR 2 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33878534348177,
+      "lng": 103.846873055688,
+      "txns": [
+        {
+          "date": "2017-10-01",
+          "price": 935000.0,
+          "area_sqft": 1528.5,
+          "psf": 611.7,
+          "storey": "16 TO 18"
+        },
+        {
+          "date": "2018-02-01",
+          "price": 830000.0,
+          "area_sqft": 1571.5,
+          "psf": 528.1,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2018-09-01",
+          "price": 872000.0,
+          "area_sqft": 1560.8,
+          "psf": 558.7,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-06-01",
+          "price": 830000.0,
+          "area_sqft": 1560.8,
+          "psf": 531.8,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-12-01",
+          "price": 1071250.0,
+          "area_sqft": 1528.5,
+          "psf": 700.9,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2023-02-01",
+          "price": 1120000.0,
+          "area_sqft": 1539.2,
+          "psf": 727.6,
+          "storey": "13 TO 15"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1993,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1993,
+      "latest_psf": 727.6,
+      "txn_count": 6
+    },
+    {
+      "id": "hdb-99b-lor-2-toa-payoh-executive-apartment",
+      "name": "99B LOR 2 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "99B LOR 2 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33874496491842,
+      "lng": 103.84725279468,
+      "txns": [
+        {
+          "date": "2017-06-01",
+          "price": 880000.0,
+          "area_sqft": 1550.0,
+          "psf": 567.7,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2018-09-01",
+          "price": 885000.0,
+          "area_sqft": 1560.8,
+          "psf": 567.0,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2020-01-01",
+          "price": 1025000.0,
+          "area_sqft": 1550.0,
+          "psf": 661.3,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2022-03-01",
+          "price": 908000.0,
+          "area_sqft": 1560.8,
+          "psf": 581.8,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2022-09-01",
+          "price": 986000.0,
+          "area_sqft": 1560.8,
+          "psf": 631.7,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1993,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1993,
+      "latest_psf": 631.7,
+      "txn_count": 5
+    },
+    {
+      "id": "hdb-99c-lor-2-toa-payoh-executive-apartment",
+      "name": "99C LOR 2 TOA PAYOH",
+      "source": "HDB",
+      "type": "EXECUTIVE",
+      "segment": "TOA PAYOH",
+      "address": "99C LOR 2 TOA PAYOH",
+      "district_town": "TOA PAYOH",
+      "lat": 1.33901612961753,
+      "lng": 103.84744935603,
+      "txns": [
+        {
+          "date": "2018-06-01",
+          "price": 888000.0,
+          "area_sqft": 1593.1,
+          "psf": 557.4,
+          "storey": "04 TO 06"
+        },
+        {
+          "date": "2021-03-01",
+          "price": 985000.0,
+          "area_sqft": 1603.8,
+          "psf": 614.2,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2021-11-01",
+          "price": 1000000.0,
+          "area_sqft": 1603.8,
+          "psf": 623.5,
+          "storey": "10 TO 12"
+        },
+        {
+          "date": "2023-01-01",
+          "price": 1030000.0,
+          "area_sqft": 1560.8,
+          "psf": 659.9,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2024-04-01",
+          "price": 1212000.0,
+          "area_sqft": 1603.8,
+          "psf": 755.7,
+          "storey": "13 TO 15"
+        },
+        {
+          "date": "2024-08-01",
+          "price": 1030000.0,
+          "area_sqft": 1560.8,
+          "psf": 659.9,
+          "storey": "01 TO 03"
+        },
+        {
+          "date": "2024-08-01",
+          "price": 1238888.0,
+          "area_sqft": 1593.1,
+          "psf": 777.7,
+          "storey": "07 TO 09"
+        },
+        {
+          "date": "2025-05-01",
+          "price": 1253000.0,
+          "area_sqft": 1560.8,
+          "psf": 802.8,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1993,
+      "lease_years": 99,
+      "flat_model": "Apartment",
+      "top_year": 1993,
+      "latest_psf": 802.8,
+      "txn_count": 8
     },
     {
       "id": "ura-trevista",

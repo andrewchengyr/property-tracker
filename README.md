@@ -232,10 +232,17 @@ tests/                  offline tests + saved API fixtures
 - HDB resale updates roughly monthly, URA roughly weekly — hence a weekly cron.
 - data.gov.sg **rate-limits (429)** once a watchlist makes several calls in a
   row; the client retries with exponential backoff and honours `Retry-After`.
-- HDB **towns are administrative, not geographic**: Bidadari Park Drive is in
-  the `TOA PAYOH` town but sits ~2 km east near Woodleigh, so a town-wide
-  watchlist entry spreads the map wider than the name suggests.
+- HDB **towns are administrative, not geographic**. The `TOA PAYOH` town also
+  contains Bidadari Park Drive (~2 km east, near Woodleigh), Potong Pasir Ave 1,
+  Joo Seng Rd and Kim Keat Ave. A town-wide watchlist entry spreads the map
+  considerably wider than the town name suggests.
 - One block can hold **more than one flat type** (8 Joo Seng Rd has both 5 ROOM
-  and EXECUTIVE), so the export groups on name *and* type. Grouping on name
-  alone merged them into a single marker whose type and psf came from whichever
-  row sorted first.
+  and EXECUTIVE) **and more than one model within a type** (236 Lor 1 Toa Payoh
+  and 254 Kim Keat Ave each hold executive maisonettes *and* apartments, ~166
+  vs ~142 sqm). The export therefore groups on name + type + model; grouping on
+  name alone produced one marker with a blended psf under whichever label
+  sorted last.
+- `data/transactions.db` is committed, so a schema change has to cope with an
+  older database being checked out by CI. `CREATE TABLE IF NOT EXISTS` will not
+  add a column to a table that already exists — `Store._migrate()` does the
+  additive `ALTER TABLE`s.

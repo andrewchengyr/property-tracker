@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     price_psf     REAL,
     storey_range  TEXT,
     tenure        TEXT,
+    flat_model    TEXT,
     lat           REAL,
     lng           REAL,
     raw_json      TEXT,
@@ -67,11 +68,11 @@ UPSERT = """
 INSERT INTO transactions (
     dedup_key, source, property_name, property_type, segment, address,
     district_town, txn_date, price, area_sqm, area_sqft, price_psf,
-    storey_range, tenure, lat, lng, raw_json, first_seen, last_seen
+    storey_range, tenure, flat_model, lat, lng, raw_json, first_seen, last_seen
 ) VALUES (
     :dedup_key, :source, :property_name, :property_type, :segment, :address,
     :district_town, :txn_date, :price, :area_sqm, :area_sqft, :price_psf,
-    :storey_range, :tenure, :lat, :lng, :raw_json, :now, :now
+    :storey_range, :tenure, :flat_model, :lat, :lng, :raw_json, :now, :now
 )
 ON CONFLICT(dedup_key) DO UPDATE SET
     property_type = excluded.property_type,
@@ -81,6 +82,7 @@ ON CONFLICT(dedup_key) DO UPDATE SET
     area_sqft     = excluded.area_sqft,
     price_psf     = excluded.price_psf,
     tenure        = excluded.tenure,
+    flat_model    = excluded.flat_model,
     -- never overwrite a known coordinate with a null
     lat           = COALESCE(excluded.lat, transactions.lat),
     lng           = COALESCE(excluded.lng, transactions.lng),
@@ -105,7 +107,19 @@ class Store:
         self.conn = sqlite3.connect(self.path)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.conn.commit()
+
+    def _migrate(self) -> None:
+        """Additive column migrations for a database committed by an earlier
+        version. CREATE TABLE IF NOT EXISTS won't add columns to a table that
+        already exists, and the db is version-controlled, so an older one will
+        be checked out by CI and by anyone cloning the repo."""
+        have = {r["name"] for r in self.conn.execute("PRAGMA table_info(transactions)")}
+        for column, ddl in (("flat_model", "TEXT"),):
+            if column not in have:
+                log.info("migrating: adding transactions.%s", column)
+                self.conn.execute(f"ALTER TABLE transactions ADD COLUMN {column} {ddl}")
 
     def close(self) -> None:
         self.conn.close()
@@ -207,19 +221,24 @@ class Store:
         path.parent.mkdir(parents=True, exist_ok=True)
         top_years = {k.lower(): v for k, v in (top_years or {}).items()}
 
-        # Keyed on flat type as well as name: one HDB block can hold more than
-        # one flat type (8 Joo Seng Rd has both 5 ROOM and EXECUTIVE), and
-        # grouping on name alone would silently merge them into a single
-        # marker whose type and psf came from whichever row sorted first.
-        grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
+        # Keyed on flat type AND model, not just name. One HDB block can hold
+        # more than one flat type (8 Joo Seng Rd has both 5 ROOM and
+        # EXECUTIVE) and more than one model within a type (236 Lor 1 Toa
+        # Payoh has executive maisonettes and apartments, ~142 vs ~166 sqm).
+        # Grouping on name alone merged them into one marker with a blended
+        # psf and whichever label sorted first.
+        grouped: dict[tuple[str, str, str, str], dict[str, Any]] = {}
         for row in self.all_rows():
             ptype = row["property_type"] or ""
-            key = (row["source"], row["property_name"], ptype)
+            model = (row["flat_model"] or "") if row["source"] == "HDB" else ""
+            key = (row["source"], row["property_name"], ptype, model)
             prop = grouped.get(key)
             if prop is None:
                 slug = slugify(row["property_name"])
                 if row["source"] == "HDB" and ptype:
                     slug = f"{slug}-{slugify(ptype)}"
+                    if model:
+                        slug = f"{slug}-{slugify(model)}"
                 prop = grouped[key] = {
                     "id": f"{row['source'].lower()}-{slug}",
                     "name": row["property_name"],
@@ -249,12 +268,13 @@ class Store:
 
         # Lease facts come from the most recent row — tenure is a property of
         # the building, but a stale caveat can carry an outdated string.
-        for (source, name, ptype), prop in grouped.items():
+        for (source, name, ptype, model), prop in grouped.items():
             row = self.conn.execute(
                 "SELECT tenure, raw_json FROM transactions "
                 "WHERE source = ? AND property_name = ? AND IFNULL(property_type,'') = ? "
+                "AND (? = '' OR IFNULL(flat_model,'') = ?) "
                 "ORDER BY txn_date DESC LIMIT 1",
-                (source, name, ptype),
+                (source, name, ptype, model, model),
             ).fetchone()
             facts = {}
             if row:
@@ -297,7 +317,7 @@ class Store:
         columns = [
             "source", "property_name", "property_type", "segment", "address",
             "district_town", "txn_date", "price", "area_sqm", "area_sqft",
-            "price_psf", "storey_range", "tenure", "lat", "lng",
+            "price_psf", "storey_range", "tenure", "flat_model", "lat", "lng",
         ]
         with out.open("w", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=columns)

@@ -194,5 +194,7 @@ def _normalize_one(rec: dict[str, Any]) -> Transaction:
         area_sqm=float(rec["floor_area_sqm"]),
         storey_range=str(rec.get("storey_range") or "").strip(),
         tenure=str(rec.get("remaining_lease") or "").strip(),
+        # Kept in the dataset's own casing ("Maisonette"), since it is shown.
+        flat_model=str(rec.get("flat_model") or "").strip(),
         raw=rec,
     )
