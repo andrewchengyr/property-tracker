@@ -1,5 +1,8 @@
 # Singapore Property Transaction Tracker
 
+**Live map: https://andrewchengyr.github.io/property-tracker/**
+Refreshed automatically every Monday at 04:00 SGT.
+
 Tracks **transacted** (actually sold) prices for a watchlist of Singapore
 properties — both HDB resale flats and private condos/landed — accumulates the
 history in a committed SQLite database, and renders it on an interactive map
