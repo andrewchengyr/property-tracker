@@ -23,6 +23,13 @@
   --accent-soft: rgba(42, 120, 214, .12);
   --delta-up: #006300;
   --delta-down: #d03b3b;
+  /* Schools sit off the psf ramp entirely. Orange, not violet: violet
+     measured ΔE 1.9 against mid-blue under protanopia and 9.0 even with
+     normal vision, so school pins would have read as expensive properties.
+     Orange is the warm/cool opposite — worst pair ΔE 23.1 across the ramp. */
+  --school: #eb6834;
+  --school-strong: #c9491a;
+  --school-halo: rgba(235, 104, 52, .3);
 
   /* Sequential psf ramp — 5 steps, blue, light→dark */
   --psf-1: #86b6ef;
@@ -55,6 +62,9 @@
     --accent-soft: rgba(57, 135, 229, .18);
     --delta-up: #0ca30c;
     --delta-down: #e66767;
+    --school: #d95926;
+    --school-strong: #eb6834;
+    --school-halo: rgba(217, 89, 38, .35);
 
     --psf-1: #9ec5f4;
     --psf-2: #6da7ec;
@@ -529,6 +539,60 @@ body.filters-closed .filters--more { display: none; }
   font-size: 10px;
   color: var(--text-muted);
   text-align: center;
+}
+
+/* ── Schools & P1 rings ──────────────────────────────────────────────── */
+
+/* Deliberately off the psf ramp: schools are a reference layer, not a value
+   on the price scale, so they get a neutral ink and their own shape. */
+.sk {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--school);
+  border: 2px solid var(--surface-1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  transition: transform .12s;
+}
+
+.sk-wrap { background: none; border: 0; cursor: pointer; }
+.sk-wrap:hover .sk { transform: scale(1.25); }
+
+.sk-wrap.is-selected .sk {
+  transform: scale(1.4);
+  background: var(--school-strong);
+  border-color: var(--surface-1);
+  box-shadow: 0 0 0 3px var(--school-halo);
+}
+
+.sk--legend {
+  width: 12px; height: 12px; border-width: 1.5px; box-shadow: none;
+  flex: 0 0 auto;
+}
+
+/* Solid hairlines, no dashes — the rings are a boundary, not a projection. */
+.ring { fill: var(--school); fill-opacity: .07; stroke: var(--school-strong); }
+.ring--1km { stroke-width: 2; stroke-opacity: .9; }
+.ring--2km { stroke-width: 1.5; stroke-opacity: .4; fill-opacity: .04; }
+
+.sp-model {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  letter-spacing: .02em;
+}
+
+.sp-link { margin: 16px 0 0; font-size: 12.5px; }
+.sp-link a { color: var(--accent); }
+
+.sp-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--gridline);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
 /* ── Legend ──────────────────────────────────────────────────────────── */

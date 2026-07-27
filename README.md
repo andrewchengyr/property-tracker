@@ -128,6 +128,27 @@ actually present so the top of the track isn't dead travel.
 The psf colour scale stays fixed while filtering, so a marker changing colour
 always means its value moved, never that the scale shifted underneath it.
 
+### Schools and P1 distance
+
+**Schools** in the top bar overlays all 179 MOE primary schools. Click one to
+draw its **1 km** and **1–2 km** Primary 1 registration bands and list which
+watched properties fall in each, nearest first, with distances.
+
+Distance is **straight-line** — that is how MOE measures it, not walking or
+driving distance. It runs from the school's registered postal code to each
+block's geocoded position, so a block sitting within a few tens of metres of
+the 1 km line should be checked against MOE's own tool rather than trusted
+here.
+
+The list respects the other filters, so "5-room under $1.2M within 1 km of this
+school" is answerable in one pass.
+
+Schools come from MOE's *School Directory and Information*
+(`d_688b934f82c1059ed0a6993d2a829089`), filtered to `mainlevel_code = PRIMARY`
+and geocoded by postal code into the same cached `geo` table the properties
+use — 179 lookups once, none afterwards. `--skip-schools` skips the layer; if
+`web/schools.json` is missing the map just hides the control.
+
 ### Growth rate
 
 The panel and hover card show **compound annual growth in median psf** across

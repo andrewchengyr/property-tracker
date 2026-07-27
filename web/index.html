@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -49,6 +49,10 @@
       <button type="button" class="btn btn--ghost" id="moreToggle"
               aria-expanded="true" aria-controls="moreFilters">
         Filters<span class="btn-badge" id="filterCount" hidden>0</span>
+      </button>
+      <button type="button" class="btn btn--ghost" id="schoolsToggle"
+              aria-pressed="false" title="Show primary schools and their P1 distance rings">
+        <span class="btn-glyph" aria-hidden="true">◎</span>Schools
       </button>
       <button type="button" class="btn btn--ghost" id="reset">Reset</button>
     </div>
@@ -108,6 +112,9 @@
     <div class="legend-shapes">
       <span class="legend-shape"><i class="mk mk--ura" aria-hidden="true"></i>Private</span>
       <span class="legend-shape"><i class="mk mk--hdb" aria-hidden="true"></i>HDB</span>
+      <span class="legend-shape" id="legendSchool" hidden>
+        <i class="sk sk--legend" aria-hidden="true"></i>School
+      </span>
     </div>
   </div>
 
@@ -131,6 +138,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

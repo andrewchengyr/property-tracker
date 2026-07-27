@@ -23,6 +23,7 @@ import yaml
 from dotenv import load_dotenv
 
 from . import hdb as hdb_mod
+from . import schools as schools_mod
 from . import ura as ura_mod
 from .geocode import Geocoder, OneMapClient, svy21_to_wgs84
 from .models import SOURCE_HDB, SOURCE_URA, Transaction
@@ -31,6 +32,7 @@ from .store import DB_PATH, EXPORT_JSON, Store
 log = logging.getLogger("ingest")
 
 WATCHLIST = Path("config/watchlist.yaml")
+SCHOOLS_JSON = Path("web/schools.json")
 FIXTURES = Path("tests/fixtures")
 
 
@@ -268,6 +270,39 @@ def geocode_missing(
     )
 
 
+def collect_schools(
+    store: Store, from_fixtures: bool, errors: list[str] | None = None
+) -> list[dict[str, Any]]:
+    """Primary schools, for the P1 distance rings. Reference data, not
+    transactions, so it never touches the transactions table."""
+    try:
+        if from_fixtures:
+            path = FIXTURES / "schools_directory.json"
+            if not path.exists():
+                return []
+            records = (json.loads(path.read_text()).get("result") or {}).get("records") or []
+        else:
+            records = schools_mod.fetch_directory()
+    except Exception as exc:  # noqa: BLE001 — the properties still matter
+        log.error("school directory pull failed, keeping the last export: %s", exc)
+        if errors is not None:
+            errors.append(f"school directory pull failed: {exc}")
+        return []
+
+    wanted = schools_mod.primary_schools(records)
+    if not wanted:
+        return []
+
+    client = None if from_fixtures else _onemap_client(False, store, [])
+    geocoder = Geocoder(store, client)
+    located = schools_mod.geocode_schools(wanted, geocoder)
+    log.info(
+        "school geocoding: %d cached, %d fetched, %d unresolved",
+        geocoder.hits, geocoder.misses, geocoder.failures,
+    )
+    return located
+
+
 def _seed_fixture_geocodes(store: Store, txns: list[Transaction]) -> None:
     """Offline runs read coordinates from a saved OneMap response so the
     fixture path produces a complete, map-ready dataset."""
@@ -319,6 +354,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--skip-ura", action="store_true", help="skip private residential")
     parser.add_argument("--skip-hdb", action="store_true", help="skip HDB resale")
+    parser.add_argument("--skip-schools", action="store_true",
+                        help="skip the MOE primary-school layer")
+    parser.add_argument("--schools-out", default=str(SCHOOLS_JSON))
     parser.add_argument("--no-csv", action="store_true")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args(argv)
@@ -338,6 +376,10 @@ def main(argv: list[str] | None = None) -> int:
             txns.extend(collect_private(watchlist["private"], store, args.from_fixtures, errors))
         if not args.skip_hdb:
             txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures, errors))
+
+        if not args.skip_schools:
+            store.export_schools(
+                collect_schools(store, args.from_fixtures, errors), args.schools_out)
 
         added, updated = store.upsert_many(txns)
         top_years = {

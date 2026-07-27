@@ -1,0 +1,1795 @@
+{
+  "generated_at": "2026-07-27T15:11:28Z",
+  "schools": [
+    {
+      "name": "ADMIRALTY PRIMARY SCHOOL",
+      "address": "11 WOODLANDS CIRCLE",
+      "postal": "738907",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "https://admiraltypri.moe.edu.sg/",
+      "lat": 1.4426347903311,
+      "lng": 103.800040119743
+    },
+    {
+      "name": "AHMAD IBRAHIM PRIMARY SCHOOL",
+      "address": "10 YISHUN STREET 11",
+      "postal": "768643",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.ahmadibrahimpri.moe.edu.sg",
+      "lat": 1.43315271543517,
+      "lng": 103.832942401086
+    },
+    {
+      "name": "AI TONG SCHOOL",
+      "address": "100 Bright Hill Drive",
+      "postal": "579646",
+      "area": "BISHAN",
+      "zone": "SOUTH",
+      "url": "http://www.aitong.moe.edu.sg",
+      "lat": 1.3605834338904,
+      "lng": 103.833020333986
+    },
+    {
+      "name": "ALEXANDRA PRIMARY SCHOOL",
+      "address": "2A Prince Charles Crescent",
+      "postal": "159016",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://alexandrapri.moe.edu.sg",
+      "lat": 1.29133439161334,
+      "lng": 103.824424680531
+    },
+    {
+      "name": "ANCHOR GREEN PRIMARY SCHOOL",
+      "address": "31 Anchorvale Drive",
+      "postal": "544969",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.anchorgreenpri.moe.edu.sg",
+      "lat": 1.39036998654612,
+      "lng": 103.887165375933
+    },
+    {
+      "name": "ANDERSON PRIMARY SCHOOL",
+      "address": "19 ANG MO KIO AVE 9",
+      "postal": "569785",
+      "area": "ANG MO KIO",
+      "zone": "NORTH",
+      "url": "http://www.andersonpri.moe.edu.sg",
+      "lat": 1.38419941907925,
+      "lng": 103.841411716006
+    },
+    {
+      "name": "ANG MO KIO PRIMARY SCHOOL",
+      "address": "20 ANG MO KIO AVENUE 3",
+      "postal": "569920",
+      "area": "ANG MO KIO",
+      "zone": "SOUTH",
+      "url": "http://www.angmokiopri.moe.edu.sg",
+      "lat": 1.36932176584608,
+      "lng": 103.839630858752
+    },
+    {
+      "name": "ANGLO-CHINESE SCHOOL (JUNIOR)",
+      "address": "16 WINSTEDT ROAD",
+      "postal": "227988",
+      "area": "CENTRAL",
+      "zone": "SOUTH",
+      "url": "www.acsj.moe.edu.sg",
+      "lat": 1.30935041274966,
+      "lng": 103.840950265464
+    },
+    {
+      "name": "ANGLO-CHINESE SCHOOL (PRIMARY)",
+      "address": "50 BARKER ROAD",
+      "postal": "309918",
+      "area": "NOVENA",
+      "zone": "SOUTH",
+      "url": "http://www.acspri.moe.edu.sg/",
+      "lat": 1.31837054523521,
+      "lng": 103.835609732354
+    },
+    {
+      "name": "ANGSANA PRIMARY SCHOOL",
+      "address": "51 Tampines Street 61",
+      "postal": "528565",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "https://angsanapri.moe.edu.sg/",
+      "lat": 1.36360590588314,
+      "lng": 103.9389409004
+    },
+    {
+      "name": "BEACON PRIMARY SCHOOL",
+      "address": "36 Bukit Panjang Ring Road",
+      "postal": "679944",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "https://beaconpri.moe.edu.sg/",
+      "lat": 1.38394936211823,
+      "lng": 103.773632022975
+    },
+    {
+      "name": "BEDOK GREEN PRIMARY SCHOOL",
+      "address": "1 BEDOK SOUTH AVE 2",
+      "postal": "469317",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.bedokgreenpri.moe.edu.sg",
+      "lat": 1.32344593287992,
+      "lng": 103.937878976352
+    },
+    {
+      "name": "BENDEMEER PRIMARY SCHOOL",
+      "address": "91 BENDEMEER ROAD",
+      "postal": "339948",
+      "area": "KALLANG",
+      "zone": "SOUTH",
+      "url": "http://www.bendemeerpri.moe.edu.sg/",
+      "lat": 1.32181250780475,
+      "lng": 103.865404167629
+    },
+    {
+      "name": "BLANGAH RISE PRIMARY SCHOOL",
+      "address": "91 TELOK BLANGAH HEIGHTS",
+      "postal": "109100",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://www.blangahrisepri.moe.edu.sg/",
+      "lat": 1.27612047924037,
+      "lng": 103.808628535239
+    },
+    {
+      "name": "BOON LAY GARDEN PRIMARY SCHOOL",
+      "address": "20 BOON LAY DRIVE",
+      "postal": "649930",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "www.boonlaygardenpri.moe.edu.sg",
+      "lat": 1.34284013791617,
+      "lng": 103.712858381937
+    },
+    {
+      "name": "BUKIT PANJANG PRIMARY SCHOOL",
+      "address": "109 CASHEW ROAD",
+      "postal": "679676",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.bukitpanjangpri.moe.edu.sg",
+      "lat": 1.37350089986584,
+      "lng": 103.769417337654
+    },
+    {
+      "name": "BUKIT TIMAH PRIMARY SCHOOL",
+      "address": "111 Lorong Kismis",
+      "postal": "598112",
+      "area": "BUKIT TIMAH",
+      "zone": "WEST",
+      "url": "http://www.bukittimahpri.moe.edu.sg",
+      "lat": 1.3377498622588,
+      "lng": 103.766855344779
+    },
+    {
+      "name": "BUKIT VIEW PRIMARY SCHOOL",
+      "address": "18 BUKIT BATOK STREET 21",
+      "postal": "659634",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.bukitviewpri.moe.edu.sg",
+      "lat": 1.34586054788695,
+      "lng": 103.75366641455
+    },
+    {
+      "name": "CANBERRA PRIMARY SCHOOL",
+      "address": "21 ADMIRALTY DRIVE",
+      "postal": "757714",
+      "area": "SEMBAWANG",
+      "zone": "NORTH",
+      "url": "http://www.canberrapri.moe.edu.sg",
+      "lat": 1.45125024371543,
+      "lng": 103.815858858929
+    },
+    {
+      "name": "CANOSSA CATHOLIC PRIMARY SCHOOL",
+      "address": "1 Sallim Road",
+      "postal": "387621",
+      "area": "GEYLANG",
+      "zone": "EAST",
+      "url": "https://canossacatholicpri.moe.edu.sg/",
+      "lat": 1.32664424544839,
+      "lng": 103.882227964852
+    },
+    {
+      "name": "CANTONMENT PRIMARY SCHOOL",
+      "address": "1 CANTONMENT CLOSE",
+      "postal": "88256",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://www.cantonmentpri.moe.edu.sg",
+      "lat": 1.27547252623201,
+      "lng": 103.839962631748
+    },
+    {
+      "name": "CASUARINA PRIMARY SCHOOL",
+      "address": "30 PASIR RIS ST 41",
+      "postal": "518935",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.casuarinapri.moe.edu.sg/",
+      "lat": 1.37246063927999,
+      "lng": 103.957020286115
+    },
+    {
+      "name": "CEDAR PRIMARY SCHOOL",
+      "address": "15 CEDAR AVENUE",
+      "postal": "349700",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.cedarpri.moe.edu.sg",
+      "lat": 1.33566084356265,
+      "lng": 103.87562006259
+    },
+    {
+      "name": "CHANGKAT PRIMARY SCHOOL",
+      "address": "11 SIMEI ST 3",
+      "postal": "529896",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.changkatpri.moe.edu.sg/",
+      "lat": 1.34023163951633,
+      "lng": 103.952080114035
+    },
+    {
+      "name": "CHIJ (KATONG) PRIMARY",
+      "address": "17 MARTIA ROAD",
+      "postal": "424821",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://chijkcp.moe.edu.sg/",
+      "lat": 1.30648535277087,
+      "lng": 103.911105620496
+    },
+    {
+      "name": "CHIJ (KELLOCK)",
+      "address": "1 Bukit Teresa Road",
+      "postal": "99757",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://www.chijkellock.moe.edu.sg/",
+      "lat": 1.275022722964,
+      "lng": 103.828157564896
+    },
+    {
+      "name": "CHIJ OUR LADY OF GOOD COUNSEL",
+      "address": "2C Burghley Drive",
+      "postal": "558979",
+      "area": "SERANGOON",
+      "zone": "SOUTH",
+      "url": "http://www.chijourladyofgoodcounsel.moe.edu.sg",
+      "lat": 1.35742952269615,
+      "lng": 103.864009397373
+    },
+    {
+      "name": "CHIJ OUR LADY OF THE NATIVITY",
+      "address": "1257 UPPER SERANGOON ROAD",
+      "postal": "534793",
+      "area": "HOUGANG",
+      "zone": "SOUTH",
+      "url": "http://www.chijourladyofthenativity.moe.edu.sg/",
+      "lat": 1.37330297140128,
+      "lng": 103.897575728303
+    },
+    {
+      "name": "CHIJ OUR LADY QUEEN OF PEACE",
+      "address": "4 Chestnut Drive",
+      "postal": "679287",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.chijourladyqueenofpeace.moe.edu.sg/",
+      "lat": 1.366603668561,
+      "lng": 103.767412204602
+    },
+    {
+      "name": "CHIJ PRIMARY (TOA PAYOH)",
+      "address": "628 Lorong 1 Toa Payoh",
+      "postal": "319765",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.chijpritoapayoh.moe.edu.sg",
+      "lat": 1.33275264711587,
+      "lng": 103.841847263786
+    },
+    {
+      "name": "CHONGFU SCHOOL",
+      "address": "170 YISHUN AVENUE 6",
+      "postal": "768959",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.chongfu.moe.edu.sg/",
+      "lat": 1.43839562897006,
+      "lng": 103.839309173817
+    },
+    {
+      "name": "CHONGZHENG PRIMARY SCHOOL",
+      "address": "1 TAMPINES STREET 21",
+      "postal": "529392",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.chongzhengpri.moe.edu.sg",
+      "lat": 1.35061130568554,
+      "lng": 103.951317297552
+    },
+    {
+      "name": "CHUA CHU KANG PRIMARY SCHOOL",
+      "address": "20 CHOA CHU KANG AVENUE 2",
+      "postal": "689905",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.chuachukangpri.moe.edu.sg",
+      "lat": 1.37775890093367,
+      "lng": 103.741832917421
+    },
+    {
+      "name": "CLEMENTI PRIMARY SCHOOL",
+      "address": "8 CLEMENTI AVE 3",
+      "postal": "129903",
+      "area": "CLEMENTI",
+      "zone": "WEST",
+      "url": "http://www.clementipri.moe.edu.sg",
+      "lat": 1.31506321827875,
+      "lng": 103.763144493687
+    },
+    {
+      "name": "COMPASSVALE PRIMARY SCHOOL",
+      "address": "21 COMPASSVALE ST",
+      "postal": "545091",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.compassvalepri.moe.edu.sg/",
+      "lat": 1.39444529636566,
+      "lng": 103.897812229905
+    },
+    {
+      "name": "CONCORD PRIMARY SCHOOL",
+      "address": "3 CHOA CHU KANG AVE 4",
+      "postal": "689814",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.concordpri.moe.edu.sg/",
+      "lat": 1.38026516111464,
+      "lng": 103.736554295636
+    },
+    {
+      "name": "CORPORATION PRIMARY SCHOOL",
+      "address": "31 JURONG WEST STREET 24",
+      "postal": "648347",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.corporationpri.moe.edu.sg",
+      "lat": 1.35148548772662,
+      "lng": 103.707578404944
+    },
+    {
+      "name": "DAMAI PRIMARY SCHOOL",
+      "address": "52 BEDOK RESERVOIR CRESCENT",
+      "postal": "479226",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.damaipri.moe.edu.sg",
+      "lat": 1.33524602829747,
+      "lng": 103.921286435321
+    },
+    {
+      "name": "DAZHONG PRIMARY SCHOOL",
+      "address": "35 BUKIT BATOK STREET 31",
+      "postal": "659441",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.dazhongpri.moe.edu.sg",
+      "lat": 1.3591797447277,
+      "lng": 103.74847210784
+    },
+    {
+      "name": "DE LA SALLE SCHOOL",
+      "address": "11 Choa Chu Kang St 52",
+      "postal": "689285",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.delasalle.moe.edu.sg",
+      "lat": 1.3947078296399,
+      "lng": 103.743201812831
+    },
+    {
+      "name": "EAST SPRING PRIMARY SCHOOL",
+      "address": "31 TAMPINES ST 33",
+      "postal": "529258",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.eastspringpri.moe.edu.sg",
+      "lat": 1.35268400746357,
+      "lng": 103.961676849165
+    },
+    {
+      "name": "EDGEFIELD PRIMARY SCHOOL",
+      "address": "41 EDGEFIELD PLAINS",
+      "postal": "828869",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.edgefieldpri.moe.edu.sg",
+      "lat": 1.40009139510996,
+      "lng": 103.907847599114
+    },
+    {
+      "name": "ELIAS PARK PRIMARY SCHOOL",
+      "address": "11 PASIR RIS STREET 52",
+      "postal": "518866",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.eliasparkpri.moe.edu.sg",
+      "lat": 1.37505696315817,
+      "lng": 103.945289416873
+    },
+    {
+      "name": "ENDEAVOUR PRIMARY SCHOOL",
+      "address": "10 Admiralty Link",
+      "postal": "757521",
+      "area": "SEMBAWANG",
+      "zone": "NORTH",
+      "url": "https://endeavourpri.moe.edu.sg/",
+      "lat": 1.45388170417263,
+      "lng": 103.817174701639
+    },
+    {
+      "name": "EVERGREEN PRIMARY SCHOOL",
+      "address": "31 WOODLANDS CIRCLE",
+      "postal": "738908",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.evergreenpri.moe.edu.sg/",
+      "lat": 1.44414835451585,
+      "lng": 103.794545295922
+    },
+    {
+      "name": "FAIRFIELD METHODIST SCHOOL (PRIMARY)",
+      "address": "100 DOVER ROAD",
+      "postal": "139648",
+      "area": "QUEENSTOWN",
+      "zone": "SOUTH",
+      "url": "http://www.fmsp.moe.edu.sg/",
+      "lat": 1.30100441916733,
+      "lng": 103.785455606827
+    },
+    {
+      "name": "FARRER PARK PRIMARY SCHOOL",
+      "address": "2 FARRER PARK ROAD",
+      "postal": "217567",
+      "area": "KALLANG",
+      "zone": "SOUTH",
+      "url": "http://www.farrerparkpri.moe.edu.sg",
+      "lat": 1.31236867681371,
+      "lng": 103.850766402965
+    },
+    {
+      "name": "FENGSHAN PRIMARY SCHOOL",
+      "address": "307 BEDOK NORTH ROAD",
+      "postal": "469680",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.fengshanpri.moe.edu.sg",
+      "lat": 1.32980598760785,
+      "lng": 103.931710293058
+    },
+    {
+      "name": "FERN GREEN PRIMARY SCHOOL",
+      "address": "70 Fernvale Link Fern Green Primary School",
+      "postal": "797538",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "www.ferngreenpri.moe.edu.sg",
+      "lat": 1.39726966050479,
+      "lng": 103.880330305684
+    },
+    {
+      "name": "FERNVALE PRIMARY SCHOOL",
+      "address": "1 Fernvale Lane",
+      "postal": "797701",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "www.fernvalepri.moe.edu.sg",
+      "lat": 1.39030227963797,
+      "lng": 103.874445458032
+    },
+    {
+      "name": "FIRST TOA PAYOH PRIMARY SCHOOL",
+      "address": "7 LORONG 8 TOA PAYOH",
+      "postal": "319252",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.firsttoapayohpri.moe.edu.sg",
+      "lat": 1.34032299499938,
+      "lng": 103.855529906182
+    },
+    {
+      "name": "FRONTIER PRIMARY SCHOOL",
+      "address": "20 Jurong West Street 61",
+      "postal": "648200",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.frontierpri.moe.edu.sg",
+      "lat": 1.33641298743234,
+      "lng": 103.69970173931
+    },
+    {
+      "name": "FUCHUN PRIMARY SCHOOL",
+      "address": "23 WOODLANDS AVENUE 1",
+      "postal": "739063",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.fuchunpri.moe.edu.sg",
+      "lat": 1.43047990810126,
+      "lng": 103.778192944298
+    },
+    {
+      "name": "FUHUA PRIMARY SCHOOL",
+      "address": "65 JURONG EAST STREET 13",
+      "postal": "609647",
+      "area": "JURONG EAST",
+      "zone": "WEST",
+      "url": "http://www.fuhuapri.moe.edu.sg",
+      "lat": 1.33659726465816,
+      "lng": 103.736089481883
+    },
+    {
+      "name": "GAN ENG SENG PRIMARY SCHOOL",
+      "address": "100 REDHILL CLOSE",
+      "postal": "158901",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://www.ganengsengpri.moe.edu.sg",
+      "lat": 1.28559516494962,
+      "lng": 103.815547410064
+    },
+    {
+      "name": "GEYLANG METHODIST SCHOOL (PRIMARY)",
+      "address": "4 Geylang East Central",
+      "postal": "389706",
+      "area": "GEYLANG",
+      "zone": "EAST",
+      "url": "www.geylangmethodistpri.moe.edu.sg",
+      "lat": 1.31814416827374,
+      "lng": 103.883628501601
+    },
+    {
+      "name": "GONGSHANG PRIMARY SCHOOL",
+      "address": "1 TAMPINES STREET 42",
+      "postal": "529176",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.gongshangpri.moe.edu.sg",
+      "lat": 1.35711606790292,
+      "lng": 103.949144797277
+    },
+    {
+      "name": "GREENDALE PRIMARY SCHOOL",
+      "address": "50 Edgedale Plains",
+      "postal": "828848",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.greendalepri.moe.edu.sg",
+      "lat": 1.39648195114256,
+      "lng": 103.91233462071
+    },
+    {
+      "name": "GREENRIDGE PRIMARY SCHOOL",
+      "address": "11 JELAPANG ROAD",
+      "postal": "677744",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.greenridgepri.moe.edu.sg",
+      "lat": 1.3858892193692,
+      "lng": 103.767794469258
+    },
+    {
+      "name": "GREENWOOD PRIMARY SCHOOL",
+      "address": "11 WOODLANDS DR 62",
+      "postal": "737942",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.greenwoodpri.moe.edu.sg",
+      "lat": 1.43989958331782,
+      "lng": 103.804725587384
+    },
+    {
+      "name": "HAIG GIRLS' SCHOOL",
+      "address": "51 Koon Seng Road",
+      "postal": "427072",
+      "area": "GEYLANG",
+      "zone": "EAST",
+      "url": "http://www.haiggirls.moe.edu.sg",
+      "lat": 1.31194344271383,
+      "lng": 103.902902557195
+    },
+    {
+      "name": "HENRY PARK PRIMARY SCHOOL",
+      "address": "1 HOLLAND GROVE ROAD",
+      "postal": "278790",
+      "area": "BUKIT TIMAH",
+      "zone": "WEST",
+      "url": "http://www.henryparkpri.moe.edu.sg",
+      "lat": 1.31667646178347,
+      "lng": 103.784296227747
+    },
+    {
+      "name": "HOLY INNOCENTS' PRIMARY SCHOOL",
+      "address": "5 Lorong Low Koon",
+      "postal": "536451",
+      "area": "HOUGANG",
+      "zone": "SOUTH",
+      "url": "http://www.holyinnocentspri.moe.edu.sg/",
+      "lat": 1.36693830877349,
+      "lng": 103.894114899795
+    },
+    {
+      "name": "HONG WEN SCHOOL",
+      "address": "30 TOWNER ROAD",
+      "postal": "327829",
+      "area": "KALLANG",
+      "zone": "SOUTH",
+      "url": "http://www.hongwen.moe.edu.sg",
+      "lat": 1.32175999964553,
+      "lng": 103.857628468881
+    },
+    {
+      "name": "HORIZON PRIMARY SCHOOL",
+      "address": "61 Edgedale Plains",
+      "postal": "828819",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.horizonpri.moe.edu.sg",
+      "lat": 1.399550034492,
+      "lng": 103.913404855665
+    },
+    {
+      "name": "HOUGANG PRIMARY SCHOOL",
+      "address": "1 HOUGANG ST 93",
+      "postal": "534238",
+      "area": "HOUGANG",
+      "zone": "NORTH",
+      "url": "http://www.hougangpri.moe.edu.sg/",
+      "lat": 1.37738245231461,
+      "lng": 103.880805274557
+    },
+    {
+      "name": "HUAMIN PRIMARY SCHOOL",
+      "address": "21 YISHUN AVENUE 11",
+      "postal": "768857",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.huaminpri.moe.edu.sg",
+      "lat": 1.42697284512936,
+      "lng": 103.844240226564
+    },
+    {
+      "name": "INNOVA PRIMARY SCHOOL",
+      "address": "80 Woodlands Drive 17",
+      "postal": "737888",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.innovapri.moe.edu.sg/",
+      "lat": 1.42896700684852,
+      "lng": 103.790607539185
+    },
+    {
+      "name": "JIEMIN PRIMARY SCHOOL",
+      "address": "2 YISHUN STREET 71",
+      "postal": "768515",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.jieminpri.moe.edu.sg",
+      "lat": 1.42768847665227,
+      "lng": 103.830425490093
+    },
+    {
+      "name": "JING SHAN PRIMARY SCHOOL",
+      "address": "5 ANG MO KIO ST 52",
+      "postal": "569228",
+      "area": "ANG MO KIO",
+      "zone": "SOUTH",
+      "url": "http://www.jingshanpri.moe.edu.sg",
+      "lat": 1.37196445720109,
+      "lng": 103.851763531681
+    },
+    {
+      "name": "JUNYUAN PRIMARY SCHOOL",
+      "address": "2 Tampines Street 91",
+      "postal": "528906",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "https://junyuanpri.moe.edu.sg",
+      "lat": 1.34787074766746,
+      "lng": 103.939221709073
+    },
+    {
+      "name": "JURONG PRIMARY SCHOOL",
+      "address": "320 JURONG EAST Street 32",
+      "postal": "609476",
+      "area": "JURONG EAST",
+      "zone": "WEST",
+      "url": "http://www.jurongpri.moe.edu.sg",
+      "lat": 1.34843859698946,
+      "lng": 103.733156566858
+    },
+    {
+      "name": "JURONG WEST PRIMARY SCHOOL",
+      "address": "30 JURONG WEST ST 61",
+      "postal": "648368",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.jurongwestpri.moe.edu.sg",
+      "lat": 1.33917519796104,
+      "lng": 103.698803732244
+    },
+    {
+      "name": "KEMING PRIMARY SCHOOL",
+      "address": "90 BUKIT BATOK EAST AVENUE 6",
+      "postal": "659762",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.kemingpri.moe.edu.sg",
+      "lat": 1.34552849960874,
+      "lng": 103.756449399351
+    },
+    {
+      "name": "KHENG CHENG SCHOOL",
+      "address": "15 LORONG 3 TOA PAYOH",
+      "postal": "319580",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.khengcheng.moe.edu.sg/",
+      "lat": 1.3373381935639,
+      "lng": 103.847148501824
+    },
+    {
+      "name": "KONG HWA SCHOOL",
+      "address": "350 GUILLEMARD ROAD",
+      "postal": "399772",
+      "area": "GEYLANG",
+      "zone": "EAST",
+      "url": "http://www.konghwa.moe.edu.sg",
+      "lat": 1.31099674009193,
+      "lng": 103.888352029067
+    },
+    {
+      "name": "KRANJI PRIMARY SCHOOL",
+      "address": "11 CHOA CHU KANG STREET 54",
+      "postal": "689189",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://kranjipri.moe.edu.sg",
+      "lat": 1.39356050497104,
+      "lng": 103.747362720939
+    },
+    {
+      "name": "KUO CHUAN PRESBYTERIAN PRIMARY SCHOOL",
+      "address": "8 BISHAN STREET 13",
+      "postal": "579793",
+      "area": "BISHAN",
+      "zone": "SOUTH",
+      "url": "http://www.kuochuanpresbyterianpri.moe.edu.sg",
+      "lat": 1.34939813669536,
+      "lng": 103.855018233311
+    },
+    {
+      "name": "LAKESIDE PRIMARY SCHOOL",
+      "address": "161 Corporation Walk",
+      "postal": "618310",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.lakesidepri.moe.edu.sg/",
+      "lat": 1.33820397704287,
+      "lng": 103.718089546664
+    },
+    {
+      "name": "LIANHUA PRIMARY SCHOOL",
+      "address": "2 BUKIT BATOK STREET 52",
+      "postal": "659243",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.lianhuapri.moe.edu.sg/",
+      "lat": 1.35424191127295,
+      "lng": 103.754165828711
+    },
+    {
+      "name": "MAHA BODHI SCHOOL",
+      "address": "10 UBI AVENUE 1",
+      "postal": "408931",
+      "area": "GEYLANG",
+      "zone": "EAST",
+      "url": "http://www.mahabodhi.moe.edu.sg/",
+      "lat": 1.32858023873554,
+      "lng": 103.901306904157
+    },
+    {
+      "name": "MARSILING PRIMARY SCHOOL",
+      "address": "31 WOODLANDS CENTRE ROAD",
+      "postal": "738927",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.marsilingpri.moe.edu.sg",
+      "lat": 1.43383904037059,
+      "lng": 103.773643013846
+    },
+    {
+      "name": "MARYMOUNT CONVENT SCHOOL",
+      "address": "20 Marymount Road",
+      "postal": "297754",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.marymountconvent.moe.edu.sg",
+      "lat": 1.34043840661368,
+      "lng": 103.839811736775
+    },
+    {
+      "name": "MAYFLOWER PRIMARY SCHOOL",
+      "address": "200 Ang Mo Kio Avenue 5",
+      "postal": "569878",
+      "area": "ANG MO KIO",
+      "zone": "SOUTH",
+      "url": "http://www.mayflowerpri.moe.edu.sg",
+      "lat": 1.37637683547682,
+      "lng": 103.843252803742
+    },
+    {
+      "name": "MEE TOH SCHOOL",
+      "address": "21 EDGEDALE PLAINS",
+      "postal": "828867",
+      "area": "PUNGGOL",
+      "zone": "NORTH",
+      "url": "http://www.meetoh.moe.edu.sg/",
+      "lat": 1.39485356081865,
+      "lng": 103.90857257736
+    },
+    {
+      "name": "MERIDIAN PRIMARY SCHOOL",
+      "address": "20 PASIR RIS ST 71",
+      "postal": "518798",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.meridianpri.moe.edu.sg/",
+      "lat": 1.37550677054835,
+      "lng": 103.934953276155
+    },
+    {
+      "name": "METHODIST GIRLS' SCHOOL (PRIMARY)",
+      "address": "11 Blackmore Drive",
+      "postal": "599986",
+      "area": "BUKIT TIMAH",
+      "zone": "WEST",
+      "url": "https://www.mgs.moe.edu.sg/",
+      "lat": 1.33266213599636,
+      "lng": 103.783382114018
+    },
+    {
+      "name": "MONTFORT JUNIOR SCHOOL",
+      "address": "52 HOUGANG AVENUE 8",
+      "postal": "538786",
+      "area": "HOUGANG",
+      "zone": "NORTH",
+      "url": "http://www.montfortjunior.moe.edu.sg/",
+      "lat": 1.37362445234082,
+      "lng": 103.889741457901
+    },
+    {
+      "name": "NAN CHIAU PRIMARY SCHOOL",
+      "address": "50 ANCHORVALE LINK",
+      "postal": "545080",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.ncps.moe.edu.sg",
+      "lat": 1.39221149906592,
+      "lng": 103.891180928186
+    },
+    {
+      "name": "NAN HUA PRIMARY SCHOOL",
+      "address": "30 Jalan Lempeng",
+      "postal": "128806",
+      "area": "CLEMENTI",
+      "zone": "WEST",
+      "url": "http://www.nanhuapri.moe.edu.sg",
+      "lat": 1.31920159956387,
+      "lng": 103.761095065761
+    },
+    {
+      "name": "NANYANG PRIMARY SCHOOL",
+      "address": "52 KING'S ROAD",
+      "postal": "268097",
+      "area": "BUKIT TIMAH",
+      "zone": "WEST",
+      "url": "http://www.nyps.moe.edu.sg",
+      "lat": 1.32107094241153,
+      "lng": 103.807681852799
+    },
+    {
+      "name": "NAVAL BASE PRIMARY SCHOOL",
+      "address": "7 YISHUN AVE 4",
+      "postal": "769028",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.navalbasepri.moe.edu.sg/",
+      "lat": 1.41590195697649,
+      "lng": 103.839100590207
+    },
+    {
+      "name": "NEW TOWN PRIMARY SCHOOL",
+      "address": "300 Tanglin Halt Road",
+      "postal": "148812",
+      "area": "QUEENSTOWN",
+      "zone": "SOUTH",
+      "url": "http://www.newtownpri.moe.edu.sg/",
+      "lat": 1.29981138884057,
+      "lng": 103.799964819895
+    },
+    {
+      "name": "NGEE ANN PRIMARY SCHOOL",
+      "address": "344 MARINE TERRACE",
+      "postal": "449149",
+      "area": "MARINE PARADE",
+      "zone": "EAST",
+      "url": "http://www.ngeeannpri.moe.edu.sg",
+      "lat": 1.30553224180437,
+      "lng": 103.917570005713
+    },
+    {
+      "name": "NORTH SPRING PRIMARY SCHOOL",
+      "address": "1 RIVERVALE STREET",
+      "postal": "545088",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.northspringpri.moe.edu.sg",
+      "lat": 1.38706146494859,
+      "lng": 103.903202683028
+    },
+    {
+      "name": "NORTH VIEW PRIMARY SCHOOL",
+      "address": "210 YISHUN AVENUE 6",
+      "postal": "768960",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.northviewpri.moe.edu.sg",
+      "lat": 1.42745159462566,
+      "lng": 103.848378442893
+    },
+    {
+      "name": "NORTH VISTA PRIMARY SCHOOL",
+      "address": "20 Compassvale Link",
+      "postal": "544974",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.northvistapri.moe.edu.sg",
+      "lat": 1.38255066171151,
+      "lng": 103.89626457548
+    },
+    {
+      "name": "NORTHLAND PRIMARY SCHOOL",
+      "address": "15 YISHUN AVENUE 4",
+      "postal": "769026",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.northlandpri.moe.edu.sg",
+      "lat": 1.42130404159807,
+      "lng": 103.840792923345
+    },
+    {
+      "name": "NORTHOAKS PRIMARY SCHOOL",
+      "address": "61 Sembawang Drive",
+      "postal": "757622",
+      "area": "SEMBAWANG",
+      "zone": "NORTH",
+      "url": "http://www.northoakspri.moe.edu.sg",
+      "lat": 1.45732867302094,
+      "lng": 103.814075611175
+    },
+    {
+      "name": "NORTHSHORE PRIMARY SCHOOL",
+      "address": "30 Northshore Drive",
+      "postal": "828671",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "https://northshorepri.moe.edu.sg/",
+      "lat": 1.41842322079348,
+      "lng": 103.905147201163
+    },
+    {
+      "name": "OASIS PRIMARY SCHOOL",
+      "address": "71 Edgefield Plains",
+      "postal": "828716",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.oasispri.moe.edu.sg/",
+      "lat": 1.40507184758584,
+      "lng": 103.911200193835
+    },
+    {
+      "name": "OPERA ESTATE PRIMARY SCHOOL",
+      "address": "48 FIDELIO STREET",
+      "postal": "458436",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.operaestatepri.moe.edu.sg",
+      "lat": 1.31996876377748,
+      "lng": 103.923752668632
+    },
+    {
+      "name": "PALM VIEW PRIMARY SCHOOL",
+      "address": "150 Compassvale Bow",
+      "postal": "544822",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.palmviewpri.moe.edu.sg",
+      "lat": 1.38376923022123,
+      "lng": 103.891354675017
+    },
+    {
+      "name": "PARK VIEW PRIMARY SCHOOL",
+      "address": "60 PASIR RIS DRIVE 1",
+      "postal": "519524",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.parkviewpri.moe.edu.sg",
+      "lat": 1.37801687647812,
+      "lng": 103.9392021807
+    },
+    {
+      "name": "PASIR RIS PRIMARY SCHOOL",
+      "address": "5 PASIR RIS STREET 21",
+      "postal": "518968",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.pasirrispri.moe.edu.sg",
+      "lat": 1.37245132722087,
+      "lng": 103.962922699031
+    },
+    {
+      "name": "PAYA LEBAR METHODIST GIRLS' SCHOOL (PRIMARY)",
+      "address": "298 LORONG AH SOO",
+      "postal": "536741",
+      "area": "HOUGANG",
+      "zone": "EAST",
+      "url": "http://www.payalebarmethodistgirlspri.moe.edu.sg/",
+      "lat": 1.3502545600894,
+      "lng": 103.884846876112
+    },
+    {
+      "name": "PEI CHUN PUBLIC SCHOOL",
+      "address": "16 LORONG 7 TOA PAYOH",
+      "postal": "319320",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.peichunpublic.moe.edu.sg",
+      "lat": 1.33677864390672,
+      "lng": 103.855341310212
+    },
+    {
+      "name": "PEI HWA PRESBYTERIAN PRIMARY SCHOOL",
+      "address": "7 PEI WAH AVENUE",
+      "postal": "597610",
+      "area": "BUKIT TIMAH",
+      "zone": "WEST",
+      "url": "http://www.peihwapresbyterianpri.moe.edu.sg/",
+      "lat": 1.33807302121151,
+      "lng": 103.776250903095
+    },
+    {
+      "name": "PEI TONG PRIMARY SCHOOL",
+      "address": "15 CLEMENTI AVENUE 5",
+      "postal": "129857",
+      "area": "CLEMENTI",
+      "zone": "WEST",
+      "url": "http://www.peitongpri.moe.edu.sg/",
+      "lat": 1.31666529308968,
+      "lng": 103.767438999533
+    },
+    {
+      "name": "PEIYING PRIMARY SCHOOL",
+      "address": "651 YISHUN RING ROAD",
+      "postal": "768687",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.peiyingpri.moe.edu.sg",
+      "lat": 1.41741627551251,
+      "lng": 103.830143209875
+    },
+    {
+      "name": "PIONEER PRIMARY SCHOOL",
+      "address": "80 TENGAH GARDEN AVENUE",
+      "postal": "699915",
+      "area": "TENGAH",
+      "zone": "WEST",
+      "url": "http://www.pioneerpri.moe.edu.sg",
+      "lat": 1.35442592930738,
+      "lng": 103.732790920197
+    },
+    {
+      "name": "POI CHING SCHOOL",
+      "address": "21 TAMPINES STREET 71",
+      "postal": "529067",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.poiching.moe.edu.sg",
+      "lat": 1.35765121877679,
+      "lng": 103.935246486174
+    },
+    {
+      "name": "PRINCESS ELIZABETH PRIMARY SCHOOL",
+      "address": "30 BUKIT BATOK WEST AVENUE 3",
+      "postal": "659163",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.princesselizabethpri.moe.edu.sg",
+      "lat": 1.34919098857585,
+      "lng": 103.740719208011
+    },
+    {
+      "name": "PUNGGOL COVE PRIMARY SCHOOL",
+      "address": "52 Sumang Walk",
+      "postal": "828674",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "https://punggolcovepri.moe.edu.sg/",
+      "lat": 1.41158455562454,
+      "lng": 103.89890448429
+    },
+    {
+      "name": "PUNGGOL GREEN PRIMARY SCHOOL",
+      "address": "98 Punggol Walk",
+      "postal": "828772",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.punggolgreenpri.moe.edu.sg",
+      "lat": 1.40172590450528,
+      "lng": 103.898794262307
+    },
+    {
+      "name": "PUNGGOL PRIMARY SCHOOL",
+      "address": "61 HOUGANG AVENUE 8",
+      "postal": "538787",
+      "area": "HOUGANG",
+      "zone": "SOUTH",
+      "url": "http://www.punggolpri.moe.edu.sg/",
+      "lat": 1.37820062547641,
+      "lng": 103.894667159512
+    },
+    {
+      "name": "PUNGGOL VIEW PRIMARY SCHOOL",
+      "address": "9 Punggol Place",
+      "postal": "828845",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "http://www.punggolviewpri.moe.edu.sg",
+      "lat": 1.40505250226058,
+      "lng": 103.905299026568
+    },
+    {
+      "name": "QIFA PRIMARY SCHOOL",
+      "address": "50 WEST COAST AVENUE",
+      "postal": "128104",
+      "area": "CLEMENTI",
+      "zone": "WEST",
+      "url": "http://www.qifapri.moe.edu.sg",
+      "lat": 1.3132658326807,
+      "lng": 103.756629101811
+    },
+    {
+      "name": "QIHUA PRIMARY SCHOOL",
+      "address": "5 WOODLANDS STREET 81",
+      "postal": "738525",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.qihuapri.moe.edu.sg",
+      "lat": 1.44203596557592,
+      "lng": 103.788339762066
+    },
+    {
+      "name": "QUEENSTOWN PRIMARY SCHOOL",
+      "address": "310 MARGARET DR",
+      "postal": "149303",
+      "area": "QUEENSTOWN",
+      "zone": "SOUTH",
+      "url": "http://www.queenstownpri.moe.edu.sg",
+      "lat": 1.29552905587752,
+      "lng": 103.807648475656
+    },
+    {
+      "name": "RADIN MAS PRIMARY SCHOOL",
+      "address": "1 BUKIT PURMEI AVENUE",
+      "postal": "99840",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "https://www.radinmaspri.moe.edu.sg/",
+      "lat": 1.27489701529771,
+      "lng": 103.824115781658
+    },
+    {
+      "name": "RAFFLES GIRLS' PRIMARY SCHOOL",
+      "address": "21 Hillcrest Road",
+      "postal": "289072",
+      "area": "BUKIT TIMAH",
+      "zone": "SOUTH",
+      "url": "http://www.rafflesgirlspri.moe.edu.sg",
+      "lat": 1.33004178068277,
+      "lng": 103.806397828938
+    },
+    {
+      "name": "RED SWASTIKA SCHOOL",
+      "address": "350 BEDOK NORTH AVENUE 3",
+      "postal": "469719",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.redswastika.moe.edu.sg",
+      "lat": 1.33405659580859,
+      "lng": 103.934317528484
+    },
+    {
+      "name": "RIVER VALLEY PRIMARY SCHOOL",
+      "address": "2 RIVER VALLEY GREEN",
+      "postal": "237993",
+      "area": "CENTRAL",
+      "zone": "SOUTH",
+      "url": "http://www.rivervalleypri.moe.edu.sg",
+      "lat": 1.29418347842837,
+      "lng": 103.836018941571
+    },
+    {
+      "name": "RIVERSIDE PRIMARY SCHOOL",
+      "address": "110 Woodlands Crescent",
+      "postal": "737803",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.riversidepri.moe.edu.sg",
+      "lat": 1.44700426493785,
+      "lng": 103.801889031334
+    },
+    {
+      "name": "RIVERVALE PRIMARY SCHOOL",
+      "address": "80 RIVERVALE DRIVE",
+      "postal": "545092",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.rivervalepri.moe.edu.sg/",
+      "lat": 1.39333506298213,
+      "lng": 103.904545253288
+    },
+    {
+      "name": "ROSYTH SCHOOL",
+      "address": "21 Serangoon North Avenue 4",
+      "postal": "555855",
+      "area": "SERANGOON",
+      "zone": "NORTH",
+      "url": "https://www.rosyth.moe.edu.sg",
+      "lat": 1.3728583654058,
+      "lng": 103.87477170399
+    },
+    {
+      "name": "RULANG PRIMARY SCHOOL",
+      "address": "6 JURONG WEST STREET 52",
+      "postal": "649295",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.rulangpri.moe.edu.sg/",
+      "lat": 1.34673868889096,
+      "lng": 103.718457955487
+    },
+    {
+      "name": "SEMBAWANG PRIMARY SCHOOL",
+      "address": "10 SEMBAWANG DRIVE",
+      "postal": "757715",
+      "area": "SEMBAWANG",
+      "zone": "NORTH",
+      "url": "http://www.sembawangpri.moe.edu.sg",
+      "lat": 1.4457453096024,
+      "lng": 103.821152676215
+    },
+    {
+      "name": "SENG KANG PRIMARY SCHOOL",
+      "address": "21 COMPASSVALE WALK",
+      "postal": "545166",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://www.sengkangpri.moe.edu.sg/",
+      "lat": 1.38925044778224,
+      "lng": 103.899527879229
+    },
+    {
+      "name": "SENGKANG GREEN PRIMARY SCHOOL",
+      "address": "15 Fernvale Road",
+      "postal": "797636",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "https://sengkanggreenpri.moe.edu.sg/",
+      "lat": 1.3925400930811,
+      "lng": 103.874984869551
+    },
+    {
+      "name": "SHUQUN PRIMARY SCHOOL",
+      "address": "8 JURONG WEST STREET 51",
+      "postal": "649332",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.shuqunpri.moe.edu.sg",
+      "lat": 1.34686967259067,
+      "lng": 103.721559387203
+    },
+    {
+      "name": "SI LING PRIMARY SCHOOL",
+      "address": "61 WOODLANDS AVENUE 1",
+      "postal": "739067",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.silingpri.moe.edu.sg",
+      "lat": 1.43240935732525,
+      "lng": 103.786035065192
+    },
+    {
+      "name": "SINGAPORE CHINESE GIRLS' PRIMARY SCHOOL",
+      "address": "190 DUNEARN ROAD",
+      "postal": "309437",
+      "area": "NOVENA",
+      "zone": "SOUTH",
+      "url": "www.scgs.moe.edu.sg",
+      "lat": 1.3206340835184,
+      "lng": 103.828164966953
+    },
+    {
+      "name": "SOUTH VIEW PRIMARY SCHOOL",
+      "address": "6 Choa Chu Kang Central",
+      "postal": "689762",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.southviewpri.moe.edu.sg",
+      "lat": 1.38143123987698,
+      "lng": 103.747153671
+    },
+    {
+      "name": "SPRINGDALE PRIMARY SCHOOL",
+      "address": "71 Anchorvale Link",
+      "postal": "544799",
+      "area": "SENG KANG",
+      "zone": "NORTH",
+      "url": "http://springdalepri.moe.edu.sg/",
+      "lat": 1.39528544463377,
+      "lng": 103.889416413501
+    },
+    {
+      "name": "ST ANDREW'S SCHOOL (JUNIOR)",
+      "address": "2 FRANCIS THOMAS DRIVE",
+      "postal": "359337",
+      "area": "TOA PAYOH",
+      "zone": "SOUTH",
+      "url": "http://www.saintandrewsjunior.moe.edu.sg",
+      "lat": 1.33140255308868,
+      "lng": 103.865117134385
+    },
+    {
+      "name": "ST. ANTHONY'S CANOSSIAN PRIMARY SCHOOL",
+      "address": "1602 BEDOK NORTH AVE 4",
+      "postal": "469701",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.stanthonyscanossianpri.moe.edu.sg",
+      "lat": 1.3347253730189,
+      "lng": 103.941234868202
+    },
+    {
+      "name": "ST. ANTHONY'S PRIMARY SCHOOL",
+      "address": "30 Bukit Batok St 32",
+      "postal": "659401",
+      "area": "BUKIT BATOK",
+      "zone": "WEST",
+      "url": "http://www.stanthonyspri.moe.edu.sg",
+      "lat": 1.36411948475833,
+      "lng": 103.749251919049
+    },
+    {
+      "name": "ST. GABRIEL'S PRIMARY SCHOOL",
+      "address": "220 Lorong Chuan",
+      "postal": "556742",
+      "area": "SERANGOON",
+      "zone": "SOUTH",
+      "url": "http://www.stgabrielspri.moe.edu.sg",
+      "lat": 1.34930766795555,
+      "lng": 103.862309899986
+    },
+    {
+      "name": "ST. HILDA'S PRIMARY SCHOOL",
+      "address": "2 Tampines Ave 3",
+      "postal": "529706",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.shps.moe.edu.sg",
+      "lat": 1.34967978969837,
+      "lng": 103.937016363397
+    },
+    {
+      "name": "ST. JOSEPH'S INSTITUTION JUNIOR",
+      "address": "3 ESSEX ROAD",
+      "postal": "309331",
+      "area": "NOVENA",
+      "zone": "SOUTH",
+      "url": "https://sjijunior.moe.edu.sg",
+      "lat": 1.31781476118551,
+      "lng": 103.845633334522
+    },
+    {
+      "name": "ST. MARGARET'S SCHOOL (PRIMARY)",
+      "address": "136 Sophia Road",
+      "postal": "228197",
+      "area": "CENTRAL",
+      "zone": "SOUTH",
+      "url": "http://www.stmargaretspri.moe.edu.sg",
+      "lat": 1.30414407358332,
+      "lng": 103.845820266438
+    },
+    {
+      "name": "ST. STEPHEN'S SCHOOL",
+      "address": "20 SIGLAP VIEW",
+      "postal": "455789",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.ststephens.moe.edu.sg",
+      "lat": 1.31878997295135,
+      "lng": 103.917258129598
+    },
+    {
+      "name": "TAMPINES NORTH PRIMARY SCHOOL",
+      "address": "30 TAMPINES AVENUE 9",
+      "postal": "529565",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.tampinesnorthpri.moe.edu.sg",
+      "lat": 1.36048786025607,
+      "lng": 103.948768900518
+    },
+    {
+      "name": "TAMPINES PRIMARY SCHOOL",
+      "address": "250 TAMPINES STREET 12",
+      "postal": "529426",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.tampinespri.moe.edu.sg",
+      "lat": 1.3504863946694,
+      "lng": 103.943573098509
+    },
+    {
+      "name": "TANJONG KATONG PRIMARY SCHOOL",
+      "address": "10 Seraya Road",
+      "postal": "437259",
+      "area": "MARINE PARADE",
+      "zone": "EAST",
+      "url": "http://www.tanjongkatongpri.moe.edu.sg/",
+      "lat": 1.30498489044822,
+      "lng": 103.899999965407
+    },
+    {
+      "name": "TAO NAN SCHOOL",
+      "address": "49 MARINE CRESCENT",
+      "postal": "449761",
+      "area": "MARINE PARADE",
+      "zone": "EAST",
+      "url": "http://www.taonan.moe.edu.sg",
+      "lat": 1.30528528687321,
+      "lng": 103.911553152326
+    },
+    {
+      "name": "TECK GHEE PRIMARY SCHOOL",
+      "address": "1 ANG MO KIO STREET 32",
+      "postal": "569299",
+      "area": "ANG MO KIO",
+      "zone": "SOUTH",
+      "url": "http://www.teckgheepri.moe.edu.sg",
+      "lat": 1.36565018546903,
+      "lng": 103.851009800453
+    },
+    {
+      "name": "TECK WHYE PRIMARY SCHOOL",
+      "address": "11 TECK WHYE WALK",
+      "postal": "688261",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.teckwhyepri.moe.edu.sg",
+      "lat": 1.38388660469396,
+      "lng": 103.753924558586
+    },
+    {
+      "name": "TELOK KURAU PRIMARY SCHOOL",
+      "address": "50 BEDOK RESERVOIR RD",
+      "postal": "479239",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.telokkuraupri.moe.edu.sg",
+      "lat": 1.33109611001931,
+      "lng": 103.911005345855
+    },
+    {
+      "name": "TEMASEK PRIMARY SCHOOL",
+      "address": "501 BEDOK SOUTH AVE 3",
+      "postal": "469300",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.temasekpri.moe.edu.sg",
+      "lat": 1.31720341663064,
+      "lng": 103.94575943784
+    },
+    {
+      "name": "TOWNSVILLE PRIMARY SCHOOL",
+      "address": "3 ANG MO KIO AVE 10",
+      "postal": "569730",
+      "area": "ANG MO KIO",
+      "zone": "SOUTH",
+      "url": "http://www.townsvillepri.moe.edu.sg/",
+      "lat": 1.35994649477568,
+      "lng": 103.853768994775
+    },
+    {
+      "name": "UNITY PRIMARY SCHOOL",
+      "address": "21 CHOA CHU KANG CRESCENT",
+      "postal": "688268",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.unitypri.moe.edu.sg",
+      "lat": 1.40278303219036,
+      "lng": 103.746801233973
+    },
+    {
+      "name": "VALOUR PRIMARY SCHOOL",
+      "address": "49 Punggol Central",
+      "postal": "828728",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "valourpri.moe.edu.sg",
+      "lat": 1.40744168163777,
+      "lng": 103.898762173662
+    },
+    {
+      "name": "WATERWAY PRIMARY SCHOOL",
+      "address": "70 Punggol Drive",
+      "postal": "828802",
+      "area": "PUNGGOL",
+      "zone": "EAST",
+      "url": "https://waterwaypri.moe.edu.sg",
+      "lat": 1.39889261226315,
+      "lng": 103.918585924582
+    },
+    {
+      "name": "WELLINGTON PRIMARY SCHOOL",
+      "address": "10 WELLINGTON CIRCLE",
+      "postal": "757702",
+      "area": "SEMBAWANG",
+      "zone": "NORTH",
+      "url": "http://www.wellingtonpri.moe.edu.sg",
+      "lat": 1.45168517614776,
+      "lng": 103.822516208087
+    },
+    {
+      "name": "WEST GROVE PRIMARY SCHOOL",
+      "address": "1 JURONG WEST ST 72",
+      "postal": "649223",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.westgrovepri.moe.edu.sg/",
+      "lat": 1.34471211768915,
+      "lng": 103.698964212988
+    },
+    {
+      "name": "WEST SPRING PRIMARY SCHOOL",
+      "address": "60 Bukit Panjang Ring Road",
+      "postal": "679946",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.westspringpri.moe.edu.sg",
+      "lat": 1.38917971808454,
+      "lng": 103.76639772288
+    },
+    {
+      "name": "WEST VIEW PRIMARY SCHOOL",
+      "address": "31 SENJA ROAD",
+      "postal": "677742",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.westviewpri.moe.edu.sg",
+      "lat": 1.38378546546228,
+      "lng": 103.760273432258
+    },
+    {
+      "name": "WESTWOOD PRIMARY SCHOOL",
+      "address": "1 Jurong West Street 73",
+      "postal": "649188",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.westwoodpri.moe.edu.sg",
+      "lat": 1.3477109654722,
+      "lng": 103.700467520791
+    },
+    {
+      "name": "WHITE SANDS PRIMARY SCHOOL",
+      "address": "2 PASIR RIS ST 11",
+      "postal": "519075",
+      "area": "PASIR RIS",
+      "zone": "EAST",
+      "url": "http://www.whitesandspri.moe.edu.sg",
+      "lat": 1.36563610941695,
+      "lng": 103.960861814678
+    },
+    {
+      "name": "WOODGROVE PRIMARY SCHOOL",
+      "address": "2 WOODLANDS DRIVE 14",
+      "postal": "738079",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.woodgrovepri.moe.edu.sg/",
+      "lat": 1.43273620725049,
+      "lng": 103.79023031392
+    },
+    {
+      "name": "WOODLANDS PRIMARY SCHOOL",
+      "address": "10 WOODLANDS DRIVE 50",
+      "postal": "738853",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.woodlandspri.moe.edu.sg",
+      "lat": 1.43658270720199,
+      "lng": 103.791791282236
+    },
+    {
+      "name": "WOODLANDS RING PRIMARY SCHOOL",
+      "address": "11 WOODLANDS RING ROAD",
+      "postal": "738240",
+      "area": "WOODLANDS",
+      "zone": "NORTH",
+      "url": "http://www.woodlandsringpri.moe.edu.sg",
+      "lat": 1.43485179380236,
+      "lng": 103.79741434351
+    },
+    {
+      "name": "XINGHUA PRIMARY SCHOOL",
+      "address": "45 HOUGANG AVENUE 1",
+      "postal": "538882",
+      "area": "HOUGANG",
+      "zone": "SOUTH",
+      "url": "http://www.xinghuapri.moe.edu.sg",
+      "lat": 1.35799653782463,
+      "lng": 103.890216355459
+    },
+    {
+      "name": "XINGNAN PRIMARY SCHOOL",
+      "address": "5 JURONG WEST STREET 91",
+      "postal": "649036",
+      "area": "JURONG WEST",
+      "zone": "WEST",
+      "url": "http://www.xingnanpri.moe.edu.sg",
+      "lat": 1.34270639669225,
+      "lng": 103.687588478681
+    },
+    {
+      "name": "XINMIN PRIMARY SCHOOL",
+      "address": "9 HOUGANG AVENUE 8",
+      "postal": "538784",
+      "area": "HOUGANG",
+      "zone": "NORTH",
+      "url": "https://xinminpri.moe.edu.sg/",
+      "lat": 1.37176798317468,
+      "lng": 103.88280991785
+    },
+    {
+      "name": "XISHAN PRIMARY SCHOOL",
+      "address": "8 YISHUN STREET 21",
+      "postal": "768611",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "https://www.xishanpri.moe.edu.sg/",
+      "lat": 1.43347186925064,
+      "lng": 103.837755319448
+    },
+    {
+      "name": "YANGZHENG PRIMARY SCHOOL",
+      "address": "15 SERANGOON AVENUE 3",
+      "postal": "556108",
+      "area": "SERANGOON",
+      "zone": "SOUTH",
+      "url": "http://www.yangzhengpri.moe.edu.sg/",
+      "lat": 1.3489768083841,
+      "lng": 103.868467129954
+    },
+    {
+      "name": "YEW TEE PRIMARY SCHOOL",
+      "address": "10 CHOA CHU KANG ST 64",
+      "postal": "689100",
+      "area": "CHOA CHU KANG",
+      "zone": "WEST",
+      "url": "http://www.yewteepri.moe.edu.sg",
+      "lat": 1.39672603497195,
+      "lng": 103.751817992962
+    },
+    {
+      "name": "YIO CHU KANG PRIMARY SCHOOL",
+      "address": "1 HOUGANG STREET 51",
+      "postal": "538720",
+      "area": "HOUGANG",
+      "zone": "NORTH",
+      "url": "http://www.yiochukangpri.moe.edu.sg",
+      "lat": 1.37793264345276,
+      "lng": 103.885643682171
+    },
+    {
+      "name": "YISHUN PRIMARY SCHOOL",
+      "address": "500 YISHUN RING ROAD",
+      "postal": "768679",
+      "area": "YISHUN",
+      "zone": "NORTH",
+      "url": "http://www.yishunpri.moe.edu.sg",
+      "lat": 1.43397617334964,
+      "lng": 103.834050796658
+    },
+    {
+      "name": "YU NENG PRIMARY SCHOOL",
+      "address": "56 BEDOK NORTH ST 3",
+      "postal": "469623",
+      "area": "BEDOK",
+      "zone": "EAST",
+      "url": "http://www.ynps.moe.edu.sg/",
+      "lat": 1.33398037894072,
+      "lng": 103.932015036296
+    },
+    {
+      "name": "YUHUA PRIMARY SCHOOL",
+      "address": "158 JURONG EAST STREET 24",
+      "postal": "609558",
+      "area": "JURONG EAST",
+      "zone": "WEST",
+      "url": "http://www.yuhuapri.moe.edu.sg",
+      "lat": 1.34291981622016,
+      "lng": 103.740861148879
+    },
+    {
+      "name": "YUMIN PRIMARY SCHOOL",
+      "address": "3 TAMPINES STREET 21",
+      "postal": "529393",
+      "area": "TAMPINES",
+      "zone": "EAST",
+      "url": "http://www.yuminpri.moe.edu.sg",
+      "lat": 1.35131569890862,
+      "lng": 103.950551091373
+    },
+    {
+      "name": "ZHANGDE PRIMARY SCHOOL",
+      "address": "51 Jalan Membina",
+      "postal": "169485",
+      "area": "BUKIT MERAH",
+      "zone": "SOUTH",
+      "url": "http://www.zhangdepri.moe.edu.sg/",
+      "lat": 1.28421153855474,
+      "lng": 103.825951884637
+    },
+    {
+      "name": "ZHENGHUA PRIMARY SCHOOL",
+      "address": "9 Fajar Road",
+      "postal": "679002",
+      "area": "BUKIT PANJANG",
+      "zone": "WEST",
+      "url": "http://www.zhenghuapri.moe.edu.sg",
+      "lat": 1.37942873617052,
+      "lng": 103.76970317201
+    },
+    {
+      "name": "ZHONGHUA PRIMARY SCHOOL",
+      "address": "12 SERANGOON AVENUE 4",
+      "postal": "556095",
+      "area": "SERANGOON",
+      "zone": "SOUTH",
+      "url": "http://www.zhonghuapri.moe.edu.sg",
+      "lat": 1.36026072476019,
+      "lng": 103.869712517383
+    }
+  ]
+}

@@ -26,6 +26,7 @@
     minPrice: $("minPrice"), maxPrice: $("maxPrice"),
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
+    schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
   };
 
   const state = {
@@ -39,7 +40,14 @@
     models: new Set(), allModels: [],
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
+    schools: [], showSchools: false, selectedSchool: null,
   };
+
+  // Primary 1 registration priority is distance-banded: inside 1 km, then
+  // 1–2 km, then beyond. Both rings are drawn because the second band is a
+  // real tier, not decoration.
+  const P1_BANDS = [1000, 2000];
+  const EARTH_R = 6371000;
 
   // ── formatting ────────────────────────────────────────────────────────
 
@@ -258,6 +266,18 @@
     return n;
   }
 
+  /** Great-circle distance in metres. Straight-line "as the crow flies" is
+   *  exactly what MOE uses for P1 — not walking or driving distance. */
+  function distanceM(aLat, aLng, bLat, bLng) {
+    const toRad = Math.PI / 180;
+    const dLat = (bLat - aLat) * toRad;
+    const dLng = (bLng - aLng) * toRad;
+    const s =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(aLat * toRad) * Math.cos(bLat * toRad) * Math.sin(dLng / 2) ** 2;
+    return 2 * EARTH_R * Math.asin(Math.sqrt(s));
+  }
+
   // ── map ───────────────────────────────────────────────────────────────
 
   let map, layer;
@@ -269,6 +289,9 @@
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
+    // Rings under the school markers, both under the property markers.
+    ringLayer = L.layerGroup().addTo(map);
+    schoolLayer = L.layerGroup().addTo(map);
     layer = L.layerGroup().addTo(map);
     map.on("zoomend moveend", updateLabels);
     map.on("movestart zoomstart", hideHoverCard);   // never leave it stranded
@@ -461,9 +484,157 @@
     }
   }
 
+  // ── schools & P1 distance rings ───────────────────────────────────────
+
+  let schoolLayer, ringLayer;
+
+  function toggleSchools() {
+    state.showSchools = !state.showSchools;
+    el.schoolsToggle.classList.toggle("is-on", state.showSchools);
+    el.schoolsToggle.setAttribute("aria-pressed", String(state.showSchools));
+    if (el.legendSchool) el.legendSchool.hidden = !state.showSchools;
+    if (!state.showSchools) clearSchoolSelection();
+    renderSchools();
+  }
+
+  function renderSchools() {
+    schoolLayer.clearLayers();
+    if (!state.showSchools) return;
+
+    for (const school of state.schools) {
+      if (school.lat == null || school.lng == null) continue;
+      const selected = state.selectedSchool && state.selectedSchool.postal === school.postal;
+      const marker = L.marker([school.lat, school.lng], {
+        icon: L.divIcon({
+          className: "sk-wrap" + (selected ? " is-selected" : ""),
+          html: `<span class="sk" title="${escapeHtml(school.name)}"></span>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9],
+        }),
+        title: `${school.name} — click for the 1 km P1 radius`,
+        // Below property markers: the properties are the subject, schools the
+        // reference layer.
+        zIndexOffset: -500,
+      });
+      marker.on("click", (e) => {
+        L.DomEvent.stop(e);
+        selectSchool(school);
+      });
+      marker.addTo(schoolLayer);
+    }
+  }
+
+  function selectSchool(school) {
+    // Clicking the same school again clears it, so there's a way out that
+    // doesn't require finding the close button.
+    if (state.selectedSchool && state.selectedSchool.postal === school.postal) {
+      clearSchoolSelection();
+      renderSchools();
+      return;
+    }
+    state.selectedSchool = school;
+    drawRings(school);
+    renderSchools();
+    renderSchoolPanel(school);
+  }
+
+  function clearSchoolSelection() {
+    state.selectedSchool = null;
+    ringLayer.clearLayers();
+    if (!state.selectedId) closePanel();
+  }
+
+  function drawRings(school) {
+    ringLayer.clearLayers();
+    const centre = [school.lat, school.lng];
+    // Outer first so the 1 km ring paints over it.
+    for (const radius of [...P1_BANDS].reverse()) {
+      L.circle(centre, {
+        radius,
+        className: radius === 1000 ? "ring ring--1km" : "ring ring--2km",
+        interactive: false,
+      }).addTo(ringLayer);
+    }
+    // latLng.toBounds() takes the box's full width in metres and needs no map.
+    // Circle.getBounds() would be the obvious call, but it reads this._map and
+    // throws on a circle that hasn't been added yet.
+    const outer = P1_BANDS[P1_BANDS.length - 1];
+    map.fitBounds(L.latLng(centre).toBounds(outer * 2.4), { maxZoom: 16 });
+  }
+
+  /** Which watched properties fall in each P1 band. Uses the visible set, so
+   *  the other filters still apply — "5-room under $1.2M within 1 km of this
+   *  school" is the question worth answering. */
+  function propertiesNear(school) {
+    const out = [];
+    for (const prop of visibleProperties()) {
+      if (prop.lat == null || prop.lng == null) continue;
+      if (!matchingTxns(prop).length) continue;
+      const d = distanceM(school.lat, school.lng, prop.lat, prop.lng);
+      if (d <= P1_BANDS[P1_BANDS.length - 1]) out.push({ prop, d });
+    }
+    return out.sort((a, b) => a.d - b.d);
+  }
+
+  function renderSchoolPanel(school) {
+    const near = propertiesNear(school);
+    const within1 = near.filter((n) => n.d <= P1_BANDS[0]);
+    const band2 = near.filter((n) => n.d > P1_BANDS[0]);
+
+    const rows = (list) => list.map(({ prop, d }) => {
+      const txns = matchingTxns(prop);
+      return `<tr>
+        <td>${escapeHtml(prop.name)}<span class="sp-model">${escapeHtml(prop.model || "")}</span></td>
+        <td class="num">${Math.round(d)} m</td>
+        <td class="num">${psfText(medianPsf(txns))}</td>
+      </tr>`;
+    }).join("");
+
+    el.panelBody.innerHTML = `
+      <p class="p-eyebrow"><i class="sk sk--legend" aria-hidden="true"></i>Primary school</p>
+      <h2 class="p-name">${escapeHtml(school.name)}</h2>
+      <p class="p-sub">${escapeHtml(school.address)} · S(${escapeHtml(school.postal)})</p>
+
+      <div class="p-hero">
+        <span class="p-hero-value">${within1.length}</span>
+        <span class="p-hero-unit">within 1 km</span>
+      </div>
+      <p class="p-hero-label">
+        Of the ${visibleProperties().length} watched propert${visibleProperties().length === 1 ? "y" : "ies"}
+        currently shown${band2.length ? ` · ${band2.length} more in the 1–2 km band` : ""}
+      </p>
+
+      <h3 class="p-h3">Within 1 km</h3>
+      <p class="p-h3-sub">Straight-line distance, as MOE measures it</p>
+      ${within1.length ? `<div class="p-table-wrap"><table class="p-table">
+        <thead><tr><th>Property</th><th class="num">Distance</th><th class="num">PSF</th></tr></thead>
+        <tbody>${rows(within1)}</tbody></table></div>`
+        : `<p class="p-empty">No watched properties within 1 km.</p>`}
+
+      ${band2.length ? `<h3 class="p-h3" style="margin-top:20px">1–2 km</h3>
+        <p class="p-h3-sub">Second priority band</p>
+        <div class="p-table-wrap"><table class="p-table">
+        <thead><tr><th>Property</th><th class="num">Distance</th><th class="num">PSF</th></tr></thead>
+        <tbody>${rows(band2)}</tbody></table></div>` : ""}
+
+      ${school.url ? `<p class="sp-link"><a href="${escapeHtml(school.url)}"
+         target="_blank" rel="noopener noreferrer">School website ↗</a></p>` : ""}
+      <p class="sp-note">Distances are computed from the school's registered
+        postal code to each block's geocoded position, so treat them as
+        indicative near the 1 km boundary — check MOE's own tool before
+        relying on it.</p>
+    `;
+    el.panel.hidden = false;
+    el.scrim.hidden = false;
+    if (state.chart) { state.chart.destroy(); state.chart = null; }
+  }
+
   // ── panel ─────────────────────────────────────────────────────────────
 
   function selectProperty(id) {
+    state.selectedSchool = null;      // the panel shows one thing at a time
+    ringLayer.clearLayers();
+    renderSchools();
     state.selectedId = id;
     renderPanel();
     renderMarkers();
@@ -476,6 +647,11 @@
     el.panel.hidden = true;
     el.scrim.hidden = true;
     if (state.chart) { state.chart.destroy(); state.chart = null; }
+    if (state.selectedSchool) {
+      state.selectedSchool = null;
+      ringLayer.clearLayers();
+      renderSchools();
+    }
     renderMarkers();
   }
 
@@ -965,6 +1141,7 @@
     }
     el.minLease.addEventListener("input", onLeaseInput);
     el.moreToggle.addEventListener("click", toggleMoreFilters);
+    el.schoolsToggle.addEventListener("click", toggleSchools);
     el.play.addEventListener("click", togglePlay);
     el.reset.addEventListener("click", resetView);
     el.panelClose.addEventListener("click", closePanel);
@@ -985,6 +1162,22 @@
       map.invalidateSize({ animate: false });
       syncFiltersAria();
     });
+
+    // Optional layer: an older deploy, or a run with --skip-schools, simply
+    // has no schools.json. Hide the control rather than erroring.
+    try {
+      const res = await fetch("schools.json", { cache: "no-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      state.schools = (await res.json()).schools || [];
+    } catch (err) {
+      console.warn("no schools.json — school layer disabled", err);
+    }
+    if (!state.schools.length) {
+      el.schoolsToggle.hidden = true;
+    } else {
+      el.schoolsToggle.title =
+        `Show ${state.schools.length} primary schools and their P1 distance rings`;
+    }
   }
 
   boot();

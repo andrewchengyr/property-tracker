@@ -315,6 +315,21 @@ class Store:
         log.info("wrote %s (%d properties)", path, len(properties))
         return payload
 
+    def export_schools(self, schools: list[dict[str, Any]], path: Path | str) -> None:
+        """Written only when there is something to write: a failed directory
+        fetch must leave the last good file in place rather than blank the
+        map's school layer."""
+        path = Path(path)
+        if not schools:
+            log.warning("no schools to export — leaving %s as it is", path)
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "schools": sorted(schools, key=lambda s: s["name"]),
+        }, indent=2))
+        log.info("wrote %s (%d primary schools)", path, len(schools))
+
     def export_csv(self, directory: Path | str = EXPORT_DIR) -> Path:
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
