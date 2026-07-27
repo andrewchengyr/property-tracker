@@ -23,9 +23,9 @@ jobs:
     outputs:
       pull_failed: ${{ steps.pull.outcome == 'failure' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -59,7 +59,7 @@ jobs:
             git push
           fi
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: web
 
@@ -74,7 +74,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # Last, so the site is already live. Turns the run red when a source
       # broke — the only signal you get that a credential needs attention.
