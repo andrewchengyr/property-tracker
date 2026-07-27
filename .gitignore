@@ -11,5 +11,6 @@ venv/
 # OS
 .DS_Store
 
-# Cached OneMap bearer token (short-lived, machine-local)
+# Cached API tokens (short-lived, machine-local, never committed)
 .onemap_token.json
+.ura_token.json

@@ -186,6 +186,86 @@ def test_missing_coords_leave_row_intact_without_latlng():
     assert len(txns) == 1 and txns[0].lat is None
 
 
+# ----------------------------------------------------- URA token handling ---
+
+class _FakeResponse:
+    def __init__(self, status=200, payload=None):
+        self.status_code = status
+        self._payload = payload or {"Status": "Success", "Result": "tok-123"}
+
+    def json(self):
+        return self._payload
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+
+class _FakeSession:
+    """Replays a queue of responses and records the calls."""
+
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.calls = 0
+
+    def get(self, url, **kwargs):
+        self.calls += 1
+        return self.responses.pop(0) if self.responses else _FakeResponse()
+
+
+def test_ura_token_retries_through_throttling(tmp_path, monkeypatch):
+    """URA answers 403 to rapid re-minting even with a valid key — that took
+    down a scheduled run. It must back off and retry, not give up."""
+    monkeypatch.setattr(ura_mod.time, "sleep", lambda s: None)
+    session = _FakeSession([_FakeResponse(403), _FakeResponse(403), _FakeResponse(200)])
+    client = ura_mod.URAClient("key", session=session, token_cache=tmp_path / "t.json")
+    assert client.mint_token() == "tok-123"
+    assert session.calls == 3
+
+
+def test_ura_token_gives_up_with_a_useful_message(tmp_path, monkeypatch):
+    monkeypatch.setattr(ura_mod.time, "sleep", lambda s: None)
+    session = _FakeSession([_FakeResponse(403)] * ura_mod.MAX_RETRIES)
+    client = ura_mod.URAClient("key", session=session, token_cache=tmp_path / "t.json")
+    with pytest.raises(ura_mod.URAError, match="throttles"):
+        client.mint_token()
+
+
+def test_ura_token_is_cached_for_the_day(tmp_path):
+    cache = tmp_path / "t.json"
+    s1 = _FakeSession([_FakeResponse(200)])
+    ura_mod.URAClient("key", session=s1, token_cache=cache).mint_token()
+    assert s1.calls == 1
+
+    s2 = _FakeSession([_FakeResponse(200)])       # fresh client, same cache
+    client = ura_mod.URAClient("key", session=s2, token_cache=cache)
+    assert client.token() == "tok-123"
+    assert s2.calls == 0                          # reused, no second mint
+
+
+def test_yesterdays_cached_token_is_not_reused(tmp_path):
+    cache = tmp_path / "t.json"
+    cache.write_text(json.dumps({"token": "stale", "date": "2000-01-01"}))
+    session = _FakeSession([_FakeResponse(200)])
+    client = ura_mod.URAClient("key", session=session, token_cache=cache)
+    assert client.token() == "tok-123"            # re-minted, not the stale one
+    assert session.calls == 1
+
+
+def test_a_rejected_cached_token_is_reminted_once(tmp_path):
+    """A token cached earlier today can still expire mid-run."""
+    cache = tmp_path / "t.json"
+    session = _FakeSession([
+        _FakeResponse(403),                                   # batch rejected
+        _FakeResponse(200),                                   # re-mint
+        _FakeResponse(200, {"Status": "Success", "Result": []}),  # batch retry
+    ])
+    client = ura_mod.URAClient("key", session=session, token_cache=cache)
+    client._token = "expired"
+    assert client.fetch_batch(1) == []
+    assert session.calls == 3
+
+
 # ----------------------------------------------------------------- HDB ------
 
 def test_street_filter_narrows_to_one_street(hdb_records):

@@ -10,7 +10,11 @@ saved fixtures with no key and no network.
 
 from __future__ import annotations
 
+import json
 import logging
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Callable, Iterable
 
 import requests
@@ -32,17 +36,30 @@ USER_AGENT = (
 
 TIMEOUT = 60
 
+# URA throttles token minting: several mints in quick succession start coming
+# back 403 even with a valid key. Retried with backoff, and the token — valid
+# for the day — is cached so repeated runs don't mint a fresh one each time.
+MAX_RETRIES = 4
+BACKOFF_BASE = 5  # seconds: 5, 10, 20
+TOKEN_CACHE = Path(".ura_token.json")
+
 
 class URAError(RuntimeError):
     pass
 
 
 class URAClient:
-    def __init__(self, access_key: str, session: requests.Session | None = None):
+    def __init__(
+        self,
+        access_key: str,
+        session: requests.Session | None = None,
+        token_cache: Path = TOKEN_CACHE,
+    ):
         if not access_key:
             raise URAError("URA_ACCESS_KEY is not set")
         self.access_key = access_key
         self.session = session or requests.Session()
+        self.token_cache = token_cache
         self._token: str | None = None
 
     def _headers(self, with_token: bool = False) -> dict[str, str]:
@@ -53,24 +70,80 @@ class URAClient:
             h["Token"] = self._token
         return h
 
-    def mint_token(self) -> str:
-        """Tokens are valid for the day; one per run is enough."""
-        r = self.session.get(TOKEN_URL, headers=self._headers(), timeout=TIMEOUT)
-        r.raise_for_status()
-        payload = r.json()
-        if payload.get("Status") != "Success" or not payload.get("Result"):
-            raise URAError(f"token request rejected: {payload!r}")
-        self._token = payload["Result"]
-        log.info("URA token minted")
-        return self._token
+    def _cached_token(self) -> str | None:
+        """Tokens are valid for the day, so one minted earlier today will do."""
+        try:
+            data = json.loads(self.token_cache.read_text())
+        except (OSError, ValueError):
+            return None
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        return data.get("token") if data.get("date") == today else None
 
-    def fetch_batch(self, batch: int) -> list[dict[str, Any]]:
+    def token(self) -> str:
+        if self._token:
+            return self._token
+        cached = self._cached_token()
+        if cached:
+            self._token = cached
+            log.info("URA token reused from cache")
+            return cached
+        return self.mint_token()
+
+    def mint_token(self) -> str:
+        """Mint a fresh daily token, retrying through URA's throttling."""
+        last = ""
+        for attempt in range(MAX_RETRIES):
+            r = self.session.get(TOKEN_URL, headers=self._headers(), timeout=TIMEOUT)
+            if r.status_code in (403, 429) or r.status_code >= 500:
+                last = f"HTTP {r.status_code}"
+                if attempt < MAX_RETRIES - 1:
+                    wait = BACKOFF_BASE * 2**attempt
+                    log.warning(
+                        "URA token mint returned %d (throttled?), retrying in %ds "
+                        "(attempt %d/%d)", r.status_code, wait, attempt + 1, MAX_RETRIES,
+                    )
+                    time.sleep(wait)
+                    continue
+                break
+
+            r.raise_for_status()
+            payload = r.json()
+            if payload.get("Status") != "Success" or not payload.get("Result"):
+                raise URAError(f"token request rejected: {payload!r}")
+
+            self._token = payload["Result"]
+            try:
+                self.token_cache.write_text(
+                    json.dumps({
+                        "token": self._token,
+                        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                    })
+                )
+            except OSError as exc:
+                log.debug("could not cache URA token: %s", exc)
+            log.info("URA token minted")
+            return self._token
+
+        raise URAError(
+            f"token mint failed after {MAX_RETRIES} attempts ({last}). URA throttles "
+            "minting; the key itself is probably fine if it worked recently."
+        )
+
+    def fetch_batch(self, batch: int, _retried: bool = False) -> list[dict[str, Any]]:
         r = self.session.get(
             DATA_URL,
             params={"service": SERVICE, "batch": batch},
             headers=self._headers(with_token=True),
             timeout=TIMEOUT,
         )
+        # A cached token can be rejected if it expired since it was written.
+        # Re-mint once rather than failing the whole pull on a stale cache.
+        if r.status_code in (401, 403) and not _retried:
+            log.warning("batch %d rejected with %d — re-minting token", batch, r.status_code)
+            self._token = None
+            self.mint_token()
+            return self.fetch_batch(batch, _retried=True)
+
         r.raise_for_status()
         payload = r.json()
         if payload.get("Status") != "Success":
@@ -80,8 +153,7 @@ class URAClient:
     def fetch_all(self) -> list[dict[str, Any]]:
         """All 4 batches. A single failing batch logs and is skipped rather
         than losing the other three."""
-        if not self._token:
-            self.mint_token()
+        self.token()          # cached if one was minted earlier today
         projects: list[dict[str, Any]] = []
         for batch in BATCHES:
             try:
