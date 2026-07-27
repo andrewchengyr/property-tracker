@@ -27,6 +27,7 @@
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
     schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
+    presets: $("presets"),
   };
 
   const state = {
@@ -48,6 +49,20 @@
   // real tier, not decoration.
   const P1_BANDS = [1000, 2000];
   const EARTH_R = 6371000;
+
+  // Anchored to the newest month in the data, not to today: the datasets lag
+  // reality by weeks, so "1Y" from today would clip the most recent month.
+  // `years` follows the same-date-last-year convention used by price charts.
+  const PERIOD_PRESETS = [
+    { id: "ytd", label: "YTD" },
+    { id: "1y", label: "1Y", years: 1 },
+    { id: "2y", label: "2Y", years: 2 },
+    { id: "3y", label: "3Y", years: 3 },
+    { id: "5y", label: "5Y", years: 5 },
+    { id: "7y", label: "7Y", years: 7 },
+    { id: "10y", label: "10Y", years: 10 },
+    { id: "all", label: "All" },
+  ];
 
   // ── formatting ────────────────────────────────────────────────────────
 
@@ -880,8 +895,64 @@
     el.rangeLabel.textContent = `${monthLabel(from)} – ${monthLabel(to)}`;
   }
 
+  /** The month a preset starts at, or null when the history is too short —
+   *  a 10Y button on 9 years of data would just be "All" under another name. */
+  function presetStart(preset) {
+    const months = state.months;
+    if (!months.length) return null;
+    if (preset.id === "all") return 0;
+
+    const last = months[months.length - 1];
+    const target = preset.id === "ytd"
+      ? `${last.slice(0, 4)}-01-01`
+      : `${+last.slice(0, 4) - preset.years}${last.slice(4)}`;
+
+    if (target <= months[0]) return null;           // not enough history
+    const idx = months.findIndex((m) => m >= target);
+    return idx === -1 ? null : idx;
+  }
+
+  function buildPresets() {
+    el.presets.innerHTML = PERIOD_PRESETS.map((p) => {
+      const start = presetStart(p);
+      const off = start === null;
+      return `<button type="button" class="preset${off ? " is-off" : ""}"
+        data-preset="${p.id}" ${off ? "disabled" : ""} aria-pressed="false"
+        ${off ? `title="Not enough history for ${p.label}"` : ""}>${p.label}</button>`;
+    }).join("");
+
+    for (const btn of el.presets.querySelectorAll(".preset")) {
+      btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
+    }
+  }
+
+  function applyPreset(id) {
+    const preset = PERIOD_PRESETS.find((p) => p.id === id);
+    const start = preset && presetStart(preset);
+    if (start === null || start === undefined) return;
+    stopPlay();                       // a preset is an explicit choice
+    state.startIdx = start;
+    state.endIdx = state.months.length - 1;
+    applyRange();
+  }
+
+  /** Light whichever preset the current range happens to equal, including
+   *  after dragging a thumb onto one — the slider and the buttons are two
+   *  views of one range, not two separate controls. */
+  function syncPresets() {
+    const last = state.months.length - 1;
+    for (const btn of el.presets.querySelectorAll(".preset")) {
+      const preset = PERIOD_PRESETS.find((p) => p.id === btn.dataset.preset);
+      const start = preset ? presetStart(preset) : null;
+      const on = start !== null && state.startIdx === start && state.endIdx === last;
+      btn.classList.toggle("is-on", on);
+      btn.setAttribute("aria-pressed", String(on));
+    }
+  }
+
   function applyRange() {
     syncRangeUI();
+    syncPresets();
     applyFilters();
   }
 
@@ -1075,6 +1146,7 @@
     el.minLease.value = "0";
     syncLeaseUI();
     syncRangeUI();
+    syncPresets();
     setSource("ALL");                 // renders and refits
   }
 
@@ -1129,7 +1201,9 @@
 
     renderLegend();
     buildModelChips();
+    buildPresets();
     syncRangeUI();
+    syncPresets();
     syncLeaseUI();
     syncFiltersAria();
     renderMarkers({ fit: true });

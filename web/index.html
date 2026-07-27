@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -40,6 +40,9 @@
         <input type="range" id="rangeStart" min="0" max="1" value="0" step="1" aria-label="Start month">
         <input type="range" id="rangeEnd" min="0" max="1" value="1" step="1" aria-label="End month">
       </div>
+      <!-- Built from the data: a preset longer than the history available is
+           disabled rather than silently collapsing to "All". -->
+      <div class="presets" id="presets" role="group" aria-label="Preset periods"></div>
     </div>
 
     <div class="filter filter--actions">
@@ -138,6 +141,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=10"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

@@ -95,7 +95,11 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
   slider changes a marker's value and never the meaning of a colour).
 - Marker **shape** is the source — circle for private, square for HDB.
 - The **period slider** rescopes every marker, chart and growth rate; **Play**
-  sweeps it forward through time.
+  sweeps it forward through time. Presets (**YTD, 1Y … 10Y, All**) sit under
+  it, anchored to the newest month in the data rather than to today — the
+  datasets lag reality by weeks, so "1Y from today" would clip the latest
+  month. A preset longer than the history available is disabled rather than
+  silently behaving as "All".
 - **Filters** (size, price, lease) sit behind the disclosure in the top bar,
   with a badge showing how many are active. **Reset** clears all of them.
 - **Hover a marker** for a summary card: median psf, growth rate, a sparkline,
