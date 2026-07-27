@@ -267,6 +267,18 @@ body.filters-closed .filters--more { display: none; }
 /* ── Chips ───────────────────────────────────────────────────────────── */
 
 .chips { display: flex; gap: 4px; }
+.chips--wrap { flex-wrap: wrap; }
+
+.filter--model { flex: 0 1 auto; min-width: 0; }
+
+/* Count rides inside the chip, in the chip's own ink so it never competes. */
+.chip-count {
+  margin-left: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  opacity: .6;
+  font-variant-numeric: tabular-nums;
+}
 
 .chip {
   appearance: none;
@@ -863,6 +875,11 @@ table.p-table {
   .num-input, .num-input--wide { width: 100%; min-width: 0; }
   .pair { min-width: 0; }
   .filter--lease { grid-column: 1 / -1; max-width: none; }
+
+  /* Full width, or the chips stack into a tall column in one grid cell and
+     leave the size inputs stranded alongside them. */
+  .filter--model { grid-column: 1 / -1; }
+  .filter--model .chip { padding: 5px 11px; font-size: 12.5px; }
 
   .legend {
     left: 10px;

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T14:45:52Z",
+  "generated_at": "2026-07-27T14:50:49Z",
   "properties": [
     {
       "id": "hdb-101a-lor-2-toa-payoh-executive-apartment",
@@ -102,6 +102,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1993,
+      "model": "Apartment",
       "latest_psf": 756.0,
       "txn_count": 12
     },
@@ -157,6 +158,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1993,
+      "model": "Apartment",
       "latest_psf": 784.9,
       "txn_count": 5
     },
@@ -226,6 +228,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2020,
+      "model": "Improved",
       "latest_psf": 1109.9,
       "txn_count": 7
     },
@@ -330,6 +333,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2020,
+      "model": "Improved",
       "latest_psf": 1124.6,
       "txn_count": 12
     },
@@ -427,6 +431,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2020,
+      "model": "Improved",
       "latest_psf": 1100.2,
       "txn_count": 11
     },
@@ -475,6 +480,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2020,
+      "model": "Improved",
       "latest_psf": 1035.9,
       "txn_count": 4
     },
@@ -607,6 +613,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2002,
+      "model": "Improved",
       "latest_psf": 872.7,
       "txn_count": 16
     },
@@ -634,6 +641,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 547.0,
       "txn_count": 1
     },
@@ -696,6 +704,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 727.1,
       "txn_count": 6
     },
@@ -730,6 +739,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 621.4,
       "txn_count": 2
     },
@@ -778,6 +788,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 577.0,
       "txn_count": 4
     },
@@ -819,6 +830,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 542.4,
       "txn_count": 3
     },
@@ -860,6 +872,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 727.1,
       "txn_count": 3
     },
@@ -901,6 +914,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 669.4,
       "txn_count": 3
     },
@@ -963,6 +977,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 727.1,
       "txn_count": 6
     },
@@ -997,6 +1012,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 584.5,
       "txn_count": 2
     },
@@ -1038,6 +1054,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1984,
+      "model": "Maisonette",
       "latest_psf": 715.5,
       "txn_count": 3
     },
@@ -1450,6 +1467,7 @@
       "lease_years": 99,
       "flat_model": "DBSS",
       "top_year": 2012,
+      "model": "DBSS",
       "latest_psf": 1263.2,
       "txn_count": 56
     },
@@ -1869,6 +1887,7 @@
       "lease_years": 99,
       "flat_model": "DBSS",
       "top_year": 2012,
+      "model": "DBSS",
       "latest_psf": 1123.3,
       "txn_count": 57
     },
@@ -2414,6 +2433,7 @@
       "lease_years": 99,
       "flat_model": "DBSS",
       "top_year": 2012,
+      "model": "DBSS",
       "latest_psf": 1135.5,
       "txn_count": 75
     },
@@ -3036,6 +3056,7 @@
       "lease_years": 99,
       "flat_model": "DBSS",
       "top_year": 2012,
+      "model": "DBSS",
       "latest_psf": 1056.5,
       "txn_count": 86
     },
@@ -3567,6 +3588,7 @@
       "lease_years": 99,
       "flat_model": "DBSS",
       "top_year": 2012,
+      "model": "DBSS",
       "latest_psf": 1287.6,
       "txn_count": 73
     },
@@ -3685,6 +3707,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2001,
+      "model": "Improved",
       "latest_psf": 666.2,
       "txn_count": 14
     },
@@ -3810,6 +3833,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2001,
+      "model": "Improved",
       "latest_psf": 877.3,
       "txn_count": 15
     },
@@ -3956,6 +3980,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2002,
+      "model": "Improved",
       "latest_psf": 916.4,
       "txn_count": 18
     },
@@ -4095,6 +4120,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2002,
+      "model": "Improved",
       "latest_psf": 859.8,
       "txn_count": 17
     },
@@ -4206,6 +4232,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2006,
+      "model": "Improved",
       "latest_psf": 1071.7,
       "txn_count": 13
     },
@@ -4240,6 +4267,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2006,
+      "model": "Improved",
       "latest_psf": 793.9,
       "txn_count": 2
     },
@@ -4372,6 +4400,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2006,
+      "model": "Improved",
       "latest_psf": 961.1,
       "txn_count": 16
     },
@@ -4497,6 +4526,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2006,
+      "model": "Improved",
       "latest_psf": 1047.3,
       "txn_count": 15
     },
@@ -4594,6 +4624,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2001,
+      "model": "Improved",
       "latest_psf": 912.5,
       "txn_count": 11
     },
@@ -4698,6 +4729,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1988,
+      "model": "Maisonette",
       "latest_psf": 554.4,
       "txn_count": 12
     },
@@ -4816,6 +4848,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1988,
+      "model": "Maisonette",
       "latest_psf": 623.6,
       "txn_count": 14
     },
@@ -4983,6 +5016,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1986,
+      "model": "Maisonette",
       "latest_psf": 623.6,
       "txn_count": 21
     },
@@ -5017,6 +5051,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1986,
+      "model": "Apartment",
       "latest_psf": 674.4,
       "txn_count": 2
     },
@@ -5149,6 +5184,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1986,
+      "model": "Maisonette",
       "latest_psf": 604.5,
       "txn_count": 16
     },
@@ -5232,6 +5268,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1986,
+      "model": "Maisonette",
       "latest_psf": 680.2,
       "txn_count": 9
     },
@@ -5399,6 +5436,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1989,
+      "model": "Maisonette",
       "latest_psf": 628.7,
       "txn_count": 21
     },
@@ -5433,6 +5471,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1989,
+      "model": "Apartment",
       "latest_psf": 610.9,
       "txn_count": 2
     },
@@ -5544,6 +5583,7 @@
       "lease_years": 99,
       "flat_model": "Maisonette",
       "top_year": 1988,
+      "model": "Maisonette",
       "latest_psf": 724.1,
       "txn_count": 13
     },
@@ -5606,6 +5646,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2009,
+      "model": "Improved",
       "latest_psf": 811.9,
       "txn_count": 6
     },
@@ -5752,6 +5793,7 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2009,
+      "model": "Improved",
       "latest_psf": 1064.2,
       "txn_count": 18
     },
@@ -5800,6 +5842,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1995,
+      "model": "Apartment",
       "latest_psf": 636.3,
       "txn_count": 4
     },
@@ -5862,6 +5905,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1993,
+      "model": "Apartment",
       "latest_psf": 727.6,
       "txn_count": 6
     },
@@ -5917,6 +5961,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1993,
+      "model": "Apartment",
       "latest_psf": 631.7,
       "txn_count": 5
     },
@@ -5993,6 +6038,7 @@
       "lease_years": 99,
       "flat_model": "Apartment",
       "top_year": 1993,
+      "model": "Apartment",
       "latest_psf": 802.8,
       "txn_count": 8
     },
@@ -6929,6 +6975,7 @@
       "lease_start": 2008,
       "lease_years": 99,
       "top_year": 2011,
+      "model": "Condominium",
       "latest_psf": 2020.7,
       "txn_count": 131
     }

@@ -25,6 +25,7 @@
     minSqft: $("minSqft"), maxSqft: $("maxSqft"),
     minPrice: $("minPrice"), maxPrice: $("maxPrice"),
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
+    modelChips: $("modelChips"), sourceChips: $("sourceChips"),
   };
 
   const state = {
@@ -33,6 +34,9 @@
     // null means unbounded — an empty box is "no limit", not zero.
     minSqft: null, maxSqft: null, minPrice: null, maxPrice: null,
     minLease: 0, leaseMax: 99,
+    // Empty set means "all models" — the same "unset = no bound" rule the
+    // numeric filters use, rather than pre-selecting everything.
+    models: new Set(), allModels: [],
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
   };
@@ -227,9 +231,12 @@
    *  one transaction, so it hides the property outright. Freehold and
    *  unknown-lease properties pass any minimum — a freehold outlasts every
    *  threshold, and hiding what we can't assess would quietly lose data. */
+  const modelOf = (p) => p.model || p.flat_model || p.type || "";
+
   function visibleProperties() {
     return state.properties.filter((p) => {
       if (state.source !== "ALL" && p.source !== state.source) return false;
+      if (state.models.size && !state.models.has(modelOf(p))) return false;
       if (state.minLease > 0) {
         const left = yearsLeft(p);
         if (left != null && left < state.minLease) return false;
@@ -246,6 +253,7 @@
     if (state.minPrice != null) n++;
     if (state.maxPrice != null) n++;
     if (state.minLease > 0) n++;
+    if (state.models.size) n++;
     if (state.startIdx > 0 || state.endIdx < state.months.length - 1) n++;
     return n;
   }
@@ -444,7 +452,8 @@
     // Say which filter emptied the map, rather than showing a blank one.
     if (shown === 0 && state.properties.length) {
       el.emptyNote.textContent = props.length === 0
-        ? "No properties match these filters. Try lowering the lease minimum or clearing the type."
+        ? "No properties match these filters. Try clearing the type or model, "
+          + "or lowering the lease minimum."
         : "No transactions match these filters. Try widening the size, price or period.";
       el.emptyNote.hidden = false;
     } else {
@@ -772,9 +781,58 @@
     el.moreToggle.setAttribute("aria-expanded", String(filtersOpen()));
   }
 
+  /** Chips come from the data, so the watchlist can change without touching
+   *  the markup. Counts are of all properties, not the filtered set, so a chip
+   *  doesn't renumber as you click around. */
+  function buildModelChips() {
+    const counts = new Map();
+    for (const p of state.properties) {
+      const m = modelOf(p);
+      if (m) counts.set(m, (counts.get(m) || 0) + 1);
+    }
+    state.allModels = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+    if (state.allModels.length < 2) return;      // nothing to choose between
+
+    el.modelChips.innerHTML =
+      `<button type="button" class="chip is-on" data-model="" aria-pressed="true">All</button>` +
+      state.allModels.map((m) =>
+        `<button type="button" class="chip" data-model="${escapeHtml(m)}"
+           aria-pressed="false" title="${counts.get(m)} propert${counts.get(m) === 1 ? "y" : "ies"}"
+           >${escapeHtml(m)}<span class="chip-count">${counts.get(m)}</span></button>`
+      ).join("");
+
+    for (const chip of el.modelChips.querySelectorAll(".chip")) {
+      chip.addEventListener("click", () => toggleModel(chip.dataset.model));
+    }
+  }
+
+  function toggleModel(model) {
+    if (!model) {
+      state.models.clear();                      // the "All" chip
+    } else if (state.models.has(model)) {
+      state.models.delete(model);
+    } else {
+      state.models.add(model);
+    }
+    syncModelChips();
+    applyFilters();
+  }
+
+  function syncModelChips() {
+    for (const chip of el.modelChips.querySelectorAll(".chip")) {
+      const m = chip.dataset.model;
+      const on = m ? state.models.has(m) : state.models.size === 0;
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", String(on));
+    }
+  }
+
   function setSource(source) {
     state.source = source;
-    for (const chip of document.querySelectorAll(".chip")) {
+    // Scoped to the source group: a bare ".chip" also matches the model chips,
+    // whose dataset has no `source`, so `undefined === undefined` lit every
+    // one of them up and set the source to undefined.
+    for (const chip of el.sourceChips.querySelectorAll(".chip")) {
       const on = chip.dataset.source === source;
       chip.classList.toggle("is-on", on);
       chip.setAttribute("aria-pressed", String(on));
@@ -833,6 +891,8 @@
     state.endIdx = state.months.length - 1;
     state.minSqft = state.maxSqft = state.minPrice = state.maxPrice = null;
     state.minLease = 0;
+    state.models.clear();
+    syncModelChips();
     for (const input of [el.minSqft, el.maxSqft, el.minPrice, el.maxPrice]) {
       input.value = "";
     }
@@ -892,6 +952,7 @@
     el.minLease.max = String(state.leaseMax);
 
     renderLegend();
+    buildModelChips();
     syncRangeUI();
     syncLeaseUI();
     syncFiltersAria();
@@ -908,7 +969,7 @@
     el.reset.addEventListener("click", resetView);
     el.panelClose.addEventListener("click", closePanel);
     el.scrim.addEventListener("click", closePanel);
-    for (const chip of document.querySelectorAll(".chip")) {
+    for (const chip of el.sourceChips.querySelectorAll(".chip")) {
       chip.addEventListener("click", () => setSource(chip.dataset.source));
     }
     document.addEventListener("keydown", (e) => {

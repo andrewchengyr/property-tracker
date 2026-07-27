@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
   <div class="filters">
     <div class="filter">
       <span class="filter-label" id="sourceLabel">Type</span>
-      <div class="chips" role="group" aria-labelledby="sourceLabel">
+      <div class="chips" id="sourceChips" role="group" aria-labelledby="sourceLabel">
         <button type="button" class="chip is-on" data-source="ALL" aria-pressed="true">All</button>
         <button type="button" class="chip" data-source="URA" aria-pressed="false">Private</button>
         <button type="button" class="chip" data-source="HDB" aria-pressed="false">HDB</button>
@@ -57,6 +57,13 @@
   <!-- Size and price narrow the transactions themselves; lease remaining is a
        property of the building, so it hides whole properties. -->
   <div class="filters filters--more" id="moreFilters">
+    <div class="filter filter--model">
+      <span class="filter-label" id="modelLabel">Model</span>
+      <!-- Chips are built from the data — the set of models depends on the
+           watchlist, so hardcoding them would drift. -->
+      <div class="chips chips--wrap" id="modelChips" role="group" aria-labelledby="modelLabel"></div>
+    </div>
+
     <div class="filter">
       <span class="filter-label">Size <span class="filter-unit">sqft</span></span>
       <div class="pair">
@@ -124,6 +131,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

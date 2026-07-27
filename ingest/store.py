@@ -289,6 +289,12 @@ class Store:
                 top = facts.get("lease_start")
             prop["top_year"] = top
 
+            # One label spanning both sources, for the frontend's model filter:
+            # HDB's flat model (DBSS / Improved / Maisonette / Apartment), or
+            # the URA property type (Condominium / Terrace / …) which is the
+            # equivalent level of description for private property.
+            prop["model"] = (model or prop.get("type") or "").strip()
+
         properties = []
         for prop in grouped.values():
             prop["txns"].sort(key=lambda t: t["date"])
