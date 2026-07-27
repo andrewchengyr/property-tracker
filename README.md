@@ -23,13 +23,36 @@ No code changes.
 ```yaml
 private:                       # matched against URA project names
   - project: "TREVISTA"        # case-insensitive "contains"
+    top_year: 2011             # optional — URA has no completion date
 
 hdb:                           # filtered on the data.gov.sg dataset
   - town: "TOA PAYOH"          # required
     flat_type: "5 ROOM"        # required
-    street_name: "LORONG 1A TOA PAYOH"   # optional
-    block: "101"                         # optional
+    lease_from: 2000           # optional — min lease_commence_date
+    street_name: "LOR 2 TOA PAYOH"   # optional
+    block: "141"                     # optional
+    flat_model: "Improved"           # optional
 ```
+
+**`flat_type` is not what you'd guess for executive flats.** The dataset has no
+`EXECUTIVE MAISONETTE` or `EXECUTIVE APARTMENT` flat type — both return zero
+records. The flat type is `EXECUTIVE`, and maisonette vs apartment lives in
+`flat_model`:
+
+```yaml
+  - town: "TOA PAYOH"
+    flat_type: "EXECUTIVE"
+    flat_model: "Maisonette"   # or "Apartment"
+```
+
+Valid `flat_type` values: `1 ROOM` … `5 ROOM`, `EXECUTIVE`, `MULTI-GENERATION`.
+Common `flat_model` values: `Improved`, `Standard`, `Model A`, `New Generation`,
+`Premium Apartment`, `Maisonette`, `Apartment`, `DBSS`, `Adjoined flat`.
+
+`town` and `flat_type` are sent to the API; everything else is applied
+client-side, so a too-narrow entry logs how many records it saw *before*
+filtering — which tells you whether the town/type was wrong or just the
+narrowing.
 
 The loader trims whitespace and uppercases the HDB fields to match the dataset.
 An entry that matches nothing logs a warning — it never aborts the run.
@@ -207,3 +230,12 @@ tests/                  offline tests + saved API fixtures
 - A failed geocode leaves `lat`/`lng` null: the row is still stored and still
   charts, it just doesn't get a map marker. The header reports how many.
 - HDB resale updates roughly monthly, URA roughly weekly — hence a weekly cron.
+- data.gov.sg **rate-limits (429)** once a watchlist makes several calls in a
+  row; the client retries with exponential backoff and honours `Retry-After`.
+- HDB **towns are administrative, not geographic**: Bidadari Park Drive is in
+  the `TOA PAYOH` town but sits ~2 km east near Woodleigh, so a town-wide
+  watchlist entry spreads the map wider than the name suggests.
+- One block can hold **more than one flat type** (8 Joo Seng Rd has both 5 ROOM
+  and EXECUTIVE), so the export groups on name *and* type. Grouping on name
+  alone merged them into a single marker whose type and psf came from whichever
+  row sorted first.

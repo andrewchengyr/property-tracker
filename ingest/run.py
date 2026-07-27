@@ -78,6 +78,10 @@ def load_watchlist(path: Path | str = WATCHLIST) -> dict[str, list[dict[str, str
                 "flat_type": flat_type,
                 "block": _upper(entry.get("block")),
                 "street_name": _upper(entry.get("street_name")),
+                # flat_model is how "executive maisonette" is really encoded:
+                # flat_type EXECUTIVE + flat_model Maisonette.
+                "flat_model": _upper(entry.get("flat_model")),
+                "lease_from": _year_or_none(entry.get("lease_from")),
             }
         )
 
@@ -160,7 +164,10 @@ def collect_hdb(
                 and _upper(r.get("flat_type")) == entry["flat_type"]
             ]
             records.extend(
-                hdb_mod.filter_records(subset, entry["block"], entry["street_name"])
+                hdb_mod.filter_records(
+                    subset, entry["block"], entry["street_name"],
+                    entry["flat_model"], entry["lease_from"],
+                )
             )
     else:
         client = hdb_mod.HDBClient()
@@ -173,9 +180,19 @@ def collect_hdb(
                 if errors is not None:
                     errors.append(f"HDB pull failed for {entry['town']} / {entry['flat_type']}: {exc}")
                 continue
-            narrowed = hdb_mod.filter_records(fetched, entry["block"], entry["street_name"])
+            narrowed = hdb_mod.filter_records(
+                fetched, entry["block"], entry["street_name"],
+                entry["flat_model"], entry["lease_from"],
+            )
             if not narrowed:
-                log.warning("HDB entry matched no records: %r", entry)
+                log.warning(
+                    "HDB entry matched no records: %s %s%s%s — %d fetched before "
+                    "client-side filters",
+                    entry["town"], entry["flat_type"],
+                    f" model={entry['flat_model']}" if entry["flat_model"] else "",
+                    f" lease_from={entry['lease_from']}" if entry["lease_from"] else "",
+                    len(fetched),
+                )
             records.extend(narrowed)
 
     txns = hdb_mod.normalize(records)

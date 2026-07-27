@@ -234,6 +234,45 @@ def test_street_filter_still_rejects_a_genuinely_different_street(hdb_records):
     assert hdb_mod.filter_records(hdb_records, street_name="LOR 2 TOA PAYOH") == []
 
 
+def test_flat_model_filter(hdb_records):
+    """"Executive maisonette" is flat_type EXECUTIVE + flat_model Maisonette —
+    there is no EXECUTIVE MAISONETTE flat_type in the dataset."""
+    recs = [
+        {"flat_type": "EXECUTIVE", "flat_model": "Maisonette", "lease_commence_date": "1988"},
+        {"flat_type": "EXECUTIVE", "flat_model": "Apartment", "lease_commence_date": "1993"},
+    ]
+    assert len(hdb_mod.filter_records(recs, flat_model="Maisonette")) == 1
+    assert len(hdb_mod.filter_records(recs, flat_model="MAISONETTE")) == 1   # case-insensitive
+    assert len(hdb_mod.filter_records(recs, flat_model="Apartment")) == 1
+    assert hdb_mod.filter_records(recs, flat_model="DBSS") == []
+    assert len(hdb_mod.filter_records(recs)) == 2                            # unset = no filter
+
+
+@pytest.mark.parametrize(
+    "lease_from,expected",
+    [(None, 4), (2000, 2), (2012, 1), (1980, 4), (2030, 0)],
+)
+def test_lease_from_filter(lease_from, expected):
+    recs = [{"lease_commence_date": y} for y in ("1985", "1999", "2001", "2012")]
+    assert len(hdb_mod.filter_records(recs, lease_from=lease_from)) == expected
+
+
+def test_unparseable_lease_year_fails_a_lease_bound():
+    """It can't be shown to meet the bound, so it must not pass it."""
+    recs = [{"lease_commence_date": ""}, {"lease_commence_date": "n/a"}, {}]
+    assert hdb_mod.filter_records(recs, lease_from=2000) == []
+    assert len(hdb_mod.filter_records(recs)) == 3      # but survives with no bound
+
+
+def test_filters_compose(hdb_records):
+    both = hdb_mod.filter_records(
+        hdb_records, street_name="LORONG 1A TOA PAYOH", lease_from=1900)
+    street_only = hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH")
+    assert len(both) == len(street_only) > 0
+    assert hdb_mod.filter_records(
+        hdb_records, street_name="LORONG 1A TOA PAYOH", lease_from=2500) == []
+
+
 def test_hdb_property_name_is_block_plus_street(hdb_records):
     txns = hdb_mod.normalize(
         hdb_mod.filter_records(hdb_records, street_name="LORONG 1A TOA PAYOH"))
@@ -325,6 +364,28 @@ def test_upsert_never_nulls_a_known_coordinate(store, hdb_records):
 
 # -------------------------------------------------------------- export ------
 
+def test_one_block_with_two_flat_types_stays_two_properties(store, tmp_path):
+    """8 Joo Seng Rd really does hold both 5 ROOM and EXECUTIVE units. Grouping
+    the export on name alone merged them into one marker whose type and psf
+    came from whichever row happened to sort first."""
+    base = {
+        "month": "2025-03", "town": "TOA PAYOH", "block": "8",
+        "street_name": "JOO SENG RD", "storey_range": "04 TO 06",
+        "flat_model": "Improved", "lease_commence_date": "1983",
+        "remaining_lease": "57 years",
+    }
+    recs = [
+        {**base, "flat_type": "5 ROOM", "floor_area_sqm": "120", "resale_price": "700000"},
+        {**base, "flat_type": "EXECUTIVE", "floor_area_sqm": "146", "resale_price": "900000"},
+    ]
+    store.upsert_many(hdb_mod.normalize(recs))
+    payload = store.export_json(tmp_path / "d.json")
+
+    assert len(payload["properties"]) == 2
+    assert {p["type"] for p in payload["properties"]} == {"5 ROOM", "EXECUTIVE"}
+    assert len({p["id"] for p in payload["properties"]}) == 2   # ids stay distinct
+
+
 def test_export_json_shape(store, hdb_records, ura_projects, tmp_path):
     store.upsert_many(_sample(hdb_records))
     store.upsert_many(ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84))
@@ -415,6 +476,27 @@ hdb:
     assert wl["hdb"][0]["town"] == "TOA PAYOH"               # uppercased for the API
     assert wl["hdb"][0]["flat_type"] == "5 ROOM"
     assert wl["hdb"][0]["street_name"] == "LORONG 1A TOA PAYOH"
+
+
+def test_watchlist_reads_flat_model_and_lease_from(tmp_path):
+    path = tmp_path / "w.yaml"
+    path.write_text(
+        """
+hdb:
+  - town: "TOA PAYOH"
+    flat_type: "EXECUTIVE"
+    flat_model: "Maisonette"
+    lease_from: 2000
+  - town: "TOA PAYOH"
+    flat_type: "5 ROOM"
+    lease_from: "not a year"
+"""
+    )
+    wl = load_watchlist(path)
+    assert wl["hdb"][0]["flat_model"] == "MAISONETTE"
+    assert wl["hdb"][0]["lease_from"] == 2000
+    assert wl["hdb"][1]["lease_from"] is None      # junk degrades to "no bound"
+    assert wl["hdb"][1]["flat_model"] == ""
 
 
 def test_missing_watchlist_does_not_crash(tmp_path):

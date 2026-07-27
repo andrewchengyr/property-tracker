@@ -207,13 +207,21 @@ class Store:
         path.parent.mkdir(parents=True, exist_ok=True)
         top_years = {k.lower(): v for k, v in (top_years or {}).items()}
 
-        grouped: dict[tuple[str, str], dict[str, Any]] = {}
+        # Keyed on flat type as well as name: one HDB block can hold more than
+        # one flat type (8 Joo Seng Rd has both 5 ROOM and EXECUTIVE), and
+        # grouping on name alone would silently merge them into a single
+        # marker whose type and psf came from whichever row sorted first.
+        grouped: dict[tuple[str, str, str], dict[str, Any]] = {}
         for row in self.all_rows():
-            key = (row["source"], row["property_name"])
+            ptype = row["property_type"] or ""
+            key = (row["source"], row["property_name"], ptype)
             prop = grouped.get(key)
             if prop is None:
+                slug = slugify(row["property_name"])
+                if row["source"] == "HDB" and ptype:
+                    slug = f"{slug}-{slugify(ptype)}"
                 prop = grouped[key] = {
-                    "id": f"{row['source'].lower()}-{slugify(row['property_name'])}",
+                    "id": f"{row['source'].lower()}-{slug}",
                     "name": row["property_name"],
                     "source": row["source"],
                     "type": row["property_type"] or "",
@@ -241,11 +249,12 @@ class Store:
 
         # Lease facts come from the most recent row — tenure is a property of
         # the building, but a stale caveat can carry an outdated string.
-        for (source, name), prop in grouped.items():
+        for (source, name, ptype), prop in grouped.items():
             row = self.conn.execute(
                 "SELECT tenure, raw_json FROM transactions "
-                "WHERE source = ? AND property_name = ? ORDER BY txn_date DESC LIMIT 1",
-                (source, name),
+                "WHERE source = ? AND property_name = ? AND IFNULL(property_type,'') = ? "
+                "ORDER BY txn_date DESC LIMIT 1",
+                (source, name, ptype),
             ).fetchone()
             facts = {}
             if row:

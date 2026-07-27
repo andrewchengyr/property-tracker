@@ -21,13 +21,38 @@ private:
     top_year: 2011        # lease commenced 2008; TOP 2011
 
 # HDB resale (data.gov.sg).
-# town + flat_type are required. block / street_name are optional and narrow
-# the match down to a single street or building.
 #
-# The dataset abbreviates street names ("LOR 1A TOA PAYOH", "BISHAN ST 13",
-# "UPP SERANGOON RD"). You can write either form here — both are canonicalised
-# before matching. Blocks on this street: 138A, 138B, 138C, 139A, 139B.
+# town + flat_type are required. All other keys are optional narrowing:
+#   block, street_name  — a single building or street
+#   flat_model          — Improved / DBSS / Maisonette / Apartment / Model A …
+#   lease_from          — minimum lease_commence_date, i.e. "built from year X"
+#
+# Street names are abbreviated in the dataset ("LOR 1A TOA PAYOH", "BISHAN
+# ST 13", "UPP SERANGOON RD"); either form works here.
+#
+# NOTE ON "EXECUTIVE MAISONETTE" / "EXECUTIVE APARTMENT": these are not
+# flat_type values. The dataset's flat_type is EXECUTIVE, and maisonette vs
+# apartment lives in flat_model — hence the two entries below.
 hdb:
+  # Every 5-room in Toa Payoh built from 2000 on. Covers the Lor 1A DBSS
+  # blocks (lease 2012), Lor 2 (2001/2002/2006), Toa Payoh Ctrl (2009) and
+  # Bidadari Park Drive (2020) — Bidadari sits in the TOA PAYOH HDB town
+  # despite being ~2 km east, so it will appear off to one side of the map.
   - town: "TOA PAYOH"
     flat_type: "5 ROOM"
-    street_name: "LORONG 1A TOA PAYOH"
+    lease_from: 2000
+
+  # Executive maisonettes and apartments, same lease bound. Toa Payoh's
+  # executive stock all predates 2000 (HDB stopped building them in the
+  # 1990s), so these currently match nothing — kept so the watchlist states
+  # the intent, and they cost one API call each. Drop `lease_from` to pull
+  # the 139 maisonette / 44 apartment transactions from the 1980s instead.
+  - town: "TOA PAYOH"
+    flat_type: "EXECUTIVE"
+    flat_model: "Maisonette"
+    lease_from: 2000
+
+  - town: "TOA PAYOH"
+    flat_type: "EXECUTIVE"
+    flat_model: "Apartment"
+    lease_from: 2000
