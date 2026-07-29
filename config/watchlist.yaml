@@ -42,13 +42,13 @@ private:
 # flat_type values. The dataset's flat_type is EXECUTIVE, and maisonette vs
 # apartment lives in flat_model — hence the two entries below.
 hdb:
-  # Every 5-room in Toa Payoh built from 2000 on. Covers the Lor 1A DBSS
-  # blocks (lease 2012), Lor 2 (2001/2002/2006), Toa Payoh Ctrl (2009) and
-  # Bidadari Park Drive (2020) — Bidadari sits in the TOA PAYOH HDB town
-  # despite being ~2 km east, so it will appear off to one side of the map.
+  # Every 5-room in Toa Payoh, no lease bound — leases run from the 1960s
+  # blocks around Toa Payoh Central right through to Bidadari Park Drive
+  # (2020). Bidadari sits in the TOA PAYOH HDB town despite being ~2 km east,
+  # as do Potong Pasir, Joo Seng and Kim Keat, so this spreads well beyond
+  # Toa Payoh proper. Add `lease_from` back to restrict to newer stock.
   - town: "TOA PAYOH"
     flat_type: "5 ROOM"
-    lease_from: 2000
 
   # Every executive flat in Toa Payoh — 139 maisonettes + 44 apartments
   # across 23 blocks. Deliberately NO lease_from here: HDB stopped building
