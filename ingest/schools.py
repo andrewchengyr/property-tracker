@@ -18,14 +18,13 @@ from typing import Any, Iterable
 
 import requests
 
-log = logging.getLogger(__name__)
+from . import datagov
 
-SEARCH_URL = "https://data.gov.sg/api/action/datastore_search"
+log = logging.getLogger(__name__)
 # "School Directory and Information"
 RESOURCE_ID = "d_688b934f82c1059ed0a6993d2a829089"
 
 PAGE_SIZE = 1000
-TIMEOUT = 60
 MAX_PAGES = 20
 PRIMARY = "PRIMARY"
 
@@ -43,12 +42,10 @@ def fetch_directory(session: requests.Session | None = None) -> list[dict[str, A
     offset = 0
 
     for _ in range(MAX_PAGES):
-        r = session.get(
-            SEARCH_URL,
-            params={"resource_id": RESOURCE_ID, "limit": PAGE_SIZE, "offset": offset},
-            timeout=TIMEOUT,
+        r = datagov.get(
+            {"resource_id": RESOURCE_ID, "limit": PAGE_SIZE, "offset": offset},
+            session=session,
         )
-        r.raise_for_status()
         payload = r.json()
         if not payload.get("success", True):
             raise SchoolsError(f"school directory request failed: {payload!r}")

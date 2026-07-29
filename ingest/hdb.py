@@ -10,27 +10,20 @@ from __future__ import annotations
 
 import json
 import logging
-import time
 from typing import Any, Iterable
 
 import requests
 
+from . import datagov
 from .models import SOURCE_HDB, Transaction, parse_hdb_month
 
 log = logging.getLogger(__name__)
 
-SEARCH_URL = "https://data.gov.sg/api/action/datastore_search"
 # "Resale flat prices (based on registration date), from Jan 2017 onwards"
 RESOURCE_ID = "d_8b84c4ee58e3cfc0ece0d773c8ca6abc"
 
 PAGE_SIZE = 10000
-TIMEOUT = 60
 MAX_PAGES = 100  # backstop against a pagination bug spinning forever
-
-# data.gov.sg rate-limits: a watchlist with several entries will trip 429 on
-# back-to-back pulls. Retried with backoff rather than losing the entry.
-MAX_RETRIES = 5
-BACKOFF_BASE = 3  # seconds: 3, 6, 12, 24, 48
 
 
 class HDBError(RuntimeError):
@@ -41,31 +34,6 @@ class HDBClient:
     def __init__(self, session: requests.Session | None = None):
         self.session = session or requests.Session()
 
-    def _get_with_retry(self, params: dict[str, Any]) -> requests.Response:
-        """Retry on 429 and 5xx with exponential backoff, honouring Retry-After."""
-        last: Exception | None = None
-        for attempt in range(MAX_RETRIES):
-            try:
-                r = self.session.get(SEARCH_URL, params=params, timeout=TIMEOUT)
-                if r.status_code == 429 or r.status_code >= 500:
-                    wait = float(r.headers.get("Retry-After") or BACKOFF_BASE * 2**attempt)
-                    log.warning(
-                        "data.gov.sg returned %d, retrying in %.0fs (attempt %d/%d)",
-                        r.status_code, wait, attempt + 1, MAX_RETRIES,
-                    )
-                    time.sleep(wait)
-                    continue
-                r.raise_for_status()
-                return r
-            except requests.RequestException as exc:
-                last = exc
-                if attempt == MAX_RETRIES - 1:
-                    break
-                wait = BACKOFF_BASE * 2**attempt
-                log.warning("data.gov.sg request failed (%s), retrying in %ds", exc, wait)
-                time.sleep(wait)
-        raise HDBError(f"data.gov.sg unreachable after {MAX_RETRIES} attempts: {last}")
-
     def fetch(self, town: str, flat_type: str) -> list[dict[str, Any]]:
         """Every record for a town + flat_type, following pagination."""
         filters = json.dumps({"town": town, "flat_type": flat_type})
@@ -73,13 +41,14 @@ class HDBClient:
         offset = 0
 
         for _ in range(MAX_PAGES):
-            r = self._get_with_retry(
+            r = datagov.get(
                 {
                     "resource_id": RESOURCE_ID,
                     "limit": PAGE_SIZE,
                     "offset": offset,
                     "filters": filters,
-                }
+                },
+                session=self.session,
             )
             payload = r.json()
             if not payload.get("success", True):

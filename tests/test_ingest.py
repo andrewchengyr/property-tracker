@@ -8,8 +8,11 @@ from datetime import date
 from pathlib import Path
 
 import pytest
+import requests
 
+from ingest import datagov
 from ingest import hdb as hdb_mod
+from ingest import schools as schools_mod
 from ingest import ura as ura_mod
 from ingest.geocode import Geocoder, first_latlng, svy21_to_wgs84
 from ingest.models import (
@@ -302,6 +305,59 @@ def test_a_rejected_cached_token_is_reminted_once(tmp_path):
     client._token = "expired"
     assert client.fetch_batch(1) == []
     assert session.calls == 3
+
+
+# --------------------------------------------------- data.gov.sg retries ----
+
+class _DGResponse:
+    def __init__(self, status=200, payload=None, headers=None):
+        self.status_code = status
+        self.headers = headers or {}
+        self._payload = payload if payload is not None else {"success": True, "result": {}}
+
+    def json(self):
+        return self._payload
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.HTTPError(f"HTTP {self.status_code}")
+
+
+def test_datagov_retries_a_429(monkeypatch):
+    """The schools pull runs straight after several HDB pulls and took a 429
+    that failed a whole scheduled run — both clients share this retry now."""
+    monkeypatch.setattr(datagov.time, "sleep", lambda s: None)
+    session = _FakeSession([_DGResponse(429), _DGResponse(429), _DGResponse(200)])
+    assert datagov.get({"resource_id": "x"}, session=session).status_code == 200
+    assert session.calls == 3
+
+
+def test_datagov_honours_retry_after(monkeypatch):
+    waits = []
+    monkeypatch.setattr(datagov.time, "sleep", waits.append)
+    session = _FakeSession([_DGResponse(429, headers={"Retry-After": "7"}), _DGResponse(200)])
+    datagov.get({"resource_id": "x"}, session=session)
+    assert waits == [7.0]
+
+
+def test_datagov_gives_up_after_max_retries(monkeypatch):
+    monkeypatch.setattr(datagov.time, "sleep", lambda s: None)
+    session = _FakeSession([_DGResponse(429)] * datagov.MAX_RETRIES)
+    with pytest.raises(datagov.DataGovError, match="unreachable"):
+        datagov.get({"resource_id": "x"}, session=session)
+
+
+def test_school_directory_uses_the_retrying_client(monkeypatch):
+    """Regression: schools.py had its own bare session.get and no backoff."""
+    monkeypatch.setattr(datagov.time, "sleep", lambda s: None)
+    page = {"success": True, "result": {"records": [
+        {"school_name": "X PRIMARY SCHOOL", "postal_code": "123456",
+         "mainlevel_code": "PRIMARY", "address": "1 RD", "dgp_code": "BISHAN",
+         "zone_code": "NORTH", "url_address": ""}], "total": 1}}
+    session = _FakeSession([_DGResponse(429), _DGResponse(200, page)])
+    recs = schools_mod.fetch_directory(session=session)
+    assert len(recs) == 1
+    assert session.calls == 2
 
 
 # ----------------------------------------------------------------- HDB ------
