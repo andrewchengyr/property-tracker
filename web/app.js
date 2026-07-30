@@ -50,7 +50,10 @@
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
-    compareMode: false, compare: [], cmpChart: null, cmpMeasure: "psf",
+    compareMode: false, compare: [], cmpChart: null,
+    // Shared by the panel chart and the compare chart — they are mutually
+    // exclusive views, so one preference rather than two that can disagree.
+    measure: "psf",
     // id → slot 0-2. Held separately from `compare` (which is display order)
     // so a property keeps its colour and key when the order changes or
     // another property is removed — colour follows the entity, not its rank.
@@ -850,7 +853,7 @@
     // compared on one axis — which is the point of the mode. Indexing to a
     // common base is also the only honest way to put them on one scale; two
     // y-axes would invent a correlation that isn't in the data.
-    const growthMode = state.cmpMeasure === "growth";
+    const growthMode = state.measure === "growth";
     for (const s of series) {
       const firstMonth = months.find((m) => s.points.has(m));
       s.base = firstMonth != null ? s.points.get(firstMonth) : null;
@@ -966,14 +969,22 @@
     });
   }
 
-  function setCmpMeasure(measure) {
-    state.cmpMeasure = measure;
-    for (const chip of el.cmpModeChips.querySelectorAll(".chip")) {
-      const on = chip.dataset.cmpmode === measure;
-      chip.classList.toggle("is-on", on);
-      chip.setAttribute("aria-pressed", String(on));
+  /** Both chart toggles set the same preference and re-sync whichever chip
+   *  group is currently on screen. */
+  function setMeasure(measure) {
+    state.measure = measure;
+    for (const group of [el.cmpModeChips, document.getElementById("panelModeChips")]) {
+      if (!group) continue;
+      for (const chip of group.querySelectorAll(".chip")) {
+        const on = chip.dataset.cmpmode === measure;
+        chip.classList.toggle("is-on", on);
+        chip.setAttribute("aria-pressed", String(on));
+      }
     }
-    drawCompareChart();
+    // renderPanel, not drawChart: the heading and its chips are part of the
+    // panel template, so redrawing only the canvas leaves the title lying.
+    if (state.selectedId) renderPanel();
+    if (!el.comparePanel.hidden) drawCompareChart();
   }
 
   // ── compare search ────────────────────────────────────────────────────
@@ -1242,6 +1253,7 @@
     const kind = prop.source === "HDB" ? "HDB Resale" : "Private";
 
     // For HDB the address *is* the name, so it would just repeat the heading.
+    const growthView = state.measure === "growth";
     const subtitle = [prop.type, prop.address, prop.segment]
       .filter(Boolean)
       .filter((v) => v !== prop.name)
@@ -1271,8 +1283,22 @@
       ${growthHtml(growth(txns))}
       ${factsHtml(prop)}
 
-      <h3 class="p-h3">Price per sqft over time</h3>
-      <p class="p-h3-sub">Monthly median${txns.length ? "" : " — no data in range"}</p>
+      <div class="cmp-chart-head">
+        <div class="cmp-chart-titles">
+          <h3 class="p-h3" id="panelChartTitle">${growthView
+            ? "Growth in price per sqft" : "Price per sqft over time"}</h3>
+          <p class="p-h3-sub" id="panelChartSub">${txns.length
+            ? (growthView ? "Change since the first month in the selected period"
+                          : "Monthly median")
+            : "Monthly median — no data in range"}</p>
+        </div>
+        <div class="chips" id="panelModeChips" role="group" aria-label="Chart measure">
+          <button type="button" class="chip${growthView ? "" : " is-on"}"
+                  data-cmpmode="psf" aria-pressed="${!growthView}">Price psf</button>
+          <button type="button" class="chip${growthView ? " is-on" : ""}"
+                  data-cmpmode="growth" aria-pressed="${growthView}">% growth</button>
+        </div>
+      </div>
       <div class="chart-box"><canvas id="psfChart"></canvas></div>
 
       <h3 class="p-h3">Recent transactions</h3>
@@ -1282,6 +1308,9 @@
 
     el.panel.hidden = false;
     el.scrim.hidden = false;
+    for (const chip of el.panelBody.querySelectorAll("#panelModeChips .chip")) {
+      chip.addEventListener("click", () => setMeasure(chip.dataset.cmpmode));
+    }
     drawChart(txns);
   }
 
@@ -1368,8 +1397,14 @@
 
     const series = monthlyMedians(txns);
     if (!series.length) return;
+    const growthMode = state.measure === "growth";
     const labels = series.map((s) => s[0]);
-    const values = series.map((s) => Math.round(s[1]));
+    // Rebased to the first month in the selected period, so the line answers
+    // "how much has this moved since then" rather than "what does it cost".
+    const base = series[0][1];
+    const values = series.map((s) => (growthMode
+      ? +(((s[1] / base) - 1) * 100).toFixed(1)
+      : Math.round(s[1])));
 
     const accent = cssVar("--accent");
     const ink = cssVar("--text-secondary");
@@ -1413,7 +1448,11 @@
             displayColors: false,
             callbacks: {
               title: (items) => monthLabel(items[0].label),
-              label: (item) => psfText(item.parsed.y) + " psf",
+              label: (item) => {
+                if (!growthMode) return psfText(item.parsed.y) + " psf";
+                const raw = series[item.dataIndex][1];
+                return `${pct(item.parsed.y / 100)} (${psfText(raw)})`;
+              },
             },
           },
         },
@@ -1427,11 +1466,17 @@
             },
           },
           y: {
-            grid: { color: grid, drawTicks: false },
+            grid: {
+              drawTicks: false,
+              color: (ctx) => (growthMode && ctx.tick.value === 0
+                ? cssVar("--baseline") : grid),
+            },
             border: { display: false },
             ticks: {
               color: muted, font: { size: 10 }, padding: 6, maxTicksLimit: 5,
-              callback: (v) => "$" + num.format(v),
+              callback: (v) => (growthMode
+                ? (v > 0 ? "+" : "") + v + "%"
+                : "$" + num.format(v)),
             },
           },
         },
@@ -1562,14 +1607,21 @@
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
     renderMarkers();
+    refreshDetailViews();
+  }
+
+  /** Re-read whatever detail view is open. Both filter paths call this, so
+   *  neither can refresh the drawer and forget the panel — which is exactly
+   *  how Reset came to leave stale numbers on screen, twice. */
+  function refreshDetailViews() {
     if (state.selectedId) {
       // The selected property may no longer pass the filters.
       const still = visibleProperties().some((p) => p.id === state.selectedId);
       still ? renderPanel() : closePanel();
     }
-    // Comparison is scoped by the filters, so every change re-reads it. The
-    // selection itself is deliberately kept — a filter that hides a compared
-    // property shows an empty column rather than dropping the choice.
+    // Comparison is scoped by the filters too. The selection itself is
+    // deliberately kept — a filter that hides a compared property shows an
+    // empty column rather than dropping the choice.
     if (state.compareMode) renderCompare();
   }
 
@@ -1702,9 +1754,9 @@
     updateModelCounts();
     renderMarkers({ fit: true });
     // This is the one filter path that doesn't go through applyFilters, and
-    // Reset ends here — without this the comparison keeps showing the numbers
-    // from before the reset.
-    if (state.compareMode) renderCompare();
+    // Reset ends here — without this the open detail views keep showing the
+    // numbers from before the reset.
+    refreshDetailViews();
   }
 
   // Sweeps a fixed-width window forward through time, then loops.
@@ -1835,7 +1887,7 @@
     el.compareSearch.addEventListener("input", onSearchInput);
     el.compareSearch.addEventListener("keydown", onSearchKey);
     for (const chip of el.cmpModeChips.querySelectorAll(".chip")) {
-      chip.addEventListener("click", () => setCmpMeasure(chip.dataset.cmpmode));
+      chip.addEventListener("click", () => setMeasure(chip.dataset.cmpmode));
     }
     el.compareSearch.addEventListener("blur", () => setTimeout(hideResults, 120));
     renderCompare();

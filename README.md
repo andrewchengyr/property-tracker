@@ -105,7 +105,9 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
 - **Hover a marker** for a summary card: median psf, growth rate, a sparkline,
   transaction count, median price and latest month.
 - **Click a marker** for the full panel — growth, property facts, the
-  price-per-sqft chart and recent transactions.
+  price-per-sqft chart and recent transactions. The chart toggles between
+  **Price psf** and **% growth**, rebased to the first month in the selected
+  period. The setting is shared with the compare chart.
 - **Compare** puts up to three properties side by side: one chart with a line
   each, plus a column of the same figures per property. Add them by clicking
   markers or by typing a name or street into the search box. Every number
