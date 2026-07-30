@@ -858,6 +858,17 @@ body.filters-closed .filters--more { display: none; }
 .cmp-head .panel-close { position: static; }
 
 .cmp-chart-wrap { margin-bottom: 16px; }
+
+.cmp-chart-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cmp-chart-titles { flex: 1 1 200px; min-width: 0; }
+.cmp-chart-head .chips { flex: 0 0 auto; }
+.cmp-chart-head .chip { font-size: 12px; padding: 4px 10px; min-height: 27px; }
 .cmp-chart { height: 190px; margin-top: 6px; }
 
 .cmp-cols {

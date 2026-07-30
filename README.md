@@ -117,6 +117,11 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
   always #1 — while the **colour follows the property**, so reordering or
   removing one never repaints the others. Number answers "where is it",
   colour answers "which is it", and the map badge shows both.
+  The chart toggles between **Price psf** and **% growth**. Growth rebases each
+  line to its own first month inside the selected period, so properties at very
+  different price levels compare on one axis — a Toa Payoh flat and a Bishan
+  condo can't share a price scale usefully, but they can share a growth one.
+  Both modes follow the filters, so changing the period re-bases the chart.
 
 ### Filters
 

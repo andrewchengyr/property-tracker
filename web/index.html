@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -167,8 +167,18 @@
               aria-label="Close comparison">&times;</button>
     </div>
     <div class="cmp-chart-wrap">
-      <p class="p-h3">Price per sqft over time</p>
-      <p class="p-h3-sub">Monthly median, one line per property</p>
+      <div class="cmp-chart-head">
+        <div class="cmp-chart-titles">
+          <p class="p-h3" id="cmpChartTitle">Price per sqft over time</p>
+          <p class="p-h3-sub" id="cmpChartSub">Monthly median, one line per property</p>
+        </div>
+        <div class="chips" id="cmpModeChips" role="group" aria-label="Chart measure">
+          <button type="button" class="chip is-on" data-cmpmode="psf"
+                  aria-pressed="true">Price psf</button>
+          <button type="button" class="chip" data-cmpmode="growth"
+                  aria-pressed="false">% growth</button>
+        </div>
+      </div>
       <div class="cmp-chart"><canvas id="cmpChart"></canvas></div>
     </div>
     <div class="cmp-cols" id="compareBody"></div>
@@ -186,6 +196,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>

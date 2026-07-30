@@ -33,6 +33,8 @@
     compareCount: $("compareCount"), comparePanel: $("comparePanel"),
     compareBody: $("compareBody"), compareClear: $("compareClear"),
     compareClose: $("compareClose"), cmpScope: $("cmpScope"),
+    cmpModeChips: $("cmpModeChips"), cmpChartTitle: $("cmpChartTitle"),
+    cmpChartSub: $("cmpChartSub"),
     presets: $("presets"),
   };
 
@@ -48,7 +50,7 @@
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
-    compareMode: false, compare: [], cmpChart: null,
+    compareMode: false, compare: [], cmpChart: null, cmpMeasure: "psf",
     // id → slot 0-2. Held separately from `compare` (which is display order)
     // so a property keeps its colour and key when the order changes or
     // another property is removed — colour follows the entity, not its rank.
@@ -843,6 +845,37 @@
     const months = [...new Set(series.flatMap((s) => [...s.points.keys()]))].sort();
     if (!months.length) return;
 
+    // In growth mode each line is rebased to its own first month *inside the
+    // selected period*, so properties at very different price levels can be
+    // compared on one axis — which is the point of the mode. Indexing to a
+    // common base is also the only honest way to put them on one scale; two
+    // y-axes would invent a correlation that isn't in the data.
+    const growthMode = state.cmpMeasure === "growth";
+    for (const s of series) {
+      const firstMonth = months.find((m) => s.points.has(m));
+      s.base = firstMonth != null ? s.points.get(firstMonth) : null;
+      s.baseMonth = firstMonth;
+    }
+
+    const valueAt = (s, m) => {
+      if (!s.points.has(m)) return null;
+      const v = s.points.get(m);
+      if (!growthMode) return Math.round(v);
+      if (!s.base) return null;
+      return +(((v / s.base) - 1) * 100).toFixed(1);
+    };
+
+    // Bases can differ when one property has no sale in the opening months —
+    // say so rather than let the reader assume a shared starting line.
+    const bases = [...new Set(series.map((s) => s.baseMonth).filter(Boolean))];
+    el.cmpChartTitle.textContent = growthMode
+      ? "Growth in price per sqft" : "Price per sqft over time";
+    el.cmpChartSub.textContent = growthMode
+      ? (bases.length === 1
+          ? `Change since ${monthLabel(bases[0])}, each line from its own first month`
+          : "Change since each property's first month in the selected period")
+      : "Monthly median, one line per property";
+
     const grid = cssVar("--gridline");
     const muted = cssVar("--text-muted");
     const surface = cssVar("--surface-1");
@@ -855,7 +888,7 @@
           const colour = cssVar(CMP_COLOURS[s.slot]);
           return {
             label: s.prop.name,
-            data: months.map((m) => (s.points.has(m) ? Math.round(s.points.get(m)) : null)),
+            data: months.map((m) => valueAt(s, m)),
             borderColor: colour,
             backgroundColor: colour,
             borderWidth: 2,
@@ -893,7 +926,13 @@
             padding: 9,
             callbacks: {
               title: (items) => monthLabel(items[0].label),
-              label: (item) => `${item.dataset.label}: ${psfText(item.parsed.y)}`,
+              label: (item) => {
+                if (!growthMode) return `${item.dataset.label}: ${psfText(item.parsed.y)}`;
+                const s = series[item.datasetIndex];
+                const raw = s.points.get(months[item.dataIndex]);
+                return `${item.dataset.label}: ${pct(item.parsed.y / 100)}`
+                  + (raw ? ` (${psfText(raw)})` : "");
+              },
             },
           },
         },
@@ -907,16 +946,34 @@
             },
           },
           y: {
-            grid: { color: grid, drawTicks: false },
+            grid: {
+              drawTicks: false,
+              // The baseline is the reference the whole mode hangs on, so it
+              // gets a stronger hairline than the rest of the grid.
+              color: (ctx) => (growthMode && ctx.tick.value === 0
+                ? cssVar("--baseline") : grid),
+            },
             border: { display: false },
             ticks: {
               color: muted, font: { size: 10 }, padding: 6, maxTicksLimit: 5,
-              callback: (v) => "$" + num.format(v),
+              callback: (v) => (growthMode
+                ? (v > 0 ? "+" : "") + v + "%"
+                : "$" + num.format(v)),
             },
           },
         },
       },
     });
+  }
+
+  function setCmpMeasure(measure) {
+    state.cmpMeasure = measure;
+    for (const chip of el.cmpModeChips.querySelectorAll(".chip")) {
+      const on = chip.dataset.cmpmode === measure;
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", String(on));
+    }
+    drawCompareChart();
   }
 
   // ── compare search ────────────────────────────────────────────────────
@@ -1777,6 +1834,9 @@
     el.compareClose.addEventListener("click", toggleCompare);
     el.compareSearch.addEventListener("input", onSearchInput);
     el.compareSearch.addEventListener("keydown", onSearchKey);
+    for (const chip of el.cmpModeChips.querySelectorAll(".chip")) {
+      chip.addEventListener("click", () => setCmpMeasure(chip.dataset.cmpmode));
+    }
     el.compareSearch.addEventListener("blur", () => setTimeout(hideResults, 120));
     renderCompare();
     el.play.addEventListener("click", togglePlay);
