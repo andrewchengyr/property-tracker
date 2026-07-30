@@ -213,8 +213,30 @@ def _projects_in_areas(
     if not area_entries:
         return {}
 
-    client = None if from_fixtures else _onemap_client(False, store, [])
-    areas = planning.load(token=client.token() if client else None)
+    # Every other source degrades rather than raising; this must too. Minting
+    # a OneMap token here once threw straight out of the run and took HDB down
+    # with it. Without a token we still have the committed polygons and the
+    # cached geocodes, which is enough for an unchanged watchlist.
+    client = None
+    if not from_fixtures:
+        client = _onemap_client(False, store, [])
+        if client is not None:
+            try:
+                client.token()
+            except Exception as exc:  # noqa: BLE001
+                log.warning(
+                    "OneMap unavailable (%s) — falling back to cached geocodes "
+                    "and cached boundaries; new projects can't be area-tested", exc,
+                )
+                client = None
+
+    token = None
+    if client is not None:
+        try:
+            token = client.token()
+        except Exception:  # noqa: BLE001 — cache is the fallback
+            token = None
+    areas = planning.load(token=token)
     if not areas:
         log.error("no planning area boundaries available — skipping area entries")
         return {}

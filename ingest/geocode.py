@@ -24,6 +24,10 @@ SEARCH_URL = "https://www.onemap.gov.sg/api/common/elastic/search"
 TOKEN_CACHE = Path(".onemap_token.json")
 TIMEOUT = 30
 
+# Minting is throttled; a scheduled run once died on a 400 from this endpoint.
+TOKEN_RETRIES = 4
+TOKEN_BACKOFF = 5  # seconds: 5, 10, 20
+
 SVY21 = "EPSG:3414"
 WGS84 = "EPSG:4326"
 
@@ -89,13 +93,39 @@ class OneMapClient:
         if not self.email or not self.password:
             raise OneMapError("ONEMAP_EMAIL / ONEMAP_PASSWORD are not set")
 
-        r = self.session.post(
-            TOKEN_URL,
-            json={"email": self.email, "password": self.password},
-            timeout=TIMEOUT,
-        )
-        r.raise_for_status()
-        payload = r.json()
+        # OneMap answers 400/429 to rapid re-minting even with valid
+        # credentials, which failed a scheduled run outright. Retried before
+        # the caller is told the credentials are bad.
+        payload = None
+        last = ""
+        for attempt in range(TOKEN_RETRIES):
+            r = self.session.post(
+                TOKEN_URL,
+                json={"email": self.email, "password": self.password},
+                timeout=TIMEOUT,
+            )
+            if r.status_code in (400, 429) or r.status_code >= 500:
+                last = f"HTTP {r.status_code}"
+                if attempt < TOKEN_RETRIES - 1:
+                    wait = TOKEN_BACKOFF * 2**attempt
+                    log.warning(
+                        "OneMap token mint returned %d, retrying in %ds (attempt %d/%d)",
+                        r.status_code, wait, attempt + 1, TOKEN_RETRIES,
+                    )
+                    time.sleep(wait)
+                    continue
+                break
+            r.raise_for_status()
+            payload = r.json()
+            break
+
+        if payload is None:
+            raise OneMapError(
+                f"token mint failed after {TOKEN_RETRIES} attempts ({last}). OneMap "
+                "throttles minting; the credentials are probably fine if they "
+                "worked recently."
+            )
+
         token = payload.get("access_token")
         if not token:
             raise OneMapError(f"no access_token in response: {payload!r}")

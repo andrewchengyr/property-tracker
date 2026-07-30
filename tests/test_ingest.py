@@ -12,6 +12,7 @@ import requests
 
 from ingest import datagov
 from ingest import hdb as hdb_mod
+from ingest import geocode as geocode_mod
 from ingest import planning
 from ingest import schools as schools_mod
 from ingest import ura as ura_mod
@@ -443,6 +444,41 @@ def test_planning_load_falls_back_to_cache(tmp_path):
     areas = planning.load(token=None, cache=cache)     # no token: no fetch
     assert set(areas) == {"BISHAN"}
     assert areas["BISHAN"].contains(1.35, 103.83)
+
+
+def test_onemap_token_retries_a_400(monkeypatch, tmp_path):
+    """OneMap answers 400 to rapid re-minting; that crashed a scheduled run."""
+    monkeypatch.setattr(geocode_mod.time, "sleep", lambda s: None)
+
+    class _Post:
+        def __init__(self, statuses):
+            self.statuses = list(statuses)
+            self.calls = 0
+
+        def post(self, url, **kwargs):
+            self.calls += 1
+            status = self.statuses.pop(0)
+            payload = {"access_token": "tok", "expiry_timestamp": "9999999999"}
+            return _DGResponse(status, payload if status == 200 else {})
+
+    session = _Post([400, 400, 200])
+    c = geocode_mod.OneMapClient("e@x", "pw", session=session,
+                                 token_cache=tmp_path / "t.json")
+    assert c.token() == "tok"
+    assert session.calls == 3
+
+
+def test_onemap_token_failure_message_points_at_throttling(monkeypatch, tmp_path):
+    monkeypatch.setattr(geocode_mod.time, "sleep", lambda s: None)
+
+    class _Post:
+        def post(self, url, **kwargs):
+            return _DGResponse(400, {})
+
+    c = geocode_mod.OneMapClient("e@x", "pw", session=_Post(),
+                                 token_cache=tmp_path / "t.json")
+    with pytest.raises(geocode_mod.OneMapError, match="throttles"):
+        c.token()
 
 
 def test_planning_load_without_cache_or_token_is_empty(tmp_path):
