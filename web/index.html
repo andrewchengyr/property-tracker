@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 
@@ -57,7 +57,35 @@
               aria-pressed="false" title="Show primary schools and their P1 distance rings">
         <span class="btn-glyph" aria-hidden="true">◎</span>Schools
       </button>
+      <button type="button" class="btn btn--ghost" id="compareToggle"
+              aria-pressed="false" aria-controls="compareBar"
+              title="Compare up to 3 properties side by side">
+        <span class="btn-glyph" aria-hidden="true">⊞</span>Compare<span
+          class="btn-badge" id="compareCount" hidden>0</span>
+      </button>
       <button type="button" class="btn btn--ghost" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- Selection bar. Sits with the filters because comparison is scoped by
+       them: every number in the drawer honours the current period and filters. -->
+  <div class="filters compare-bar" id="compareBar" hidden>
+    <div class="filter filter--search">
+      <span class="filter-label" id="cmpSearchLabel">Add property</span>
+      <div class="combo">
+        <input type="text" id="compareSearch" class="combo-input" autocomplete="off"
+               placeholder="Type a name or street, or click the map"
+               role="combobox" aria-expanded="false" aria-controls="compareResults"
+               aria-autocomplete="list" aria-labelledby="cmpSearchLabel">
+        <ul class="combo-list" id="compareResults" role="listbox"
+            aria-labelledby="cmpSearchLabel" hidden></ul>
+      </div>
+    </div>
+
+    <div class="filter filter--slots">
+      <span class="filter-label">Selected <output id="compareHint"
+            class="range-readout">0 of 3</output></span>
+      <div class="slots" id="compareSlots"></div>
     </div>
   </div>
 
@@ -129,6 +157,23 @@
 
   <button type="button" class="scrim" id="scrim" hidden aria-label="Close details"></button>
 
+  <!-- Bottom drawer rather than a side panel: three columns need the width,
+       and the map stays visible above so markers can still be clicked to add. -->
+  <section class="cmp" id="comparePanel" hidden aria-label="Property comparison">
+    <div class="cmp-head">
+      <h2 class="cmp-title">Compare<span class="cmp-scope" id="cmpScope"></span></h2>
+      <button type="button" class="btn btn--ghost" id="compareClear">Clear all</button>
+      <button type="button" class="panel-close" id="compareClose"
+              aria-label="Close comparison">&times;</button>
+    </div>
+    <div class="cmp-chart-wrap">
+      <p class="p-h3">Price per sqft over time</p>
+      <p class="p-h3-sub">Monthly median, one line per property</p>
+      <div class="cmp-chart"><canvas id="cmpChart"></canvas></div>
+    </div>
+    <div class="cmp-cols" id="compareBody"></div>
+  </section>
+
   <aside class="panel" id="panel" hidden aria-live="polite">
     <div class="panel-grab" aria-hidden="true"></div>
     <button type="button" class="panel-close" id="panelClose" aria-label="Close details">&times;</button>
@@ -141,6 +186,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

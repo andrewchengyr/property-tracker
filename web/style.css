@@ -31,6 +31,13 @@
   --school-strong: #c9491a;
   --school-halo: rgba(235, 104, 52, .3);
 
+  /* Compare series — categorical slots 1-3, validated all-pairs in both
+     modes (worst CVD ΔE 9.2 light / 9.4 dark). Slot 2 shares orange with the
+     school layer, which is why compared markers also carry a number. */
+  --cmp-1: #2a78d6;
+  --cmp-2: #eb6834;
+  --cmp-3: #1baf7a;
+
   /* Sequential psf ramp — 5 steps, blue, light→dark */
   --psf-1: #86b6ef;
   --psf-2: #5598e7;
@@ -65,6 +72,10 @@
     --school: #d95926;
     --school-strong: #eb6834;
     --school-halo: rgba(217, 89, 38, .35);
+
+    --cmp-1: #3987e5;
+    --cmp-2: #d95926;
+    --cmp-3: #199e70;
 
     --psf-1: #9ec5f4;
     --psf-2: #6da7ec;
@@ -654,6 +665,236 @@ body.filters-closed .filters--more { display: none; }
   color: var(--text-muted);
 }
 
+/* ── Compare ─────────────────────────────────────────────────────────── */
+
+.compare-bar {
+  flex: 1 1 100%;
+  gap: 22px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gridline);
+}
+
+.filter--search { flex: 0 1 320px; min-width: 220px; }
+.filter--slots { flex: 1 1 340px; min-width: 0; }
+
+.combo { position: relative; }
+
+.combo-input {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.combo-input::placeholder { color: var(--text-muted); }
+.combo-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+
+.combo-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1400;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 290px;
+  overflow-y: auto;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+}
+
+.combo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.combo-item .mk { width: 12px; height: 12px; border-width: 1.5px; box-shadow: none; flex: 0 0 auto; }
+.combo-item.is-active { background: var(--accent-soft); }
+.combo-name { flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.combo-meta { margin-left: auto; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+.slots { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 32px; }
+.slots-empty { font-size: 12.5px; color: var(--text-muted); }
+
+.slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 4px;
+  font-size: 12.5px;
+  font-weight: 550;
+  border: 1px solid var(--slot);
+  border-radius: 999px;
+  background: var(--surface-1);
+  max-width: 230px;
+}
+
+.cmp-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--slot);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.slot-x, .cmp-drop {
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.slot-x:hover, .cmp-drop:hover { color: var(--text-primary); }
+
+.range-readout.is-warn { color: var(--delta-down); }
+
+/* Compared markers get a number as well as the slot colour. */
+.mk-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  color: #fff;
+  border: 2px solid var(--surface-1);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.mk-wrap.is-compared .mk { transform: scale(1.15); }
+
+/* ── Compare drawer ──────────────────────────────────────────────────── */
+
+.cmp {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  max-height: 62%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 20px 20px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  animation: sheet-up .2s ease-out;
+}
+
+.cmp-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+
+.cmp-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.cmp-scope { font-weight: 400; font-size: 12px; color: var(--text-muted); }
+.cmp-head .btn { margin-left: auto; }
+.cmp-head .panel-close { position: static; }
+
+.cmp-chart-wrap { margin-bottom: 16px; }
+.cmp-chart { height: 190px; margin-top: 6px; }
+
+.cmp-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--gridline);
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.cmp-col { background: var(--surface-1); padding: 11px 13px 13px; }
+
+.cmp-col-head { display: flex; align-items: center; gap: 7px; }
+.cmp-col-head .mk { width: 12px; height: 12px; border-width: 1.5px; box-shadow: none; flex: 0 0 auto; }
+
+.cmp-name {
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmp-drop { margin-left: auto; flex: 0 0 auto; }
+.cmp-addr { margin: 3px 0 10px; font-size: 11px; color: var(--text-muted); }
+
+.cmp-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.cmp-rows dt {
+  color: var(--text-muted);
+  padding: 5px 12px 5px 0;
+  border-bottom: 1px solid var(--gridline);
+  white-space: nowrap;
+}
+
+.cmp-rows dd {
+  margin: 0;
+  padding: 5px 0;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--gridline);
+}
+
+.cmp-rows dt:last-of-type, .cmp-rows dd:last-of-type { border-bottom: 0; }
+.cmp-sub { display: block; font-size: 10px; font-weight: 400; color: var(--text-muted); }
+.cmp-empty { font-size: 12.5px; color: var(--text-muted); padding: 16px 0; text-align: center; }
+
+/* Bottom sheet on narrow screens; a side panel once there's width for it.
+   As a bottom sheet on a desktop the tall header left barely 100px of map —
+   taking width instead keeps the map usable while comparing. */
+@media (min-width: 900px) {
+  .cmp {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    width: min(680px, 56%);
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    animation: slide-in .18s ease-out;
+  }
+  .cmp-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 /* ── Legend ──────────────────────────────────────────────────────────── */
 
 .legend {
@@ -1002,6 +1243,15 @@ table.p-table {
   /* Full width, or the chips stack into a tall column in one grid cell and
      leave the size inputs stranded alongside them. */
   .filter--model { grid-column: 1 / -1; }
+
+  /* Three columns can't fit a phone; scroll them instead of crushing them. */
+  .cmp { max-height: 70%; padding: 12px 14px 18px; }
+  .cmp-cols {
+    grid-template-columns: repeat(3, minmax(210px, 1fr));
+    overflow-x: auto;
+  }
+  .compare-bar { gap: 10px; }
+  .filter--search, .filter--slots { flex: 1 1 100%; }
   .filter--model .chip { padding: 5px 11px; font-size: 12.5px; }
 
   .legend {

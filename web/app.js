@@ -27,6 +27,12 @@
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
     schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
+    compareToggle: $("compareToggle"), compareBar: $("compareBar"),
+    compareSearch: $("compareSearch"), compareResults: $("compareResults"),
+    compareSlots: $("compareSlots"), compareHint: $("compareHint"),
+    compareCount: $("compareCount"), comparePanel: $("comparePanel"),
+    compareBody: $("compareBody"), compareClear: $("compareClear"),
+    compareClose: $("compareClose"), cmpScope: $("cmpScope"),
     presets: $("presets"),
   };
 
@@ -42,7 +48,18 @@
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
+    compareMode: false, compare: [], cmpChart: null, cmpHighlight: -1,
   };
+
+  // Three is the cap: beyond that the columns stop being readable side by side
+  // and the chart stops being a comparison.
+  const COMPARE_MAX = 3;
+
+  // Categorical slots 1-3, validated all-pairs in both modes. Position in this
+  // list is fixed to selection order, so a colour never changes meaning when
+  // another property is removed. Numbers on the markers carry the same
+  // identity, so it is never colour alone.
+  const CMP_COLOURS = ["--cmp-1", "--cmp-2", "--cmp-3"];
 
   // Primary 1 registration priority is distance-banded: inside 1 km, then
   // 1–2 km, then beyond. Both rings are drawn because the second band is a
@@ -417,9 +434,15 @@
     const shape = prop.source === "HDB" ? "mk--hdb" : "mk--ura";
     const label = showLabel && psf != null
       ? `<span class="mk-label">${psfText(psf)}</span>` : "";
+    // A compared marker carries its slot number as well as the slot colour, so
+    // the pairing with the drawer never depends on colour alone.
+    const slot = comparedIndex(prop.id);
+    const badge = slot === -1 ? ""
+      : `<span class="mk-badge" style="background:var(${CMP_COLOURS[slot]})">${slot + 1}</span>`;
     return L.divIcon({
-      className: "mk-wrap" + (prop.id === state.selectedId ? " is-selected" : ""),
-      html: `<span class="mk ${shape}" style="background:${psfColour(psf)}"></span>${label}`,
+      className: "mk-wrap" + (prop.id === state.selectedId ? " is-selected" : "")
+        + (slot === -1 ? "" : " is-compared"),
+      html: `<span class="mk ${shape}" style="background:${psfColour(psf)}"></span>${badge}${label}`,
       iconSize: [24, 24],
       iconAnchor: [12, 12],
     });
@@ -444,7 +467,8 @@
         title: `${prop.name} — ${psfText(psf)} psf`,
         riseOnHover: true,
       });
-      marker.on("click", () => selectProperty(prop.id));
+      marker.on("click", () =>
+        state.compareMode ? addCompare(prop.id) : selectProperty(prop.id));
       // Hover only where hovering exists — on touch, a tap opens the full
       // panel and a hover card would just flash over it.
       if (CAN_HOVER) {
@@ -508,6 +532,347 @@
       el.emptyNote.hidden = false;
     } else {
       el.emptyNote.hidden = true;
+    }
+  }
+
+  // ── compare ───────────────────────────────────────────────────────────
+
+  const comparedIndex = (id) => state.compare.indexOf(id);
+
+  function toggleCompare() {
+    state.compareMode = !state.compareMode;
+    el.compareToggle.classList.toggle("is-on", state.compareMode);
+    el.compareToggle.setAttribute("aria-pressed", String(state.compareMode));
+    el.compareBar.hidden = !state.compareMode;
+
+    if (state.compareMode) {
+      closePanel();                       // one detail view at a time
+      el.compareSearch.focus();
+    } else {
+      hideResults();
+    }
+    renderCompare();
+    renderMarkers();
+    resizeMap();
+  }
+
+  function addCompare(id) {
+    if (comparedIndex(id) !== -1) return removeCompare(id);   // click again to drop
+    if (state.compare.length >= COMPARE_MAX) {
+      flashHint(`${COMPARE_MAX} of ${COMPARE_MAX} — remove one first`);
+      return;
+    }
+    state.compare.push(id);
+    if (!state.compareMode) toggleCompare();
+    else { renderCompare(); renderMarkers(); resizeMap(); }
+  }
+
+  function removeCompare(id) {
+    state.compare = state.compare.filter((x) => x !== id);
+    renderCompare();
+    renderMarkers();
+    resizeMap();
+  }
+
+  function clearCompare() {
+    state.compare = [];
+    renderCompare();
+    renderMarkers();
+    resizeMap();
+  }
+
+  let hintTimer = null;
+  function flashHint(message) {
+    el.compareHint.textContent = message;
+    el.compareHint.classList.add("is-warn");
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => {
+      el.compareHint.classList.remove("is-warn");
+      updateCompareHint();
+    }, 2200);
+  }
+
+  function updateCompareHint() {
+    el.compareHint.textContent = `${state.compare.length} of ${COMPARE_MAX}`;
+  }
+
+  /** The drawer changes the map's height, so Leaflet has to be told. */
+  function resizeMap() {
+    if (!map) return;
+    requestAnimationFrame(() => {
+      map.invalidateSize({ animate: false });
+      updateLabels();
+    });
+  }
+
+  const comparedProps = () =>
+    state.compare.map((id) => state.properties.find((p) => p.id === id)).filter(Boolean);
+
+  function renderCompare() {
+    updateCompareHint();
+    renderCompareSlots();
+
+    const n = state.compare.length;
+    el.compareCount.textContent = String(n);
+    el.compareCount.hidden = n === 0;
+    el.comparePanel.hidden = !(state.compareMode && n > 0);
+
+    if (el.comparePanel.hidden) {
+      if (state.cmpChart) { state.cmpChart.destroy(); state.cmpChart = null; }
+      return;
+    }
+
+    const [from, to] = rangeBounds();
+    const active = activeFilterCount();
+    el.cmpScope.textContent =
+      ` · ${monthLabel(from)} – ${monthLabel(to)}` +
+      (active ? ` · ${active} filter${active === 1 ? "" : "s"} applied` : "");
+
+    el.compareBody.innerHTML = comparedProps()
+      .map((prop, i) => compareColumn(prop, i)).join("");
+    for (const btn of el.compareBody.querySelectorAll("[data-drop]")) {
+      btn.addEventListener("click", () => removeCompare(btn.dataset.drop));
+    }
+    drawCompareChart();
+  }
+
+  function compareColumn(prop, i) {
+    const txns = matchingTxns(prop);
+    const g = growth(txns);
+    const l = lease(prop);
+    const prices = txns.map((t) => t.price).filter(Boolean);
+    const shape = prop.source === "HDB" ? "mk--hdb" : "mk--ura";
+
+    // A compared property filtered out of view keeps its slot and says so —
+    // dropping it would silently undo the user's selection mid-adjustment.
+    if (!txns.length) {
+      return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[i]})">
+        <header class="cmp-col-head">
+          <span class="cmp-key">${i + 1}</span>
+          <span class="cmp-name">${escapeHtml(prop.name)}</span>
+          <button type="button" class="cmp-drop" data-drop="${prop.id}"
+                  aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
+        </header>
+        <p class="cmp-empty">No transactions match the current filters.</p>
+      </article>`;
+    }
+
+    const rows = [
+      ["Median psf", psfText(medianPsf(txns))],
+      ["Growth", g ? `${pct(g.annual != null ? g.annual : g.total)}` +
+        `<span class="cmp-sub">${g.annual != null ? "per year" : "over period"}</span>` : "—"],
+      ["Transactions", num.format(txns.length)],
+      ["Median price", prices.length ? compactMoney(median(prices)) : "—"],
+      ["Latest", monthLabel(txns[txns.length - 1].date)],
+      ["Type", escapeHtml([prop.type, prop.model].filter(Boolean)
+        .filter((v, k, a) => a.indexOf(v) === k).join(" · "))],
+      ["Tenure", escapeHtml(l.label || "—")],
+      [prop.source === "HDB" ? "Completed" : "TOP", prop.top_year || "—"],
+      ["Lease left", l.yearsLeft != null
+        ? `${Math.floor(l.yearsLeft)} yrs<span class="cmp-sub">to ${l.expiry}</span>` : "—"],
+    ];
+
+    return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[i]})">
+      <header class="cmp-col-head">
+        <span class="cmp-key">${i + 1}</span>
+        <i class="mk ${shape}" style="background:var(${CMP_COLOURS[i]})" aria-hidden="true"></i>
+        <span class="cmp-name" title="${escapeHtml(prop.name)}">${escapeHtml(prop.name)}</span>
+        <button type="button" class="cmp-drop" data-drop="${prop.id}"
+                aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
+      </header>
+      <p class="cmp-addr">${escapeHtml(prop.address || prop.district_town || "")}</p>
+      <dl class="cmp-rows">${rows.map(([k, v]) =>
+        `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
+    </article>`;
+  }
+
+  function renderCompareSlots() {
+    if (!state.compare.length) {
+      el.compareSlots.innerHTML =
+        `<span class="slots-empty">Click a marker, or search above</span>`;
+      return;
+    }
+    el.compareSlots.innerHTML = comparedProps().map((prop, i) =>
+      `<span class="slot" style="--slot:var(${CMP_COLOURS[i]})">
+         <span class="cmp-key">${i + 1}</span>${escapeHtml(prop.name)}
+         <button type="button" class="slot-x" data-drop="${prop.id}"
+                 aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
+       </span>`).join("");
+    for (const btn of el.compareSlots.querySelectorAll("[data-drop]")) {
+      btn.addEventListener("click", () => removeCompare(btn.dataset.drop));
+    }
+  }
+
+  /** One chart, up to three series — overlaying them is the whole point;
+   *  three separate charts would leave the reader comparing axes. */
+  function drawCompareChart() {
+    const canvas = $("cmpChart");
+    if (!canvas) return;
+    if (state.cmpChart) { state.cmpChart.destroy(); state.cmpChart = null; }
+
+    const series = comparedProps().map((prop, i) => ({
+      prop, i, points: new Map(monthlyMedians(matchingTxns(prop))),
+    }));
+    const months = [...new Set(series.flatMap((s) => [...s.points.keys()]))].sort();
+    if (!months.length) return;
+
+    const grid = cssVar("--gridline");
+    const muted = cssVar("--text-muted");
+    const surface = cssVar("--surface-1");
+
+    state.cmpChart = new Chart(canvas.getContext("2d"), {
+      type: "line",
+      data: {
+        labels: months,
+        datasets: series.map((s) => {
+          const colour = cssVar(CMP_COLOURS[s.i]);
+          return {
+            label: s.prop.name,
+            data: months.map((m) => (s.points.has(m) ? Math.round(s.points.get(m)) : null)),
+            borderColor: colour,
+            backgroundColor: colour,
+            borderWidth: 2,
+            tension: 0.25,
+            spanGaps: true,          // months with no sale are gaps, not zeroes
+            pointRadius: months.length > 40 ? 0 : 3,
+            pointHoverRadius: 7,
+            pointHitRadius: 14,
+            pointBackgroundColor: surface,
+            pointBorderColor: colour,
+            pointBorderWidth: 2,
+          };
+        }),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: "bottom",
+            labels: {
+              color: cssVar("--text-secondary"),
+              boxWidth: 10, boxHeight: 10, usePointStyle: true,
+              pointStyle: "circle", font: { size: 11 },
+            },
+          },
+          tooltip: {
+            backgroundColor: surface,
+            titleColor: cssVar("--text-primary"),
+            bodyColor: cssVar("--text-secondary"),
+            borderColor: grid,
+            borderWidth: 1,
+            padding: 9,
+            callbacks: {
+              title: (items) => monthLabel(items[0].label),
+              label: (item) => `${item.dataset.label}: ${psfText(item.parsed.y)}`,
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: grid },
+            ticks: {
+              color: muted, font: { size: 10 }, maxRotation: 0, autoSkipPadding: 20,
+              callback(v, i) { return shortMonth(this.getLabelForValue(i)); },
+            },
+          },
+          y: {
+            grid: { color: grid, drawTicks: false },
+            border: { display: false },
+            ticks: {
+              color: muted, font: { size: 10 }, padding: 6, maxTicksLimit: 5,
+              callback: (v) => "$" + num.format(v),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // ── compare search ────────────────────────────────────────────────────
+
+  let results = [];
+  let highlight = -1;
+
+  function searchProperties(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    // Name first, then address, so typing a condo name doesn't bury it under
+    // every block on the same street.
+    const byName = [], byAddress = [];
+    for (const p of state.properties) {
+      if (comparedIndex(p.id) !== -1) continue;            // already chosen
+      if (p.name.toLowerCase().includes(q)) byName.push(p);
+      else if ((p.address || "").toLowerCase().includes(q)) byAddress.push(p);
+    }
+    return [...byName, ...byAddress].slice(0, 8);
+  }
+
+  function onSearchInput() {
+    results = searchProperties(el.compareSearch.value);
+    highlight = results.length ? 0 : -1;
+    renderResults();
+  }
+
+  function renderResults() {
+    if (!results.length) return hideResults();
+    el.compareResults.innerHTML = results.map((p, i) => `
+      <li role="option" id="cmp-opt-${i}" data-id="${p.id}"
+          class="combo-item${i === highlight ? " is-active" : ""}"
+          aria-selected="${i === highlight}">
+        <i class="mk ${p.source === "HDB" ? "mk--hdb" : "mk--ura"}"
+           style="background:${psfColour(medianPsf(matchingTxns(p)))}" aria-hidden="true"></i>
+        <span class="combo-name">${escapeHtml(p.name)}</span>
+        <span class="combo-meta">${escapeHtml([p.model, p.district_town]
+          .filter(Boolean).join(" · "))}</span>
+      </li>`).join("");
+    el.compareResults.hidden = false;
+    el.compareSearch.setAttribute("aria-expanded", "true");
+    el.compareSearch.setAttribute("aria-activedescendant",
+      highlight >= 0 ? `cmp-opt-${highlight}` : "");
+
+    for (const li of el.compareResults.querySelectorAll(".combo-item")) {
+      li.addEventListener("mousedown", (e) => {   // before blur closes the list
+        e.preventDefault();
+        pickResult(li.dataset.id);
+      });
+    }
+  }
+
+  function hideResults() {
+    el.compareResults.hidden = true;
+    el.compareResults.innerHTML = "";
+    el.compareSearch.setAttribute("aria-expanded", "false");
+    el.compareSearch.removeAttribute("aria-activedescendant");
+    results = [];
+    highlight = -1;
+  }
+
+  function pickResult(id) {
+    addCompare(id);
+    el.compareSearch.value = "";
+    hideResults();
+    const prop = state.properties.find((p) => p.id === id);
+    if (prop && prop.lat != null) map.panTo([prop.lat, prop.lng], { animate: true });
+  }
+
+  function onSearchKey(e) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      if (!results.length) return;
+      e.preventDefault();
+      highlight = (highlight + (e.key === "ArrowDown" ? 1 : -1) + results.length)
+        % results.length;
+      renderResults();
+    } else if (e.key === "Enter") {
+      if (highlight >= 0 && results[highlight]) {
+        e.preventDefault();
+        pickResult(results[highlight].id);
+      }
+    } else if (e.key === "Escape") {
+      hideResults();
     }
   }
 
@@ -1017,6 +1382,10 @@
       const still = visibleProperties().some((p) => p.id === state.selectedId);
       still ? renderPanel() : closePanel();
     }
+    // Comparison is scoped by the filters, so every change re-reads it. The
+    // selection itself is deliberately kept — a filter that hides a compared
+    // property shows an empty column rather than dropping the choice.
+    if (state.compareMode) renderCompare();
   }
 
   const filtersOpen = () => getComputedStyle(el.moreFilters).display !== "none";
@@ -1104,6 +1473,10 @@
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
     renderMarkers({ fit: true });
+    // This is the one filter path that doesn't go through applyFilters, and
+    // Reset ends here — without this the comparison keeps showing the numbers
+    // from before the reset.
+    if (state.compareMode) renderCompare();
   }
 
   // Sweeps a fixed-width window forward through time, then loops.
@@ -1228,6 +1601,13 @@
     el.minLease.addEventListener("input", onLeaseInput);
     el.moreToggle.addEventListener("click", toggleMoreFilters);
     el.schoolsToggle.addEventListener("click", toggleSchools);
+    el.compareToggle.addEventListener("click", toggleCompare);
+    el.compareClear.addEventListener("click", clearCompare);
+    el.compareClose.addEventListener("click", toggleCompare);
+    el.compareSearch.addEventListener("input", onSearchInput);
+    el.compareSearch.addEventListener("keydown", onSearchKey);
+    el.compareSearch.addEventListener("blur", () => setTimeout(hideResults, 120));
+    renderCompare();
     el.play.addEventListener("click", togglePlay);
     el.reset.addEventListener("click", resetView);
     el.panelClose.addEventListener("click", closePanel);
