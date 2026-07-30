@@ -191,14 +191,25 @@ def normalize(
     projects: list[dict[str, Any]],
     wanted_projects: Iterable[str],
     to_wgs84: Callable[[float, float], tuple[float, float]],
+    exact_names: Iterable[str] | None = None,
 ) -> list[Transaction]:
     """Flatten URA's project→transaction nesting into normalized rows.
+
+    `wanted_projects` is matched as a case-insensitive substring, which is what
+    a hand-typed watchlist needs ("trevis" should find TREVISTA).
+
+    `exact_names` is matched whole. Names chosen by the planning-area selector
+    come from the API verbatim, and substring matching on those is actively
+    wrong: "THE ORIE" on Lorong 1 Toa Payoh is a substring of "THE ORIENT" on
+    Pasir Panjang, which silently dragged a project from the other side of the
+    island onto the map.
 
     `to_wgs84` takes SVY21 (x, y) and returns (lat, lng); injected so this
     stays testable without pulling in pyproj at import time.
     """
     wanted = [w.strip().lower() for w in wanted_projects if w and w.strip()]
-    if not wanted:
+    exact = {e.strip().upper() for e in (exact_names or ()) if e and e.strip()}
+    if not wanted and not exact:
         return []
 
     out: list[Transaction] = []
@@ -206,7 +217,7 @@ def normalize(
 
     for proj in projects:
         name = (proj.get("project") or "").strip()
-        if not matches_watchlist(name, wanted):
+        if name.upper() not in exact and not matches_watchlist(name, wanted):
             continue
         matched_names.add(name)
 

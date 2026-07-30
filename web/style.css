@@ -283,9 +283,20 @@ body.filters-closed .filters--more { display: none; }
 /* ── Chips ───────────────────────────────────────────────────────────── */
 
 .chips { display: flex; gap: 4px; }
-.chips--wrap { flex-wrap: wrap; }
 
-.filter--model { flex: 0 1 auto; min-width: 0; }
+/* One scrolling row rather than wrapping. Eleven models wrapped to two lines
+   and pushed the header past half the viewport, which matters more than
+   seeing every chip at once — the row scrolls and each chip carries a count. */
+.chips--wrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 2px;
+}
+
+.chips--wrap .chip { flex: 0 0 auto; }
+
+.filter--model { flex: 1 1 260px; min-width: 0; max-width: 560px; }
 
 /* Count rides inside the chip, in the chip's own ink so it never competes. */
 .chip-count {

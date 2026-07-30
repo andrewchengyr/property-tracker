@@ -12,6 +12,7 @@ import requests
 
 from ingest import datagov
 from ingest import hdb as hdb_mod
+from ingest import planning
 from ingest import schools as schools_mod
 from ingest import ura as ura_mod
 from ingest.geocode import Geocoder, first_latlng, svy21_to_wgs84
@@ -146,6 +147,40 @@ def test_project_match_is_case_insensitive_substring(ura_projects):
     lower = ura_mod.normalize(ura_projects, ["trevista"], svy21_to_wgs84)
     partial = ura_mod.normalize(ura_projects, ["trevis"], svy21_to_wgs84)
     assert len(lower) == len(partial) > 0
+
+
+def test_exact_names_do_not_match_by_substring():
+    """Planning-area selection yields exact API names. Matching those as
+    substrings pulled THE ORIENT (Pasir Panjang) in behind THE ORIE (Lorong 1
+    Toa Payoh) and put a project from across the island on the map."""
+    txn = {"contractDate": "0324", "price": "1000000", "area": "100",
+           "propertyType": "Condominium", "district": "12", "floorRange": "01-05",
+           "tenure": "99 yrs"}
+    projects = [
+        {"project": "THE ORIE", "street": "LORONG 1 TOA PAYOH",
+         "marketSegment": "RCR", "transaction": [txn]},
+        {"project": "THE ORIENT", "street": "PASIR PANJANG ROAD",
+         "marketSegment": "RCR", "transaction": [txn]},
+    ]
+    exact = ura_mod.normalize(projects, [], svy21_to_wgs84, exact_names=["THE ORIE"])
+    assert {t.property_name for t in exact} == {"THE ORIE"}
+
+    # The substring path is still substring-matching, for hand-typed entries.
+    loose = ura_mod.normalize(projects, ["THE ORIE"], svy21_to_wgs84)
+    assert {t.property_name for t in loose} == {"THE ORIE", "THE ORIENT"}
+
+
+def test_exact_and_substring_names_combine():
+    txn = {"contractDate": "0324", "price": "1000000", "area": "100",
+           "propertyType": "Condominium", "district": "12", "floorRange": "01-05",
+           "tenure": "99 yrs"}
+    projects = [
+        {"project": "TREVISTA", "street": "A", "marketSegment": "RCR", "transaction": [txn]},
+        {"project": "SKY VUE", "street": "B", "marketSegment": "RCR", "transaction": [txn]},
+        {"project": "OTHER", "street": "C", "marketSegment": "RCR", "transaction": [txn]},
+    ]
+    txns = ura_mod.normalize(projects, ["trevis"], svy21_to_wgs84, exact_names=["SKY VUE"])
+    assert {t.property_name for t in txns} == {"TREVISTA", "SKY VUE"}
 
 
 def test_empty_watchlist_yields_nothing(ura_projects):
@@ -358,6 +393,60 @@ def test_school_directory_uses_the_retrying_client(monkeypatch):
     recs = schools_mod.fetch_directory(session=session)
     assert len(recs) == 1
     assert session.calls == 2
+
+
+# ------------------------------------------------------- planning areas -----
+
+def _square(x0, y0, x1, y1):
+    return [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]
+
+
+def test_point_in_polygon_basics():
+    area = planning.PlanningArea("BOX", {"type": "Polygon", "coordinates": [
+        _square(103.0, 1.0, 104.0, 2.0)]})
+    assert area.contains(1.5, 103.5)        # (lat, lng) — inside
+    assert not area.contains(1.5, 105.0)    # east of it
+    assert not area.contains(3.0, 103.5)    # north of it
+
+
+def test_polygon_holes_are_excluded():
+    """A planning area with an enclave must not claim points inside it."""
+    area = planning.PlanningArea("DONUT", {"type": "Polygon", "coordinates": [
+        _square(0, 0, 10, 10), _square(4, 4, 6, 6)]})
+    assert area.contains(1, 1)              # in the ring
+    assert not area.contains(5, 5)          # in the hole
+
+
+def test_multipolygon_matches_any_part():
+    area = planning.PlanningArea("SPLIT", {"type": "MultiPolygon", "coordinates": [
+        [_square(0, 0, 1, 1)], [_square(10, 10, 11, 11)]]})
+    assert area.contains(0.5, 0.5)
+    assert area.contains(10.5, 10.5)
+    assert not area.contains(5, 5)
+
+
+def test_bbox_rejects_far_points_without_scanning_rings():
+    area = planning.PlanningArea("BOX", {"type": "Polygon", "coordinates": [
+        _square(103.0, 1.0, 104.0, 2.0)]})
+    assert area.bbox == (103.0, 1.0, 104.0, 2.0)
+    assert not area.contains(50.0, 50.0)
+
+
+def test_planning_load_falls_back_to_cache(tmp_path):
+    """A OneMap outage must not stop a run — the committed cache stands in."""
+    cache = tmp_path / "areas.json"
+    cache.write_text(json.dumps([{
+        "pln_area_n": "BISHAN",
+        "geojson": json.dumps({"type": "Polygon",
+                               "coordinates": [_square(103.8, 1.34, 103.86, 1.37)]}),
+    }]))
+    areas = planning.load(token=None, cache=cache)     # no token: no fetch
+    assert set(areas) == {"BISHAN"}
+    assert areas["BISHAN"].contains(1.35, 103.83)
+
+
+def test_planning_load_without_cache_or_token_is_empty(tmp_path):
+    assert planning.load(token=None, cache=tmp_path / "missing.json") == {}
 
 
 # ----------------------------------------------------------------- HDB ------

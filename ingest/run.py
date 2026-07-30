@@ -23,6 +23,7 @@ import yaml
 from dotenv import load_dotenv
 
 from . import hdb as hdb_mod
+from . import planning
 from . import schools as schools_mod
 from . import ura as ura_mod
 from .geocode import Geocoder, OneMapClient, svy21_to_wgs84
@@ -32,6 +33,11 @@ from .store import DB_PATH, EXPORT_JSON, Store
 log = logging.getLogger("ingest")
 
 WATCHLIST = Path("config/watchlist.yaml")
+
+# "Condo" in the everyday sense: strata homes, not landed. URA's own landed
+# types (Terrace, Detached, Semi-detached and their Strata variants) are
+# excluded unless an entry names them explicitly.
+DEFAULT_PRIVATE_TYPES = ("CONDOMINIUM", "APARTMENT", "EXECUTIVE CONDOMINIUM")
 SCHOOLS_JSON = Path("web/schools.json")
 FIXTURES = Path("tests/fixtures")
 
@@ -54,15 +60,34 @@ def load_watchlist(path: Path | str = WATCHLIST) -> dict[str, list[dict[str, str
         log.warning("watchlist is not a mapping; ignoring")
         return {"private": [], "hdb": []}
 
-    private: list[dict[str, str]] = []
+    private: list[dict[str, Any]] = []
     for entry in raw.get("private") or []:
         project = _entry_value(entry, "project")
-        if not project:
-            log.warning("private entry without a project name, skipping: %r", entry)
+        area = _upper(entry.get("planning_area") if isinstance(entry, dict) else "")
+
+        if not project and not area:
+            log.warning(
+                "private entry needs either a project name or a planning_area, "
+                "skipping: %r", entry,
+            )
             continue
+
         # URA caveats don't carry a completion year, so TOP is opt-in per entry.
         top = _entry_value(entry, "top_year")
-        private.append({"project": project, "top_year": _year_or_none(top)})
+        item: dict[str, Any] = {"project": project, "top_year": _year_or_none(top)}
+
+        if area:
+            item["planning_area"] = area
+            # Districts bound how many projects have to be geocoded before the
+            # polygon test can run; without one the whole island is a candidate.
+            item["districts"] = [
+                str(d).strip() for d in (entry.get("districts") or []) if str(d).strip()
+            ]
+            types = entry.get("property_types")
+            item["property_types"] = (
+                [_upper(t) for t in types] if types else list(DEFAULT_PRIVATE_TYPES)
+            )
+        private.append(item)
 
     hdb: list[dict[str, str]] = []
     for entry in raw.get("hdb") or []:
@@ -123,7 +148,7 @@ def collect_private(
 ) -> list[Transaction]:
     if not entries:
         return []
-    wanted = [e["project"] for e in entries]
+    wanted = [e["project"] for e in entries if e.get("project")]
 
     try:
         if from_fixtures:
@@ -138,11 +163,117 @@ def collect_private(
             errors.append(f"URA pull failed: {exc}")
         return []
 
-    txns = ura_mod.normalize(projects, wanted, svy21_to_wgs84)
-    log.info("URA: %d transactions across %d watchlist projects", len(txns), len(wanted))
+    area_types = _projects_in_areas(entries, projects, store, from_fixtures)
+    # A project you named outright is never trimmed, even if an area entry
+    # would also have picked it up — naming it is the stronger statement.
+    for name in wanted:
+        area_types.pop(name.strip().upper(), None)
+
+    # Area-selected names are matched exactly, not as substrings — see
+    # ura.normalize for why that distinction matters.
+    txns = ura_mod.normalize(
+        projects, wanted, svy21_to_wgs84, exact_names=area_types.keys())
+
+    # An area entry selects a project if *any* of its units is a condo, but a
+    # mixed development also holds strata terraces and semi-detached units —
+    # which are not what "all condos in Toa Payoh" means. A project named
+    # outright keeps everything; only area-selected ones are trimmed.
+    before = len(txns)
+    txns = [t for t in txns if _type_allowed(t, area_types)]
+    if len(txns) < before:
+        log.info("dropped %d landed transactions from area-selected projects",
+                 before - len(txns))
+
+    log.info("URA: %d transactions across %d projects (%d named, %d by area)",
+             len(txns), len(wanted) + len(area_types), len(wanted), len(area_types))
 
     geocode_missing(txns, store, SOURCE_URA, from_fixtures)
     return txns
+
+
+def _type_allowed(txn: Transaction, area_types: dict[str, set[str]]) -> bool:
+    allowed = area_types.get(txn.property_name.strip().upper())
+    return allowed is None or (txn.property_type or "").strip().upper() in allowed
+
+
+def _projects_in_areas(
+    entries: list[dict[str, Any]],
+    projects: list[dict[str, Any]],
+    store: Store,
+    from_fixtures: bool,
+) -> dict[str, set[str]]:
+    """Project names inside a watchlist entry's planning area.
+
+    URA gives a district but no town, so the district narrows the candidates
+    and OneMap's planning-area polygon makes the actual call. Every candidate
+    has to be geocoded before it can be tested; those geocodes are cached and
+    reused by the coordinate backfill later, so nothing is looked up twice.
+    """
+    area_entries = [e for e in entries if e.get("planning_area")]
+    if not area_entries:
+        return {}
+
+    client = None if from_fixtures else _onemap_client(False, store, [])
+    areas = planning.load(token=client.token() if client else None)
+    if not areas:
+        log.error("no planning area boundaries available — skipping area entries")
+        return {}
+
+    geocoder = Geocoder(store, client)
+    selected: dict[str, set[str]] = {}
+
+    for entry in area_entries:
+        area = areas.get(entry["planning_area"])
+        if not area:
+            log.warning(
+                "unknown planning area %r (known: %s…)",
+                entry["planning_area"], ", ".join(sorted(areas)[:5]),
+            )
+            continue
+
+        districts = set(entry["districts"])
+        types = set(entry["property_types"])
+        candidates, undecidable, matched = [], 0, []
+
+        for proj in projects:
+            txns = proj.get("transaction") or []
+            if not txns:
+                continue
+            if districts and (txns[0].get("district") or "").strip() not in districts:
+                continue
+            if types and not any(
+                (t.get("propertyType") or "").strip().upper() in types for t in txns
+            ):
+                continue
+            candidates.append(proj)
+
+        for proj in candidates:
+            name = (proj.get("project") or "").strip()
+            street = (proj.get("street") or "").strip()
+            found = None
+            for query in (name, f"{name} {street}".strip(), street):
+                if query:
+                    found = geocoder.lookup(query)
+                if found:
+                    break
+            if not found:
+                undecidable += 1
+                continue
+            if area.contains(*found):
+                matched.append(name)
+                # A project reachable from two area entries keeps the union of
+                # what either allows, rather than whichever ran last.
+                selected.setdefault(name.upper(), set()).update(types)
+
+        log.info(
+            "%s: %d candidates in district(s) %s → %d inside the area"
+            "%s",
+            entry["planning_area"], len(candidates),
+            ",".join(sorted(districts)) or "any", len(matched),
+            f" ({undecidable} could not be geocoded and were skipped)" if undecidable else "",
+        )
+
+    return selected
 
 
 def collect_hdb(
@@ -385,7 +516,7 @@ def main(argv: list[str] | None = None) -> int:
         top_years = {
             e["project"]: e["top_year"]
             for e in watchlist["private"]
-            if e.get("top_year")
+            if e.get("top_year") and e.get("project")
         }
         store.export_json(args.json_out, top_years=top_years)
         if not args.no_csv:

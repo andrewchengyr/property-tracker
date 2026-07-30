@@ -320,16 +320,28 @@
   let sizeObserver = null;
 
   function whenMapSized(fn) {
-    if (el.map.clientHeight > 0) { fn(); return; }
     sizeObserver?.disconnect();
-    sizeObserver = new ResizeObserver(() => {
-      if (el.map.clientHeight > 0) {
-        sizeObserver.disconnect();
+    let lastH = -1;
+
+    // Not merely "non-zero" — the header is still settling as chips wrap and
+    // fonts land, so the first non-zero height is a transient one and fitting
+    // against it lands a zoom level or two too far out. Wait for two frames at
+    // the same height.
+    const check = () => {
+      const h = el.map.clientHeight;
+      if (h > 0 && h === lastH) {
+        sizeObserver?.disconnect();
         sizeObserver = null;
         fn();
+        return;
       }
-    });
+      lastH = h;
+      requestAnimationFrame(check);
+    };
+
+    sizeObserver = new ResizeObserver(() => { lastH = -1; });
     sizeObserver.observe(el.map);
+    requestAnimationFrame(check);
   }
 
   const CAN_HOVER = matchMedia("(hover: hover) and (pointer: fine)").matches;

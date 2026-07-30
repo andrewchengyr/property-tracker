@@ -28,6 +28,23 @@ private:
   - project: "SKY HABITAT"
     top_year: 2015        # lease commenced 2011
 
+  # Every condo / apartment / EC in the Toa Payoh and Bishan planning areas.
+  #
+  # `planning_area` is decided by point-in-polygon against OneMap's official
+  # boundary — the same areas the HDB towns are named after. `districts` is
+  # only a pre-filter bounding how many projects get geocoded before that test
+  # runs; it is deliberately loose, because postal districts are much wider
+  # than the areas (D12 is Balestier + Toa Payoh + Serangoon, D20 is Ang Mo Kio
+  # + Bishan + Thomson). The polygon, not the district, decides.
+  #
+  # Landed is excluded by default — see DEFAULT_PRIVATE_TYPES in ingest/run.py.
+  # Add `property_types: [...]` to an entry to change that.
+  - planning_area: "TOA PAYOH"
+    districts: ["12", "13"]      # Potong Pasir side of the area sits in D13
+
+  - planning_area: "BISHAN"
+    districts: ["20"]
+
 # HDB resale (data.gov.sg).
 #
 # town + flat_type are required. All other keys are optional narrowing:
