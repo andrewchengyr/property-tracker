@@ -48,7 +48,11 @@
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
-    compareMode: false, compare: [], cmpChart: null, cmpHighlight: -1,
+    compareMode: false, compare: [], cmpChart: null,
+    // id → slot 0-2. Held separately from `compare` (which is display order)
+    // so a property keeps its colour and key when the order changes or
+    // another property is removed — colour follows the entity, not its rank.
+    slotOf: new Map(),
   };
 
   // Three is the cap: beyond that the columns stop being readable side by side
@@ -436,12 +440,13 @@
       ? `<span class="mk-label">${psfText(psf)}</span>` : "";
     // A compared marker carries its slot number as well as the slot colour, so
     // the pairing with the drawer never depends on colour alone.
-    const slot = comparedIndex(prop.id);
-    const badge = slot === -1 ? ""
+    const compared = comparedIndex(prop.id) !== -1;
+    const slot = compared ? slotOf(prop.id) : -1;
+    const badge = !compared ? ""
       : `<span class="mk-badge" style="background:var(${CMP_COLOURS[slot]})">${slot + 1}</span>`;
     return L.divIcon({
       className: "mk-wrap" + (prop.id === state.selectedId ? " is-selected" : "")
-        + (slot === -1 ? "" : " is-compared"),
+        + (compared ? " is-compared" : ""),
       html: `<span class="mk ${shape}" style="background:${psfColour(psf)}"></span>${badge}${label}`,
       iconSize: [24, 24],
       iconAnchor: [12, 12],
@@ -556,26 +561,62 @@
     resizeMap();
   }
 
+  /** The slot a property owns — its colour and its key on the map marker.
+   *  Stable for as long as the property stays selected. */
+  const slotOf = (id) => state.slotOf.get(id) ?? 0;
+
   function addCompare(id) {
     if (comparedIndex(id) !== -1) return removeCompare(id);   // click again to drop
     if (state.compare.length >= COMPARE_MAX) {
       flashHint(`${COMPARE_MAX} of ${COMPARE_MAX} — remove one first`);
       return;
     }
+    // Lowest free slot, so removing #1 and adding another reuses blue rather
+    // than shuffling everyone else's colour along.
+    const taken = new Set(state.slotOf.values());
+    let slot = 0;
+    while (taken.has(slot) && slot < COMPARE_MAX) slot++;
+    state.slotOf.set(id, slot);
     state.compare.push(id);
+
     if (!state.compareMode) toggleCompare();
-    else { renderCompare(); renderMarkers(); resizeMap(); }
+    else refreshCompare();
   }
 
   function removeCompare(id) {
     state.compare = state.compare.filter((x) => x !== id);
-    renderCompare();
-    renderMarkers();
-    resizeMap();
+    state.slotOf.delete(id);
+    refreshCompare();
   }
 
   function clearCompare() {
     state.compare = [];
+    state.slotOf.clear();
+    refreshCompare();
+  }
+
+  /** Move a property one place left or right in the display order. Only the
+   *  order changes — each property keeps its slot colour and key, so the
+   *  chart and the map markers don't recolour underneath the reader. */
+  function moveCompare(id, delta) {
+    const from = comparedIndex(id);
+    const to = from + delta;
+    if (from === -1 || to < 0 || to >= state.compare.length) return;
+    const next = [...state.compare];
+    [next[from], next[to]] = [next[to], next[from]];
+    state.compare = next;
+    refreshCompare();
+
+    // Keep focus on the button the user just pressed, so a second nudge
+    // doesn't need the mouse again.
+    requestAnimationFrame(() => {
+      const btn = el.compareSlots.querySelector(
+        `[data-move="${id}"][data-dir="${delta}"]`);
+      if (btn && !btn.disabled) btn.focus();
+    });
+  }
+
+  function refreshCompare() {
     renderCompare();
     renderMarkers();
     resizeMap();
@@ -633,10 +674,22 @@
     for (const btn of el.compareBody.querySelectorAll("[data-drop]")) {
       btn.addEventListener("click", () => removeCompare(btn.dataset.drop));
     }
+    for (const btn of el.compareBody.querySelectorAll("[data-move]")) {
+      btn.addEventListener("click", () => moveCompare(btn.dataset.move, +btn.dataset.dir));
+    }
     drawCompareChart();
   }
 
   function compareColumn(prop, i) {
+    const s = slotOf(prop.id);
+    const last = state.compare.length - 1;
+    const moves = `
+      <button type="button" class="cmp-move" data-move="${prop.id}" data-dir="-1"
+              ${i === 0 ? "disabled" : ""} title="Move left"
+              aria-label="Move ${escapeHtml(prop.name)} left">‹</button>
+      <button type="button" class="cmp-move" data-move="${prop.id}" data-dir="1"
+              ${i === last ? "disabled" : ""} title="Move right"
+              aria-label="Move ${escapeHtml(prop.name)} right">›</button>`;
     const txns = matchingTxns(prop);
     const g = growth(txns);
     const l = lease(prop);
@@ -646,10 +699,11 @@
     // A compared property filtered out of view keeps its slot and says so —
     // dropping it would silently undo the user's selection mid-adjustment.
     if (!txns.length) {
-      return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[i]})">
+      return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[s]})">
         <header class="cmp-col-head">
-          <span class="cmp-key">${i + 1}</span>
+          <span class="cmp-key">${s + 1}</span>
           <span class="cmp-name">${escapeHtml(prop.name)}</span>
+          <span class="cmp-moves">${moves}</span>
           <button type="button" class="cmp-drop" data-drop="${prop.id}"
                   aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
         </header>
@@ -672,11 +726,12 @@
         ? `${Math.floor(l.yearsLeft)} yrs<span class="cmp-sub">to ${l.expiry}</span>` : "—"],
     ];
 
-    return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[i]})">
+    return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[s]})">
       <header class="cmp-col-head">
-        <span class="cmp-key">${i + 1}</span>
-        <i class="mk ${shape}" style="background:var(${CMP_COLOURS[i]})" aria-hidden="true"></i>
+        <span class="cmp-key">${s + 1}</span>
+        <i class="mk ${shape}" style="background:var(${CMP_COLOURS[s]})" aria-hidden="true"></i>
         <span class="cmp-name" title="${escapeHtml(prop.name)}">${escapeHtml(prop.name)}</span>
+        <span class="cmp-moves">${moves}</span>
         <button type="button" class="cmp-drop" data-drop="${prop.id}"
                 aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
       </header>
@@ -692,14 +747,29 @@
         `<span class="slots-empty">Click a marker, or search above</span>`;
       return;
     }
-    el.compareSlots.innerHTML = comparedProps().map((prop, i) =>
-      `<span class="slot" style="--slot:var(${CMP_COLOURS[i]})">
-         <span class="cmp-key">${i + 1}</span>${escapeHtml(prop.name)}
-         <button type="button" class="slot-x" data-drop="${prop.id}"
-                 aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
-       </span>`).join("");
+    const last = state.compare.length - 1;
+    el.compareSlots.innerHTML = comparedProps().map((prop, i) => {
+      const s = slotOf(prop.id);
+      return `<span class="slot" style="--slot:var(${CMP_COLOURS[s]})">
+        <button type="button" class="slot-move" data-move="${prop.id}" data-dir="-1"
+                ${i === 0 ? "disabled" : ""}
+                aria-label="Move ${escapeHtml(prop.name)} left"
+                title="Move left">‹</button>
+        <span class="cmp-key">${s + 1}</span>${escapeHtml(prop.name)}
+        <button type="button" class="slot-move" data-move="${prop.id}" data-dir="1"
+                ${i === last ? "disabled" : ""}
+                aria-label="Move ${escapeHtml(prop.name)} right"
+                title="Move right">›</button>
+        <button type="button" class="slot-x" data-drop="${prop.id}"
+                aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
+      </span>`;
+    }).join("");
+
     for (const btn of el.compareSlots.querySelectorAll("[data-drop]")) {
       btn.addEventListener("click", () => removeCompare(btn.dataset.drop));
+    }
+    for (const btn of el.compareSlots.querySelectorAll("[data-move]")) {
+      btn.addEventListener("click", () => moveCompare(btn.dataset.move, +btn.dataset.dir));
     }
   }
 
@@ -710,8 +780,9 @@
     if (!canvas) return;
     if (state.cmpChart) { state.cmpChart.destroy(); state.cmpChart = null; }
 
-    const series = comparedProps().map((prop, i) => ({
-      prop, i, points: new Map(monthlyMedians(matchingTxns(prop))),
+    const series = comparedProps().map((prop) => ({
+      prop, slot: slotOf(prop.id),
+      points: new Map(monthlyMedians(matchingTxns(prop))),
     }));
     const months = [...new Set(series.flatMap((s) => [...s.points.keys()]))].sort();
     if (!months.length) return;
@@ -725,7 +796,7 @@
       data: {
         labels: months,
         datasets: series.map((s) => {
-          const colour = cssVar(CMP_COLOURS[s.i]);
+          const colour = cssVar(CMP_COLOURS[s.slot]);
           return {
             label: s.prop.name,
             data: months.map((m) => (s.points.has(m) ? Math.round(s.points.get(m)) : null)),

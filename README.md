@@ -112,6 +112,10 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
   honours the current filters and period, so moving a slider re-reads the
   comparison live. A compared property that the filters exclude keeps its
   column and says so, rather than silently dropping out of your selection.
+  Reorder the columns with the ‹ › buttons on either the chips or the column
+  headers. Each property keeps its colour and its numbered key for as long as
+  it stays selected, so reordering moves columns without recolouring the chart
+  or the map markers, and removing one never repaints the others.
 
 ### Filters
 

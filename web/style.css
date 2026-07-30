@@ -769,6 +769,37 @@ body.filters-closed .filters--more { display: none; }
 
 .slot-x:hover, .cmp-drop:hover { color: var(--text-primary); }
 
+/* Reorder controls. Buttons rather than drag-and-drop: three items don't
+   need a drag surface, and arrows stay keyboard- and touch-reachable. */
+.slot-move, .cmp-move {
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 3px;
+  min-width: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.slot-move:hover:not(:disabled),
+.cmp-move:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.slot-move:disabled, .cmp-move:disabled { opacity: .3; cursor: default; }
+
+.slot-move:focus-visible, .cmp-move:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.cmp-moves { margin-left: auto; display: flex; gap: 1px; flex: 0 0 auto; }
+.cmp-col-head .cmp-drop { margin-left: 2px; }
+
 .range-readout.is-warn { color: var(--delta-down); }
 
 /* Compared markers get a number as well as the slot colour. */
@@ -847,7 +878,7 @@ body.filters-closed .filters--more { display: none; }
   text-overflow: ellipsis;
 }
 
-.cmp-drop { margin-left: auto; flex: 0 0 auto; }
+.cmp-drop { flex: 0 0 auto; }
 .cmp-addr { margin: 3px 0 10px; font-size: 11px; color: var(--text-muted); }
 
 .cmp-rows {
