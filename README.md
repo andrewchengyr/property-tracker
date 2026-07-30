@@ -112,10 +112,11 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
   honours the current filters and period, so moving a slider re-reads the
   comparison live. A compared property that the filters exclude keeps its
   column and says so, rather than silently dropping out of your selection.
-  Reorder the columns with the ‹ › buttons on either the chips or the column
-  headers. Each property keeps its colour and its numbered key for as long as
-  it stays selected, so reordering moves columns without recolouring the chart
-  or the map markers, and removing one never repaints the others.
+  Reorder by dragging a column, or with the ‹ › buttons on the chips and
+  column headers. **The number follows position** — the leftmost card is
+  always #1 — while the **colour follows the property**, so reordering or
+  removing one never repaints the others. Number answers "where is it",
+  colour answers "which is it", and the map badge shows both.
 
 ### Filters
 
@@ -256,9 +257,20 @@ tests/                  offline tests + saved API fixtures
 - **Dedup keys must not contain derived fields.** Coordinates are filled in
   *after* a row is first stored, so keying on them made every second run
   re-insert instead of update. Identity is the transaction.
-- URA data is a rolling 5-year window and past caveats can be **revised or
-  voided** — the weekly refresh keeps it current, so don't assume stored rows
-  are immutable.
+- URA data is a **rolling 5-year window** and past caveats can be revised or
+  voided; URA itself advises keeping only the latest five years for accuracy.
+  So private transactions start ~5 years before today and that boundary moves
+  forward each week. There is no free per-caveat source for older private
+  transactions — REALIS covers 1995 onwards but is a paid URA subscription,
+  and data.gov.sg's URA datasets are quarterly *aggregates*, not individual
+  transactions. The committed SQLite is the answer: it accumulates, so the
+  archive outgrows the API window from the day it starts running.
+- HDB is **not** subject to that limit. The dataset in use starts Jan 2017,
+  but older resale datasets exist and are free — `1990-1999`
+  (`d_ebc5ab87086db484f88045b47411ebc5`), `2000-Feb 2012`
+  (`d_43f493c6c50d54243cc1eab0df142d6a`), `Mar 2012-Dec 2014`
+  (`d_2d5ff9ea31397b66239f245f57751537`) and `Jan 2015-Dec 2016`
+  (`d_ea9ed51da2787afaf8e51f827c304208`), ~746k records in total, same fields.
 - data.gov.sg `filters` is exact-match and case-sensitive (values are
   UPPERCASE); `block`/`street_name` are therefore filtered client-side.
 - **The dataset abbreviates street names** — `LOR 1A TOA PAYOH`, not `LORONG

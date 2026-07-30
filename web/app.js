@@ -443,7 +443,8 @@
     const compared = comparedIndex(prop.id) !== -1;
     const slot = compared ? slotOf(prop.id) : -1;
     const badge = !compared ? ""
-      : `<span class="mk-badge" style="background:var(${CMP_COLOURS[slot]})">${slot + 1}</span>`;
+      : `<span class="mk-badge" style="background:var(${CMP_COLOURS[slot]})"
+             >${comparedIndex(prop.id) + 1}</span>`;
     return L.divIcon({
       className: "mk-wrap" + (prop.id === state.selectedId ? " is-selected" : "")
         + (compared ? " is-compared" : ""),
@@ -561,8 +562,12 @@
     resizeMap();
   }
 
-  /** The slot a property owns — its colour and its key on the map marker.
-   *  Stable for as long as the property stays selected. */
+  /** The colour a property owns, stable for as long as it stays selected —
+   *  so removing one never repaints the others.
+   *
+   *  The *number* is deliberately not this: it follows position, so the
+   *  leftmost card is always #1. Number answers "where is it", colour answers
+   *  "which is it", and both update together on the map badge. */
   const slotOf = (id) => state.slotOf.get(id) ?? 0;
 
   function addCompare(id) {
@@ -614,6 +619,54 @@
         `[data-move="${id}"][data-dir="${delta}"]`);
       if (btn && !btn.disabled) btn.focus();
     });
+  }
+
+  /** Move a property to an absolute position — what a drop needs. */
+  function moveCompareTo(id, index) {
+    const from = comparedIndex(id);
+    if (from === -1 || index < 0 || index >= state.compare.length || from === index) return;
+    const next = [...state.compare];
+    next.splice(index, 0, ...next.splice(from, 1));
+    state.compare = next;
+    refreshCompare();
+  }
+
+  /** HTML5 drag on the columns. The arrow buttons stay: drag is unavailable
+   *  on touch and awkward by keyboard, so it's the shortcut, not the only way. */
+  function wireColumnDrag() {
+    let draggingId = null;
+
+    for (const col of el.compareBody.querySelectorAll(".cmp-col")) {
+      col.addEventListener("dragstart", (e) => {
+        draggingId = col.dataset.id;
+        col.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", draggingId);   // Firefox needs data set
+      });
+
+      col.addEventListener("dragend", () => {
+        draggingId = null;
+        for (const c of el.compareBody.querySelectorAll(".cmp-col")) {
+          c.classList.remove("is-dragging", "is-drop-target");
+        }
+      });
+
+      col.addEventListener("dragover", (e) => {
+        if (!draggingId || col.dataset.id === draggingId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        col.classList.add("is-drop-target");
+      });
+
+      col.addEventListener("dragleave", () => col.classList.remove("is-drop-target"));
+
+      col.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const id = draggingId || e.dataTransfer.getData("text/plain");
+        col.classList.remove("is-drop-target");
+        if (id) moveCompareTo(id, [...el.compareBody.children].indexOf(col));
+      });
+    }
   }
 
   function refreshCompare() {
@@ -677,6 +730,7 @@
     for (const btn of el.compareBody.querySelectorAll("[data-move]")) {
       btn.addEventListener("click", () => moveCompare(btn.dataset.move, +btn.dataset.dir));
     }
+    wireColumnDrag();
     drawCompareChart();
   }
 
@@ -699,9 +753,10 @@
     // A compared property filtered out of view keeps its slot and says so —
     // dropping it would silently undo the user's selection mid-adjustment.
     if (!txns.length) {
-      return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[s]})">
+      return `<article class="cmp-col" draggable="true" data-id="${prop.id}"
+               style="--slot:var(${CMP_COLOURS[s]})">
         <header class="cmp-col-head">
-          <span class="cmp-key">${s + 1}</span>
+          <span class="cmp-key">${i + 1}</span>
           <span class="cmp-name">${escapeHtml(prop.name)}</span>
           <span class="cmp-moves">${moves}</span>
           <button type="button" class="cmp-drop" data-drop="${prop.id}"
@@ -726,9 +781,10 @@
         ? `${Math.floor(l.yearsLeft)} yrs<span class="cmp-sub">to ${l.expiry}</span>` : "—"],
     ];
 
-    return `<article class="cmp-col" style="--slot:var(${CMP_COLOURS[s]})">
+    return `<article class="cmp-col" draggable="true" data-id="${prop.id}"
+             style="--slot:var(${CMP_COLOURS[s]})">
       <header class="cmp-col-head">
-        <span class="cmp-key">${s + 1}</span>
+        <span class="cmp-key">${i + 1}</span>
         <i class="mk ${shape}" style="background:var(${CMP_COLOURS[s]})" aria-hidden="true"></i>
         <span class="cmp-name" title="${escapeHtml(prop.name)}">${escapeHtml(prop.name)}</span>
         <span class="cmp-moves">${moves}</span>
@@ -755,7 +811,7 @@
                 ${i === 0 ? "disabled" : ""}
                 aria-label="Move ${escapeHtml(prop.name)} left"
                 title="Move left">‹</button>
-        <span class="cmp-key">${s + 1}</span>${escapeHtml(prop.name)}
+        <span class="cmp-key">${i + 1}</span>${escapeHtml(prop.name)}
         <button type="button" class="slot-move" data-move="${prop.id}" data-dir="1"
                 ${i === last ? "disabled" : ""}
                 aria-label="Move ${escapeHtml(prop.name)} right"

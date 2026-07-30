@@ -870,7 +870,24 @@ body.filters-closed .filters--more { display: none; }
   overflow: hidden;
 }
 
-.cmp-col { background: var(--surface-1); padding: 11px 13px 13px; }
+.cmp-col {
+  background: var(--surface-1);
+  padding: 11px 13px 13px;
+  cursor: grab;
+}
+
+.cmp-col.is-dragging { opacity: .4; cursor: grabbing; }
+
+/* Which side the card will land on, shown on the target rather than as a
+   floating insertion line — simpler and survives the grid layout. */
+.cmp-col.is-drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-soft);
+}
+
+/* The controls inside the header must not start a drag. */
+.cmp-col-head button { cursor: pointer; }
 
 .cmp-col-head { display: flex; align-items: center; gap: 7px; }
 .cmp-col-head .mk { width: 12px; height: 12px; border-width: 1.5px; box-shadow: none; flex: 0 0 auto; }
