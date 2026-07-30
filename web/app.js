@@ -25,6 +25,7 @@
     minSqft: $("minSqft"), maxSqft: $("maxSqft"),
     minPrice: $("minPrice"), maxPrice: $("maxPrice"),
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
+    leaseHist: $("leaseHist"), leaseFh: $("leaseFh"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
     schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
     compareToggle: $("compareToggle"), compareBar: $("compareBar"),
@@ -282,16 +283,30 @@
    *  threshold, and hiding what we can't assess would quietly lose data. */
   const modelOf = (p) => p.model || p.flat_model || p.type || "";
 
+  /** Property-level filters, with one optionally skipped.
+   *
+   *  Skipping is what makes a facet honest: a model chip's count and the lease
+   *  histogram each have to ignore their own filter, or selecting a value
+   *  would zero everything else and there'd be nothing left to navigate by.
+   *  One function so the three callers can't drift apart. */
+  function passesProperty(p, skip) {
+    if (skip !== "source" && state.source !== "ALL" && p.source !== state.source) {
+      return false;
+    }
+    if (skip !== "model" && state.models.size && !state.models.has(modelOf(p))) {
+      return false;
+    }
+    if (skip !== "lease" && state.minLease > 0) {
+      const left = yearsLeft(p);
+      // Freehold and unknown-lease pass any minimum: a freehold outlasts every
+      // threshold, and hiding what can't be assessed would quietly lose data.
+      if (left != null && left < state.minLease) return false;
+    }
+    return true;
+  }
+
   function visibleProperties() {
-    return state.properties.filter((p) => {
-      if (state.source !== "ALL" && p.source !== state.source) return false;
-      if (state.models.size && !state.models.has(modelOf(p))) return false;
-      if (state.minLease > 0) {
-        const left = yearsLeft(p);
-        if (left != null && left < state.minLease) return false;
-      }
-      return true;
-    });
+    return state.properties.filter((p) => passesProperty(p));
   }
 
   function activeFilterCount() {
@@ -1593,6 +1608,77 @@
     applyFilters();
   }
 
+  const LEASE_BUCKET = 5;   // years per bar
+
+  /** Histogram of lease remaining, drawn on the slider's own 0..max scale so
+   *  each bar sits above the position that selects it.
+   *
+   *  Counts ignore the lease filter (see passesProperty) — the distribution
+   *  has to stay still while you drag, or the shape you are aiming at moves
+   *  as you approach it. Dragging only changes which bars read as kept. */
+  function renderLeaseHistogram() {
+    if (!el.leaseHist) return;
+    const max = state.leaseMax || 99;
+    const bars = Math.max(1, Math.ceil(max / LEASE_BUCKET));
+    const counts = new Array(bars).fill(0);
+    let noLease = 0;
+
+    for (const p of state.properties) {
+      if (!passesProperty(p, "lease")) continue;
+      if (!matchingTxns(p).length) continue;
+      const left = yearsLeft(p);
+      if (left == null) { noLease++; continue; }   // freehold / unknown
+      counts[Math.min(bars - 1, Math.floor(left / LEASE_BUCKET))]++;
+    }
+
+    if (el.leaseFh) {
+      el.leaseFh.hidden = noLease === 0;
+      el.leaseFh.textContent = `+${noLease} freehold`;
+      el.leaseFh.title =
+        `${noLease} freehold propert${noLease === 1 ? "y is" : "ies are"} not on this `
+        + "scale — they have no lease to run down, and pass any minimum";
+    }
+
+    const peak = Math.max(...counts);
+    if (!peak) {
+      el.leaseHist.innerHTML = "";
+      el.leaseHist.setAttribute("aria-label", "No properties to show a lease distribution for");
+      return;
+    }
+
+    const w = 100 / bars;
+    el.leaseHist.innerHTML =
+      `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">` +
+      counts.map((n, i) => {
+        const lo = i * LEASE_BUCKET;
+        const h = n ? Math.max(3, (n / peak) * 100) : 0;
+        // A bar is "kept" when its whole bucket clears the minimum.
+        const kept = lo + LEASE_BUCKET > state.minLease;
+        return n === 0 ? "" : `<rect class="lh-bar${kept ? "" : " is-out"}"
+          x="${(i * w + 0.35).toFixed(2)}" width="${(w - 0.7).toFixed(2)}"
+          y="${(100 - h).toFixed(2)}" height="${h.toFixed(2)}"
+          data-min="${lo}"><title>${lo}–${lo + LEASE_BUCKET - 1} years: ${n} propert${
+            n === 1 ? "y" : "ies"}</title></rect>`;
+      }).join("") + `</svg>`;
+
+    const total = counts.reduce((a, b) => a + b, 0);
+    el.leaseHist.setAttribute("aria-label",
+      `Lease remaining across ${total} propert${total === 1 ? "y" : "ies"}, `
+      + `${LEASE_BUCKET}-year bands from 0 to ${max}`
+      + (noLease ? `, plus ${noLease} freehold or unknown` : ""));
+
+    // Clicking a bar sets the minimum to that band — the histogram is the
+    // thing you're aiming at, so let it be the target.
+    for (const rect of el.leaseHist.querySelectorAll(".lh-bar")) {
+      rect.addEventListener("click", () => {
+        state.minLease = +rect.dataset.min;
+        el.minLease.value = String(state.minLease);
+        syncLeaseUI();
+        applyFilters();
+      });
+    }
+  }
+
   function syncLeaseUI() {
     const max = state.leaseMax || 99;
     el.leaseLabel.textContent =
@@ -1603,6 +1689,7 @@
   /** Re-render everything the filters scope, and keep the badge honest. */
   function applyFilters() {
     updateModelCounts();
+    renderLeaseHistogram();
     const n = activeFilterCount();
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
@@ -1681,11 +1768,7 @@
   function modelCounts() {
     const counts = new Map(state.allModels.map((m) => [m, 0]));
     for (const p of state.properties) {
-      if (state.source !== "ALL" && p.source !== state.source) continue;
-      if (state.minLease > 0) {
-        const left = yearsLeft(p);
-        if (left != null && left < state.minLease) continue;
-      }
+      if (!passesProperty(p, "model")) continue;
       // Period, size and price live on transactions, so a property only
       // counts if at least one of its transactions survives them.
       if (!matchingTxns(p).length) continue;
@@ -1752,6 +1835,7 @@
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
     updateModelCounts();
+    renderLeaseHistogram();
     renderMarkers({ fit: true });
     // This is the one filter path that doesn't go through applyFilters, and
     // Reset ends here — without this the open detail views keep showing the
@@ -1866,6 +1950,7 @@
 
     renderLegend();
     buildModelChips();
+    renderLeaseHistogram();
     buildPresets();
     syncRangeUI();
     syncPresets();

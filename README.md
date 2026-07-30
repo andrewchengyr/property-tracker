@@ -141,6 +141,15 @@ over 1,100 sqft under $1.4M" a question the map can answer. A transaction with
 no recorded floor area can't satisfy a size bound and is excluded rather than
 silently passed through.
 
+A **histogram sits above the lease slider**, on the same scale, so each bar
+stands over the position that selects it. Bars below the current minimum stay
+drawn but grey — you can see what moving the slider back would return — and
+clicking a bar sets the minimum to that band. Its counts ignore the lease
+filter itself, so the distribution holds still while you drag rather than
+reshaping as you approach it. Freehold has no years to run down and so can't
+sit on the axis; it is counted next to the label (`+35 freehold`) rather than
+silently missing.
+
 **Lease remaining filters whole properties**, because tenure is a fact about
 the building rather than any one sale. Freehold and unknown-lease properties
 pass every minimum — a freehold outlasts any threshold, and hiding what can't

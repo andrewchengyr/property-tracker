@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -124,7 +124,14 @@
     <div class="filter filter--lease">
       <span class="filter-label">
         Lease left <output id="leaseLabel" class="range-readout">Any</output>
+        <!-- Freehold has no years-remaining, so it can't sit on the histogram's
+             axis. Counted here instead of being silently missing. -->
+        <span class="lease-fh" id="leaseFh" hidden></span>
       </span>
+      <!-- Distribution of lease remaining, on the same 0..max scale as the
+           slider below it, so a bar sits directly above its own position. -->
+      <div class="lease-hist" id="leaseHist" role="img"
+           aria-label="Distribution of properties by lease remaining"></div>
       <div class="solo-range">
         <div class="dr-track" aria-hidden="true"><div class="dr-fill" id="leaseFill"></div></div>
         <input type="range" id="minLease" min="0" max="99" value="0" step="1"
@@ -196,6 +203,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=24"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>

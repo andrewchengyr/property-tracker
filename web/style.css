@@ -236,6 +236,37 @@ body.filters-closed .filters--more { display: none; }
 
 .filter--lease { flex: 1 1 210px; max-width: 300px; }
 
+/* Histogram above the lease slider, sharing its 0..max scale so each bar
+   stands over the position that selects it. */
+.lease-fh {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.lease-hist {
+  height: 30px;
+  margin-bottom: 1px;
+  /* Same inset as the slider thumb's travel, so bar and thumb line up. */
+  padding: 0 9px;
+}
+
+.lease-hist svg { display: block; width: 100%; height: 100%; }
+
+.lh-bar {
+  fill: var(--accent);
+  cursor: pointer;
+  transition: fill .12s;
+}
+
+/* Excluded by the current minimum — still drawn, so you can see what moving
+   the slider back would return. */
+.lh-bar.is-out { fill: var(--baseline); }
+.lh-bar:hover { fill: var(--psf-5); }
+
 .solo-range { position: relative; height: 26px; }
 
 .solo-range input[type="range"] {
