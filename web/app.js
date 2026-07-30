@@ -165,6 +165,22 @@
     };
   }
 
+  /** Cumulative change and its annualised equivalent at one point in a series.
+   *
+   *  Same rule as the headline growth figure: under a year there is no annual
+   *  rate to quote, because annualising four months of data extrapolates it to
+   *  a year it hasn't lived through. At the final point this returns exactly
+   *  what growth() reports, which is the point of sharing the maths. */
+  function growthAt(base, value, baseMonth, month) {
+    const cum = value / base - 1;
+    const years = (Date.parse(month) - Date.parse(baseMonth)) / MS_PER_YEAR;
+    return {
+      cum,
+      years,
+      annual: years >= 1 ? Math.pow(1 + cum, 1 / years) - 1 : null,
+    };
+  }
+
   function pct(v) {
     if (v == null) return "—";
     const s = (v * 100).toFixed(1);
@@ -947,9 +963,13 @@
               label: (item) => {
                 if (!growthMode) return `${item.dataset.label}: ${psfText(item.parsed.y)}`;
                 const s = series[item.datasetIndex];
-                const raw = s.points.get(months[item.dataIndex]);
-                return `${item.dataset.label}: ${pct(item.parsed.y / 100)}`
-                  + (raw ? ` (${psfText(raw)})` : "");
+                const month = months[item.dataIndex];
+                const raw = s.points.get(month);
+                if (raw == null || s.base == null) return `${item.dataset.label}: no sale`;
+                const g = growthAt(s.base, raw, s.baseMonth, month);
+                return `${item.dataset.label}: ${pct(g.cum)}`
+                  + (g.annual != null ? ` · ${pct(g.annual)} p.a.` : "")
+                  + ` · ${psfText(raw)}`;
               },
             },
           },
@@ -1466,7 +1486,14 @@
               label: (item) => {
                 if (!growthMode) return psfText(item.parsed.y) + " psf";
                 const raw = series[item.dataIndex][1];
-                return `${pct(item.parsed.y / 100)} (${psfText(raw)})`;
+                const g = growthAt(base, raw, labels[0], labels[item.dataIndex]);
+                return [
+                  `${pct(g.cum)} since ${monthLabel(labels[0])}`,
+                  g.annual != null
+                    ? `${pct(g.annual)} a year (CAGR)`
+                    : `under a year — no annual rate yet`,
+                  `${psfText(raw)} psf`,
+                ];
               },
             },
           },

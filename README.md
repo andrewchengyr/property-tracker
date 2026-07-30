@@ -124,6 +124,12 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
   different price levels compare on one axis — a Toa Payoh flat and a Bishan
   condo can't share a price scale usefully, but they can share a growth one.
   Both modes follow the filters, so changing the period re-bases the chart.
+  In growth mode each point reports **cumulative change since the base month,
+  the equivalent CAGR, and the psf it came from** — so a steep-looking line can
+  be checked against the rate it actually represents. Points less than a year
+  from the base show no annual rate: annualising four months extrapolates it to
+  a year it hasn't lived through. At the final point the CAGR equals the
+  headline growth figure exactly, because both use the same helper.
 
 ### Filters
 
