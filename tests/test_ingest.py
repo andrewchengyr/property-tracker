@@ -634,6 +634,41 @@ def test_rows_that_gain_coordinates_later_do_not_duplicate(store, ura_projects):
     assert all(r["lat"] == 1.33509 for r in store.all_rows())
 
 
+def test_rows_survive_falling_out_of_uras_5_year_window(store, tmp_path):
+    """The whole reason the database is committed rather than regenerated.
+
+    URA serves a rolling 5 years and drops anything older. A later run simply
+    won't mention those transactions — and because the store only inserts and
+    updates, never deletes, they stay in the archive and stay on the map."""
+    old = ura_mod.normalize([{
+        "project": "TREVISTA", "street": "LORONG 3 TOA PAYOH", "marketSegment": "RCR",
+        "transaction": [{"contractDate": "0619", "price": "1500000", "area": "100",
+                         "propertyType": "Condominium", "district": "12",
+                         "floorRange": "06-10", "tenure": "99 yrs lease commencing from 2008"}],
+    }], ["TREVISTA"], svy21_to_wgs84)
+    store.upsert_many(old)
+    assert store.count() == 1
+
+    # A later pull, years on: URA no longer returns the 2019 caveat at all.
+    recent = ura_mod.normalize([{
+        "project": "TREVISTA", "street": "LORONG 3 TOA PAYOH", "marketSegment": "RCR",
+        "transaction": [{"contractDate": "0326", "price": "2400000", "area": "100",
+                         "propertyType": "Condominium", "district": "12",
+                         "floorRange": "06-10", "tenure": "99 yrs lease commencing from 2008"}],
+    }], ["TREVISTA"], svy21_to_wgs84)
+    added, _ = store.upsert_many(recent)
+
+    assert added == 1
+    assert store.count() == 2                      # the 2019 row was not touched
+    dates = sorted(r["txn_date"] for r in store.all_rows())
+    assert dates == ["2019-06-01", "2026-03-01"]
+
+    # And it still reaches the map, not just the database.
+    payload = store.export_json(tmp_path / "d.json")
+    exported = [t["date"] for p in payload["properties"] for t in p["txns"]]
+    assert "2019-06-01" in exported
+
+
 def test_ura_and_hdb_rows_coexist(store, hdb_records, ura_projects):
     store.upsert_many(_sample(hdb_records))
     store.upsert_many(ura_mod.normalize(ura_projects, ["TREVISTA"], svy21_to_wgs84))
