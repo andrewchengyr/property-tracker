@@ -309,6 +309,11 @@ body.filters-closed .filters--more { display: none; }
 
 .filter--model { flex: 1 1 260px; min-width: 0; max-width: 560px; }
 
+/* A model with nothing behind it under the current filters. Dimmed rather
+   than disabled — still selectable, so the empty state can explain itself. */
+.chip.is-zero { opacity: .45; }
+.chip.is-zero.is-on { opacity: 1; }
+
 /* Count rides inside the chip, in the chip's own ink so it never competes. */
 .chip-count {
   margin-left: 5px;

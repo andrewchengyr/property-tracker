@@ -1444,6 +1444,7 @@
 
   /** Re-render everything the filters scope, and keep the badge honest. */
   function applyFilters() {
+    updateModelCounts();
     const n = activeFilterCount();
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
@@ -1481,27 +1482,69 @@
   }
 
   /** Chips come from the data, so the watchlist can change without touching
-   *  the markup. Counts are of all properties, not the filtered set, so a chip
-   *  doesn't renumber as you click around. */
+   *  the markup. Built once; only the counts are rewritten afterwards, so
+   *  clicking never rebuilds the row underneath the pointer. */
   function buildModelChips() {
-    const counts = new Map();
+    const all = new Set();
     for (const p of state.properties) {
       const m = modelOf(p);
-      if (m) counts.set(m, (counts.get(m) || 0) + 1);
+      if (m) all.add(m);
     }
-    state.allModels = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+    state.allModels = [...all].sort((a, b) => a.localeCompare(b));
     if (state.allModels.length < 2) return;      // nothing to choose between
 
     el.modelChips.innerHTML =
       `<button type="button" class="chip is-on" data-model="" aria-pressed="true">All</button>` +
       state.allModels.map((m) =>
-        `<button type="button" class="chip" data-model="${escapeHtml(m)}"
-           aria-pressed="false" title="${counts.get(m)} propert${counts.get(m) === 1 ? "y" : "ies"}"
-           >${escapeHtml(m)}<span class="chip-count">${counts.get(m)}</span></button>`
+        `<button type="button" class="chip" data-model="${escapeHtml(m)}" aria-pressed="false"
+           >${escapeHtml(m)}<span class="chip-count" data-count="${escapeHtml(m)}">–</span></button>`
       ).join("");
 
     for (const chip of el.modelChips.querySelectorAll(".chip")) {
       chip.addEventListener("click", () => toggleModel(chip.dataset.model));
+    }
+    updateModelCounts();
+  }
+
+  /** How many properties each model would give you *right now*.
+   *
+   *  Every other filter is applied, but the model selection itself is not —
+   *  otherwise picking one model would zero every other chip and there would
+   *  be nothing left to navigate by. This is the standard faceted-count rule:
+   *  a chip's number is what you would get if you added it to the filters you
+   *  already have. */
+  function modelCounts() {
+    const counts = new Map(state.allModels.map((m) => [m, 0]));
+    for (const p of state.properties) {
+      if (state.source !== "ALL" && p.source !== state.source) continue;
+      if (state.minLease > 0) {
+        const left = yearsLeft(p);
+        if (left != null && left < state.minLease) continue;
+      }
+      // Period, size and price live on transactions, so a property only
+      // counts if at least one of its transactions survives them.
+      if (!matchingTxns(p).length) continue;
+      const m = modelOf(p);
+      if (counts.has(m)) counts.set(m, counts.get(m) + 1);
+    }
+    return counts;
+  }
+
+  function updateModelCounts() {
+    if (!state.allModels.length) return;
+    const counts = modelCounts();
+    for (const chip of el.modelChips.querySelectorAll(".chip[data-model]")) {
+      const model = chip.dataset.model;
+      if (!model) continue;                       // the "All" chip carries none
+      const n = counts.get(model) ?? 0;
+      const span = chip.querySelector(".chip-count");
+      if (span) span.textContent = String(n);
+      // Dimmed, not disabled: it stays selectable so the empty state explains
+      // itself rather than the chip just refusing to respond.
+      chip.classList.toggle("is-zero", n === 0);
+      chip.title = n === 0
+        ? `${model} — nothing matches the other filters`
+        : `${n} propert${n === 1 ? "y" : "ies"} with the current filters`;
     }
   }
 
@@ -1543,6 +1586,7 @@
     const n = activeFilterCount();
     el.filterCount.textContent = String(n);
     el.filterCount.hidden = n === 0;
+    updateModelCounts();
     renderMarkers({ fit: true });
     // This is the one filter path that doesn't go through applyFilters, and
     // Reset ends here — without this the comparison keeps showing the numbers

@@ -142,6 +142,13 @@ actually present so the top of the track isn't dead travel.
 The psf colour scale stays fixed while filtering, so a marker changing colour
 always means its value moved, never that the scale shifted underneath it.
 
+**The number on each model chip is a live count**: how many properties that
+model would give you *with the filters you already have*. Every other filter is
+applied to it, but the model selection itself is not — otherwise picking one
+model would zero every other chip and leave nothing to navigate by. A model
+with nothing behind it dims to zero but stays selectable, so the empty state
+can explain itself.
+
 ### Schools and P1 distance
 
 **Schools** in the top bar overlays all 179 MOE primary schools. Click one to
