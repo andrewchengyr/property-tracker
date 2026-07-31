@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31T01:55:41Z",
+  "generated_at": "2026-07-31T14:25:00Z",
   "properties": [
     {
       "id": "hdb-10-joo-seng-rd-5-room-improved",
@@ -42399,6 +42399,13 @@
           "area_sqft": 1022.6,
           "psf": 2650.2,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 1190000.0,
+          "area_sqft": 505.9,
+          "psf": 2352.2,
+          "storey": "06-10"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -42406,8 +42413,8 @@
       "lease_years": 99,
       "top_year": null,
       "model": "Condominium",
-      "latest_psf": 2405.4,
-      "txn_count": 223
+      "latest_psf": 2352.2,
+      "txn_count": 224
     },
     {
       "id": "ura-platinum-edge",
@@ -52914,6 +52921,13 @@
           "storey": "16-20"
         },
         {
+          "date": "2026-05-01",
+          "price": 850000.0,
+          "area_sqft": 441.3,
+          "psf": 1926.0,
+          "storey": "06-10"
+        },
+        {
           "date": "2026-06-01",
           "price": 880000.0,
           "area_sqft": 441.3,
@@ -52940,6 +52954,13 @@
           "area_sqft": 538.2,
           "psf": 2136.8,
           "storey": "11-15"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 810000.0,
+          "area_sqft": 419.8,
+          "psf": 1929.5,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -52947,8 +52968,8 @@
       "lease_years": 99,
       "top_year": null,
       "model": "Apartment",
-      "latest_psf": 2143.7,
-      "txn_count": 214
+      "latest_psf": 2072.3,
+      "txn_count": 216
     },
     {
       "id": "ura-the-tre-ver",
@@ -60470,6 +60491,13 @@
           "area_sqft": 732.0,
           "psf": 2169.6,
           "storey": "16-20"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 920000.0,
+          "area_sqft": 495.1,
+          "psf": 1858.1,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -60477,8 +60505,8 @@
       "lease_years": 99,
       "top_year": null,
       "model": "Apartment",
-      "latest_psf": 2169.6,
-      "txn_count": 133
+      "latest_psf": 2013.8,
+      "txn_count": 134
     },
     {
       "id": "ura-thomson-v-one",
