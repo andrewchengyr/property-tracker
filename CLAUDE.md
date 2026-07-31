@@ -1,0 +1,42 @@
+# Singapore Property Tracker
+
+**Read [PLAN.md](PLAN.md) before changing anything.** It records what was built,
+the API behaviour discovered only by checking real output, and the design rules
+being deliberately held — none of which is recoverable from the source alone.
+Several bugs here recurred because a rule was applied in one place and not
+another; §5 and §7 of that file list them.
+
+Live: <https://andrewchengyr.github.io/property-tracker/> · refreshed weekly by
+GitHub Actions (Mon 04:00 SGT).
+
+## Quick orientation
+
+```bash
+.venv/bin/python -m pytest tests/ -q          # 90 tests, offline, ~0.2s
+.venv/bin/python -m ingest.run --from-fixtures # offline run, no credentials
+.venv/bin/python -m ingest.run                 # live run
+python3 -m http.server 8123 --directory web    # then open localhost:8123
+```
+
+Add or remove properties by editing `config/watchlist.yaml` — no code changes.
+
+## Things that will bite you
+
+- **`data/transactions.db` is committed and must never be deleted or
+  gitignored.** URA serves a rolling 5-year window; this archive is the only
+  copy of anything older. `ingest/store.py` has no `DELETE`, by design.
+- **Bump `?v=N` on both asset links in `web/index.html`** whenever `app.js` or
+  `style.css` changes, or browsers serve a stale script against fresh markup.
+- **`git pull` before local work.** The weekly bot commits refreshed data even
+  when nothing changed, because `data.json` carries a timestamp.
+- **Sources degrade, they never crash the run.** Keep it that way — this has
+  been violated twice and both times took down unrelated sources.
+- **Don't commit or push unless asked.** Don't add watchlist entries that
+  weren't requested.
+
+## Credentials
+
+`.env` (gitignored, already present locally): `URA_ACCESS_KEY`, `ONEMAP_EMAIL`,
+`ONEMAP_PASSWORD`. Same three exist as GitHub Actions secrets. data.gov.sg
+needs none. Both URA and OneMap throttle aggressively — a 403/400 on token
+minting usually means throttling, not a bad credential.
