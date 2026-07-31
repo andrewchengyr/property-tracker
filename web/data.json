@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-30T15:45:18Z",
+  "generated_at": "2026-07-31T01:55:41Z",
   "properties": [
     {
       "id": "hdb-10-joo-seng-rd-5-room-improved",
@@ -13449,6 +13449,13 @@
           "area_sqft": 1291.7,
           "psf": 637.2,
           "storey": "16 TO 18"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 820000.0,
+          "area_sqft": 1291.7,
+          "psf": 634.8,
+          "storey": "19 TO 21"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -13457,8 +13464,8 @@
       "flat_model": "Improved",
       "top_year": 1988,
       "model": "Improved",
-      "latest_psf": 637.2,
-      "txn_count": 13
+      "latest_psf": 634.8,
+      "txn_count": 14
     },
     {
       "id": "hdb-190-bishan-st-13-5-room-improved",
@@ -24236,6 +24243,13 @@
           "area_sqft": 1302.4,
           "psf": 727.9,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 905000.0,
+          "area_sqft": 1302.4,
+          "psf": 694.9,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -24244,8 +24258,8 @@
       "flat_model": "Improved",
       "top_year": 1984,
       "model": "Improved",
-      "latest_psf": 727.9,
-      "txn_count": 17
+      "latest_psf": 694.9,
+      "txn_count": 18
     },
     {
       "id": "hdb-312-shunfu-rd-5-room-improved",
