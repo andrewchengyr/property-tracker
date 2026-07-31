@@ -87,3 +87,15 @@ hdb:
 
   - town: "BISHAN"
     flat_type: "EXECUTIVE"
+
+  # Every 5-room in Tampines, no lease bound — 4,403 transactions across 430
+  # blocks, which on its own is more than half again the size of everything
+  # above it. Six flat models are present (Improved 3,374, Model A 525, DBSS
+  # 398, Premium Apartment 92, 3Gen 9, Adjoined flat 5), so it also brings
+  # `3Gen` onto the model chips for the first time.
+  #
+  # Note this town sits outside the two planning areas the land-use overlay
+  # covers, so Tampines markers have no parcels beneath them until the overlay
+  # is rebuilt — see PLAN §11 and `--refresh-masterplan`.
+  - town: "TAMPINES"
+    flat_type: "5 ROOM"

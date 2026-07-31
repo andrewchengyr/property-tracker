@@ -233,9 +233,16 @@ is that most of the basemap stays readable while the layer is on.
 It is **zoning, not what is built today**: a plot zoned for 4.2 plot ratio may
 hold a 40-year-old walk-up. Read it as headroom, not as inventory.
 
-The overlay is about 700 KB gzipped, so it is fetched the first time you turn
-the layer on rather than at page load. If `web/masterplan.json` is missing the
-map just hides the control.
+**Coverage follows the watchlist.** Both a private entry's `planning_area` and
+an HDB `town` pull their area into the overlay, so adding flats in a new town
+extends it rather than leaving those markers over blank ground — but only after
+a rebuild, since the overlay is not refreshed weekly. A town that is not itself
+a planning area (`KALLANG/WHAMPOA`, `CENTRAL AREA` — each straddles several) is
+skipped and named in a warning rather than guessed at.
+
+The overlay is about 1.1 MB gzipped for three planning areas — roughly 500 KB
+per area — so it is fetched the first time you turn the layer on rather than at
+page load. If `web/masterplan.json` is missing the map just hides the control.
 
 **Refreshing it is opt-in:**
 

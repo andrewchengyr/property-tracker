@@ -40,9 +40,9 @@ web/data.json + web/schools.json ──► Leaflet + Chart.js on GitHub Pages
 GitHub Actions (weekly cron) ───────┘
 ```
 
-**Current state:** 410 properties, 7,701 transactions (Jan 2017 – Jul 2026),
-179 primary schools, 6,361 land-use parcels, 691 cached geocodes. 115 tests,
-all offline. 46 commits (22 of them automated refreshes).
+**Current state:** 904 properties, 12,107 transactions (Jan 2017 – Jul 2026),
+179 primary schools, 8,695 land-use parcels, 1,121 cached geocodes. 118 tests,
+all offline. 50 commits (24 of them automated refreshes).
 
 ---
 
@@ -273,11 +273,13 @@ real output:
   HDB blocks on 2.8–3.0. Plausible for high-rise-near-MRT and for HDB
   respectively, which is what made the rest of the numbers trustworthy.
 
-Scale: 181 MB and 113,394 parcels island-wide → **6,361 parcels, 3.3 MB, 623 KB
-gzipped** clipped to Toa Payoh + Bishan with coordinates at 6 decimal places
-(~0.11 m) and the unused properties dropped. The earlier estimate in §9 was
-6,362 parcels / 6.8 MB; the parcel count matches, and the size difference is
-the trimming.
+Scale: 181 MB and 113,394 parcels island-wide → **8,695 parcels, 5.7 MB, 1.13
+MB gzipped** clipped to Toa Payoh + Bishan + Tampines, with coordinates at 6
+decimal places (~0.11 m) and the unused properties dropped. Toa Payoh + Bishan
+alone were 6,361 parcels / 623 KB gzipped; the earlier estimate in §9 was 6,362
+parcels / 6.8 MB, so the parcel count matched and the size difference is the
+trimming. Each further planning area costs roughly another 500 KB gzipped, on a
+layer that is only fetched when someone opens it.
 
 **Refreshing is opt-in (`--refresh-masterplan`), not weekly.** MP2025 was
 gazetted 1 Dec 2025 and the previous edition ran from 2019 — a roughly
@@ -442,7 +444,7 @@ that part still needs eyes.
 
 ## 8. Testing
 
-`.venv/bin/python -m pytest tests/ -q` — **115 tests, ~0.3s, all offline.**
+`.venv/bin/python -m pytest tests/ -q` — **118 tests, ~0.4s, all offline.**
 No test touches the network; fixtures live in `tests/fixtures/`.
 
 Fixture values are **synthetic** but field names and shapes mirror the real
@@ -534,10 +536,17 @@ future session can change one on purpose rather than "fix" it by accident.
   a specific zoning to a specific block on that basis would present a
   coin-flip as a fact. The ground-truth spot checks in §5.11 all landed
   correctly, but spot checks on landmark condos are the easy case.
-- **The overlay covers only the watchlist's `planning_area` entries.** A
-  watchlist of individually-named projects and no area entry gets no overlay
-  at all, and logs why. The alternative — falling back to the whole island —
-  would ship 181 MB to draw context around five buildings.
+- **The overlay covers the areas the watchlist names, and no more.** Both
+  sources contribute: a private entry's `planning_area` and an HDB `town`,
+  which is the same administrative area under the same name (§5.9). Taking
+  only the private entries was a real gap — adding Tampines 5-room flats put
+  494 properties on the map with no parcels beneath them and nothing in the
+  log to explain it. A watchlist of individually-named projects and no area at
+  all still gets no overlay, and logs why; falling back to the whole island
+  would ship 181 MB to draw context around five buildings. An HDB town that is
+  not itself a planning area (`KALLANG/WHAMPOA`, `CENTRAL AREA` — each
+  straddles several) is skipped and named in a warning rather than guessed
+  at.
 
 **If a new plan is gazetted:** run `--refresh-masterplan`, then check the log
 for the "land uses not in any bucket" warning. A revision that adds a land-use

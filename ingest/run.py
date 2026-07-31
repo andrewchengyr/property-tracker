@@ -458,18 +458,51 @@ def collect_schools(
     return located
 
 
-def watchlist_areas(entries: list[dict[str, Any]]) -> list[str]:
-    """Planning areas the watchlist selects by name, in stable order."""
+def watchlist_areas(
+    watchlist: dict[str, list[dict[str, Any]]],
+    known: set[str] | None = None,
+) -> list[str]:
+    """Planning areas the watchlist covers, in stable order.
+
+    **Both sources contribute.** A private entry names its `planning_area`
+    outright; an HDB `town` is the same administrative area under the same name
+    (§5.9). Deriving this from the private entries alone meant adding an HDB
+    town in a new area left the land-use overlay silently behind — Tampines
+    flats sitting over no parcels, with nothing in the log to say why.
+
+    A town that is not itself a planning area is skipped and named in a
+    warning rather than guessed at: HDB's `KALLANG/WHAMPOA` and `CENTRAL AREA`
+    each straddle several, and picking one would quietly overlay the wrong
+    ground.
+    """
     seen: list[str] = []
-    for entry in entries:
+    for entry in watchlist.get("private") or []:
         area = entry.get("planning_area")
         if area and area not in seen:
             seen.append(area)
+
+    unmatched: list[str] = []
+    for entry in watchlist.get("hdb") or []:
+        town = entry.get("town")
+        if not town or town in seen:
+            continue
+        if known is not None and town not in known:
+            if town not in unmatched:
+                unmatched.append(town)
+            continue
+        seen.append(town)
+
+    if unmatched:
+        log.warning(
+            "HDB town(s) %s are not planning areas, so the land-use overlay "
+            "does not cover them; name the area(s) explicitly if you want it to",
+            ", ".join(unmatched),
+        )
     return seen
 
 
 def collect_masterplan(
-    entries: list[dict[str, Any]],
+    watchlist: dict[str, list[dict[str, Any]]],
     from_fixtures: bool,
     errors: list[str] | None = None,
 ) -> dict[str, Any] | None:
@@ -480,17 +513,25 @@ def collect_masterplan(
 
     The clip uses the committed OneMap polygons (`planning.load()` with no
     token), so this needs no credentials at all — data.gov.sg serves the plan
-    unauthenticated.
+    unauthenticated. Boundaries are resolved *before* the download, so a
+    watchlist with nothing to clip to never spends 181 MB finding that out.
     """
-    wanted = watchlist_areas(entries)
-    if not wanted:
-        log.info(
-            "no planning_area entries in the watchlist — skipping the land-use "
-            "overlay (it is clipped to those areas, so there is nothing to clip to)"
-        )
-        return None
-
     try:
+        areas = planning.load()
+        if not areas:
+            log.error("no planning area boundaries available — skipping the overlay")
+            return None
+
+        wanted = watchlist_areas(watchlist, known=set(areas))
+        if not wanted:
+            log.info(
+                "no planning areas in the watchlist — skipping the land-use overlay "
+                "(it is clipped to those areas, so there is nothing to clip to)"
+            )
+            return None
+
+        selected = {name: areas[name] for name in wanted}
+
         if from_fixtures:
             path = FIXTURES / "masterplan.json"
             if not path.exists():
@@ -498,16 +539,6 @@ def collect_masterplan(
             features = (json.loads(path.read_text()).get("features") or [])
         else:
             features = masterplan_mod.fetch()
-
-        areas = planning.load()
-        selected = {name: areas[name] for name in wanted if name in areas}
-        missing = [name for name in wanted if name not in areas]
-        if missing:
-            log.warning("no boundary for planning area(s) %s — not overlaid",
-                        ", ".join(missing))
-        if not selected:
-            log.error("no planning area boundaries available — skipping the overlay")
-            return None
 
         return masterplan_mod.build(features, selected)
     except Exception as exc:  # noqa: BLE001 — the properties still matter
@@ -611,7 +642,7 @@ def main(argv: list[str] | None = None) -> int:
         # having to know the flag.
         if args.refresh_masterplan or not Path(args.masterplan_out).exists():
             store.export_masterplan(
-                collect_masterplan(watchlist["private"], args.from_fixtures, errors),
+                collect_masterplan(watchlist, args.from_fixtures, errors),
                 args.masterplan_out,
             )
 

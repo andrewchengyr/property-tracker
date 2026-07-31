@@ -689,19 +689,52 @@ def test_download_url_without_a_url_raises_rather_than_returning_none(monkeypatc
 
 
 def test_watchlist_areas_are_deduped_in_order():
-    entries = [
-        {"planning_area": "TOA PAYOH"},
-        {"project": "TREVISTA"},
-        {"planning_area": "BISHAN"},
-        {"planning_area": "TOA PAYOH"},
-    ]
-    assert watchlist_areas(entries) == ["TOA PAYOH", "BISHAN"]
+    wl = {
+        "private": [
+            {"planning_area": "TOA PAYOH"},
+            {"project": "TREVISTA"},
+            {"planning_area": "BISHAN"},
+            {"planning_area": "TOA PAYOH"},
+        ],
+        "hdb": [],
+    }
+    assert watchlist_areas(wl) == ["TOA PAYOH", "BISHAN"]
+
+
+def test_an_hdb_town_extends_the_overlay_to_its_planning_area():
+    """Deriving the clip from private entries alone left an HDB town in a new
+    area with no parcels under it, and nothing in the log to say why."""
+    wl = {
+        "private": [{"planning_area": "BISHAN"}],
+        "hdb": [{"town": "TAMPINES"}, {"town": "BISHAN"}],
+    }
+    assert watchlist_areas(wl, known={"BISHAN", "TAMPINES"}) == ["BISHAN", "TAMPINES"]
+
+
+def test_an_hdb_town_that_is_not_a_planning_area_is_skipped_and_named(caplog):
+    """KALLANG/WHAMPOA and CENTRAL AREA each straddle several planning areas;
+    picking one would quietly overlay the wrong ground."""
+    wl = {"private": [], "hdb": [{"town": "KALLANG/WHAMPOA"}, {"town": "BISHAN"}]}
+    with caplog.at_level("WARNING", logger="ingest"):
+        assert watchlist_areas(wl, known={"BISHAN"}) == ["BISHAN"]
+    assert "KALLANG/WHAMPOA" in caplog.text
+
+
+def test_the_real_watchlist_covers_every_town_it_watches():
+    """Guards the whole point of the above: every area the watchlist names,
+    from either source, resolves to a boundary the overlay can clip to."""
+    wl = load_watchlist()
+    known = set(planning.load())
+    areas = watchlist_areas(wl, known=known)
+    assert "TAMPINES" in areas and "TOA PAYOH" in areas and "BISHAN" in areas
+    assert set(areas) <= known
 
 
 def test_no_planning_area_means_no_overlay_rather_than_the_whole_island():
     """The overlay is defined by the clip. With nothing to clip to, exporting
     all 113,394 island-wide parcels would be the wrong kind of "helpful"."""
-    assert collect_masterplan([{"project": "TREVISTA"}], from_fixtures=True) is None
+    wl = {"private": [{"project": "TREVISTA"}], "hdb": []}
+    assert collect_masterplan(wl, from_fixtures=True) is None
 
 
 def test_a_master_plan_failure_is_collected_not_raised(monkeypatch):
@@ -710,7 +743,8 @@ def test_a_master_plan_failure_is_collected_not_raised(monkeypatch):
     monkeypatch.setattr(masterplan, "fetch", boom)
 
     errors = []
-    got = collect_masterplan([{"planning_area": "BISHAN"}], False, errors)
+    got = collect_masterplan({"private": [{"planning_area": "BISHAN"}], "hdb": []},
+                             False, errors)
     assert got is None
     assert errors and "data.gov.sg is down" in errors[0]
 
