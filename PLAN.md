@@ -9,7 +9,7 @@ that recurred because a rule was applied in one place and not another. The code
 tells you *what*; this tells you *why*, and which mistakes have already been
 made once.
 
-Last updated: 2026-07-30. Live at <https://andrewchengyr.github.io/property-tracker/>
+Last updated: 2026-07-31. Live at <https://andrewchengyr.github.io/property-tracker/>
 
 ---
 
@@ -28,7 +28,7 @@ config/watchlist.yaml
       │
       ▼
 ingest/ ──► URA Data Service (private caveats)
-        ──► data.gov.sg (HDB resale, MOE school directory)
+        ──► data.gov.sg (HDB resale, MOE school directory, Master Plan 2025)
         ──► OneMap (geocoding, planning-area polygons)
       │
       ▼
@@ -36,13 +36,13 @@ data/transactions.db (SQLite, COMMITTED)
       │
       ▼
 web/data.json + web/schools.json ──► Leaflet + Chart.js on GitHub Pages
-      ▲
-GitHub Actions (weekly cron) ─┘
+       + web/masterplan.json        ▲
+GitHub Actions (weekly cron) ───────┘
 ```
 
 **Current state:** 410 properties, 7,699 transactions (Jan 2017 – Jul 2026),
-179 primary schools, 691 cached geocodes. 90 tests, all offline. 46 commits
-(22 of them automated refreshes).
+179 primary schools, 6,361 land-use parcels, 691 cached geocodes. 115 tests,
+all offline. 46 commits (22 of them automated refreshes).
 
 ---
 
@@ -67,12 +67,15 @@ changing it is the point.
    histogram each ignore the filter they drive — otherwise selecting a value
    zeroes every other option and there is nothing left to navigate by.
    `passesProperty(p, skip)` in `web/app.js` is the single implementation.
-6. **Validate colour, don't eyeball it.** Every palette here was run through
-   the `dataviz` skill's `scripts/validate_palette.js`. Two were rejected on
-   measurement (§6).
+6. **Validate colour, don't eyeball it — and validate what is actually
+   rendered.** Every palette here was run through the `dataviz` skill's
+   `scripts/validate_palette.js`. Three were rejected on measurement (§6). For
+   translucent marks that means grading the *composited* colour against the
+   surface behind it, not the solid hex: doing that is what killed the pale
+   land-use wash the overlay was first designed around (§6.1).
 7. **Verify against reality, not just against the code.** Several bugs looked
    fine in code review and were caught only by checking output against known
-   ground truth (§5.2, §5.6).
+   ground truth (§5.2, §5.6) or by looking at the rendered map (§5.11).
 
 ---
 
@@ -97,6 +100,7 @@ conversationally.
 | — | Planning-area selection | `98a1f6a` | "All condos in Toa Payoh and Bishan" |
 | — | Compare | `d205cb0`→`24301a1` | 3-way side-by-side, growth mode, CAGR tooltips |
 | — | Lease histogram | `7d07795` | Distribution above the lease slider |
+| — | Master Plan overlay | — | MP2025 land use, clipped to the watched areas; §5.11, §6, §11 |
 
 ---
 
@@ -114,6 +118,7 @@ conversationally.
 | `planning.py` | OneMap planning-area polygons + point-in-polygon |
 | `geocode.py` | OneMap token/search, SVY21→WGS84, cache-first `Geocoder` |
 | `datagov.py` | Shared retrying client for **both** data.gov.sg callers |
+| `masterplan.py` | URA Master Plan 2025 land use: download, clip, bucket, shrink |
 | `store.py` | SQLite schema, migrations, idempotent upsert, JSON/CSV export |
 
 **Run it:**
@@ -124,8 +129,8 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m ingest.run                   # live
 ```
 
-Flags: `--skip-ura`, `--skip-hdb`, `--skip-schools`, `--from-fixtures`,
-`--no-csv`, `-v`.
+Flags: `--skip-ura`, `--skip-hdb`, `--skip-schools`, `--refresh-masterplan`,
+`--from-fixtures`, `--no-csv`, `-v`.
 
 **Credentials** (`.env`, gitignored; also GitHub Actions secrets):
 `URA_ACCESS_KEY`, `ONEMAP_EMAIL`, `ONEMAP_PASSWORD`. data.gov.sg needs none.
@@ -137,7 +142,7 @@ the git author address, which is normal but worth knowing.
 Buildless — `index.html`, `app.js`, `style.css`, CDN Leaflet + Chart.js.
 
 **Bump `?v=N` on both asset links whenever `app.js` or `style.css` changes.**
-Currently `v=27`. Without it a browser or CDN edge serves a stale script
+Currently `v=28`. Without it a browser or CDN edge serves a stale script
 against fresh markup, which fails confusingly rather than cleanly — this cost
 real debugging time twice.
 
@@ -233,6 +238,54 @@ slider goes, the higher the freehold share of what remains.
 
 ---
 
+### 5.11 The Master Plan is a *plan*, and one parcel can be 8 km wide
+
+Four things about `d_a8c3546b26712e35021f3a681d0353ae`, all found by looking at
+real output:
+
+- **No `Description` HTML blob.** Many data.gov.sg geo layers bury their
+  attributes in an HTML table inside a `Description` property. This one does
+  not: `LU_DESC` and `GPR` are flat properties, and coordinates are already
+  WGS84, so no SVY21 conversion is needed. Ten properties per parcel arrive;
+  three survive the export.
+- **`GPR` is not always a number.** Island-wide it is `LND` (landed housing,
+  59,055), `EVA` (subject to evaluation, 12,891), `SDP` (subject to detailed
+  planning, 329), null (7,946), or a ratio from 0.6 to 25.0. `GPR_CODES` in
+  `masterplan.py` expands the three codes so the meaning travels with the data
+  rather than living in the frontend.
+- **A "parcel" can be the whole Central Catchment.** This is the one that bit.
+  Clipping was first written as "keep the parcel if *any* vertex falls inside
+  the planning area", reasoning that a parcel straddling the boundary should
+  stay rather than fray the overlay's edge. That is right for the ~230 m²
+  median parcel and catastrophic for the outlier: the catchment is a **single**
+  OPEN SPACE polygon **8.1 km across**, it touches Bishan, and so the whole of
+  it — Bukit Panjang to Thomson — was painted onto a map that claims to cover
+  two planning areas. Parcels are now assigned by a **representative point**
+  (largest ring's centroid, pulled back onto the ring when the shape is concave
+  enough to expel it), so each parcel belongs to exactly one area. Cost: a
+  parcel whose centre is just outside but which pokes in is dropped, leaving at
+  most a lot's width of gap at the boundary. Invisible, and unlike the other
+  error it cannot put a different part of the island on the map.
+  Tests: `test_a_parcel_that_merely_touches_the_area_is_not_dragged_in`,
+  `test_representative_point_stays_on_a_concave_parcel`.
+- **Verified against known ground truth** before any of it was drawn: Trevista
+  sits on RESIDENTIAL GPR 4.2, Sky Vue and Sky Habitat on 4.9, and the watched
+  HDB blocks on 2.8–3.0. Plausible for high-rise-near-MRT and for HDB
+  respectively, which is what made the rest of the numbers trustworthy.
+
+Scale: 181 MB and 113,394 parcels island-wide → **6,361 parcels, 3.3 MB, 623 KB
+gzipped** clipped to Toa Payoh + Bishan with coordinates at 6 decimal places
+(~0.11 m) and the unused properties dropped. The earlier estimate in §9 was
+6,362 parcels / 6.8 MB; the parcel count matches, and the size difference is
+the trimming.
+
+**Refreshing is opt-in (`--refresh-masterplan`), not weekly.** MP2025 was
+gazetted 1 Dec 2025 and the previous edition ran from 2019 — a roughly
+five-yearly cycle. A weekly rebuild would spend the 181 MB download *and*
+commit a 3.3 MB diff to reproduce a file that hadn't changed. The run does
+build it automatically when the export is missing, so a fresh clone doesn't
+need to know the flag.
+
 ## 6. Colour decisions (all measured)
 
 Run from the `dataviz` skill directory:
@@ -243,9 +296,80 @@ Run from the `dataviz` skill directory:
 | psf ramp | blue 5-step, `#86b6ef`→`#104281` | Sequential, one hue, light→dark. Passes both modes |
 | Schools | orange `#eb6834` / `#d95926` | **Violet was rejected**: ΔE 1.9 vs mid-blue under protanopia, 9.0 even with normal vision — school pins read as expensive properties. Orange is warm/cool opposite, worst pair ΔE 23.1 |
 | Compare series | blue / orange / aqua (slots 1-3) | **Blue/aqua/magenta was rejected**: ΔE 1.6 dark mode. These pass all-pairs both modes (9.2 light / 9.4 dark) |
+| Land use | 6 buckets, own hues (§6.1) | Validated all-pairs against the **basemap**, not the page: CVD ΔE 11.0 light / 9.4 dark, normal-vision 19.0 / 17.6 |
 
 Compare slot 2 shares orange with the school layer — which is why compared
 markers also carry a **slot number**, so identity never rests on colour alone.
+
+### 6.1 Land use: what the measurement forced
+
+The land-use overlay is the one place where running the validator didn't just
+pick between candidate palettes — it **changed the design twice**. Worth
+recording, because both conclusions are counter-intuitive and neither is
+recoverable from the CSS.
+
+**A map is an all-pairs form.** Any two land uses can abut, so the palette has
+to clear the gates on *every* pair, not just adjacent ones. The `dataviz`
+skill's own palette certifies only its **first three slots** under `--pairs
+all`. Six categories were needed, so the palette had to be purpose-built. An
+exhaustive sweep of equally-spaced hue wheels said four was the ceiling (N=5
+fell to normal-vision ΔE 13.9, under the hard floor of 15) — but that was an
+artefact of forcing one lightness for all slots. With lightness free per slot,
+six clears comfortably. Both facts are worth keeping: *equal spacing is the
+binding constraint, not the count.*
+
+**Translucent fills are not a readable encoding, and this is measurable.** The
+obvious design — pale washes so the basemap shows through — was killed by
+grading the *composited* colours (`α·fill + (1−α)·basemap`) rather than the
+solid hex, which is what a reader actually sees:
+
+| α | worst all-pairs CVD ΔE | worst normal-vision ΔE | |
+|---|---|---|---|
+| 1.00 | 11.0 | 19.0 | passes |
+| 0.75 | 7.3 | 13.0 | fails |
+| 0.60 | 5.1 | 9.7 | fails |
+| 0.45 | 3.5 | 7.0 | hopeless |
+
+Compositing over the basemap drags lightness above the band and chroma below
+the floor — the validator's phrase is "reads gray", which is exactly what a
+pale six-colour wash does. **No hue assignment rescues it at any opacity.** So
+the six buckets are drawn near-opaque (0.82).
+
+**Which is why residential is the ground, not a seventh colour.** Near-opaque
+fills over 100% of the map would bury the streets. Residential is 82% of
+parcels here *and* is what the whole map is about, so it is drawn as a quiet
+neutral tint at 0.34 (`--lu-homes`) — deliberately outside the categorical set,
+because it is a surface, not a category, and the chroma floor does not apply to
+it. The six buckets are the *exceptions*: what is near your flat that isn't
+housing. The basemap stays readable across the residential majority, which is
+most of the map. This is the rare case where the accessibility constraint and
+the editorial one pointed the same way.
+
+**Hues sit in the arcs the map hadn't already spent.** The psf ramp owns blue
+(OKLCH h≈253–257) and the school pins own orange (h≈41); both bands are
+excluded, so a parcel can never be mistaken for a price or a school. What was
+left went to convention where it could: green for parks, purple for industry,
+cyan for civic (blue being taken), red-pink for commercial.
+
+**The contrast WARN is discharged, not dismissed.** Three light-mode fills sit
+below 3:1 against the basemap. The skill's relief rule requires visible labels
+or a table view — hence the labelled legend, which is load-bearing rather than
+decorative, plus a hover card naming the exact `LU_DESC`. Do not delete either
+without re-reading this.
+
+**Known limit:** the dark set's worst *tritan* pair is ΔE 3.3
+(`--lu-infra`↔`--lu-commerce`). The validator gates on min(protan, deutan) and
+reports tritan separately; tritanopia is very rare, and the legend and hover
+carry identity independently of colour. Recorded so it isn't rediscovered as a
+surprise.
+
+**Dark mode's `--lu-infra` was re-stepped after looking at it.** The first
+passing dark olive (`#6f6600`) turned the Bishan MRT depot and the PIE corridor
+into a mustard mass that outshouted the parcels that matter — infrastructure is
+the *most* recessive class semantically (the basemap already draws roads) and
+was the loudest visually. It sits at the chroma floor now (`#7c741c`, same
+hue), re-validated as a set. The validator scores separation, not dominance;
+that part still needs eyes.
 
 ---
 
@@ -272,12 +396,30 @@ markers also carry a **slot number**, so identity never rests on colour alone.
 - **Map fit** waits for the map container's height to be stable across two
   frames. Fitting against a transient height (data.json resolves before the
   CDN stylesheet) lands a zoom level or two too far out.
+- **The land-use layer is canvas-rendered and lazily fetched.** 6,361 polygons
+  as SVG DOM nodes stalls the map on a phone, so it uses `L.canvas()`; and at
+  623 KB gzipped it is fetched on first toggle, not at boot, with a cheap
+  `HEAD` at boot only to decide whether the button is worth showing. It is
+  rebuilt (not restyled) on a dark-mode change, because the colours are baked
+  into the canvas at draw time.
+- **Layer order is landparcels → P1 rings → school pins → property markers.**
+  Within the overlay pane Leaflet stacks by insertion order, so the layer
+  groups are created in that order in `initMap`. The properties are the
+  subject; everything else is context.
+- **The hover card has one positioning implementation** (`placeHoverCard`),
+  shared by property markers and land parcels. It takes a container point
+  rather than a marker precisely so the second caller couldn't fork it — the
+  flip-and-clamp behaviour at the stage edges is the part nobody tests by hand.
+- **Buttons are `white-space: nowrap`, and the action row scrolls on mobile.**
+  "Land use" wrapped to two lines on a phone and made one button taller than
+  the row; six actions then overflowed the viewport with no way to reach Reset.
+  Same answer the model chips already use: one scrolling row, not a wrap.
 
 ---
 
 ## 8. Testing
 
-`.venv/bin/python -m pytest tests/ -q` — **90 tests, ~0.2s, all offline.**
+`.venv/bin/python -m pytest tests/ -q` — **115 tests, ~0.3s, all offline.**
 No test touches the network; fixtures live in `tests/fixtures/`.
 
 Fixture values are **synthetic** but field names and shapes mirror the real
@@ -292,14 +434,6 @@ Regression tests exist for every §5 item that bit once. Keep it that way.
 
 **Answered but not built:**
 
-- **URA Master Plan 2025 overlay — feasible.** Free GeoJSON on data.gov.sg
-  (`d_a8c3546b26712e35021f3a681d0353ae`), gazetted 1 Dec 2025. Full file is
-  **181 MB / 113,394 parcels**; clipped to the Toa Payoh + Bishan planning
-  areas (which `planning.py` already holds) it is **6,362 parcels, 6.8 MB →
-  2.0 MB gzipped**. Parcels carry `LU_DESC` and `GPR` (plot ratio). Design
-  constraint: **22 land-use categories** in those two areas vs a palette that
-  tops out at 8 — group into ~6 buckets with the exact `LU_DESC` on hover.
-  Lazy-load only when toggled.
 - **PropertyGuru asking prices — not for this dashboard.** Behind a Cloudflare
   managed challenge (even `/robots.txt` returns a JS challenge; listing pages
   403). Getting past it means defeating bot detection, which is off the table.
@@ -309,6 +443,10 @@ Regression tests exist for every §5 item that bit once. Keep it that way.
   `ingest/`. Also note asking ≠ transacted: listings are aspirational, stale
   and duplicated across agents, and would corrupt every median and CAGR if
   blended in. Legitimate route at scale is a commercial data licence.
+
+**Deliberately left out of the land-use overlay** (see §11 for why each):
+GPR as its own visual encoding, parcel-level geometry clipping at the area
+boundary, and any link between a property and the parcel it stands on.
 
 **Available, not requested:**
 
@@ -342,3 +480,43 @@ Carried over from the build; a new session should keep to them.
   measurement.
 - Don't commit or push unless asked. Don't add watchlist entries the user
   didn't ask for.
+
+---
+
+## 11. Master Plan overlay — scope held deliberately
+
+Four things it does not do. Each was considered and each has a reason, so a
+future session can change one on purpose rather than "fix" it by accident.
+
+- **GPR is not encoded visually.** Plot ratio is the most decision-relevant
+  number in the layer, and a sequential ramp for it would be easy. It is on
+  hover only, because a second visual encoding on the same polygons would have
+  to compete with the land-use hue for the same channel, and because GPR is
+  non-numeric for 63% of parcels island-wide (`LND`/`EVA`/`SDP`/null, §5.11) —
+  a ramp with a majority "not applicable" class is a bad ramp. If it is ever
+  wanted, the honest form is a *separate* mode that replaces the bucket
+  colouring rather than layering on top of it.
+- **Parcels are not geometrically clipped at the area boundary.** They are
+  selected whole, by representative point, so the overlay's edge is the jagged
+  union of parcel outlines rather than the planning-area line. True clipping
+  needs polygon-polygon intersection against a concave boundary — Sutherland
+  –Hodgman only handles convex clip regions, so it would mean vendoring a
+  real geometry library into a repo that currently has none. The jagged edge
+  is honest and costs nothing.
+- **No property is linked to the parcel it stands on.** Tempting — "this flat
+  sits on RESIDENTIAL, GPR 2.8" in the detail panel — and the point-in-polygon
+  code to do it already exists. Held back because a property's geocode is a
+  *building centroid from OneMap*, not a surveyed position: it is good to
+  roughly a building's width, which is the same order as a parcel. Attributing
+  a specific zoning to a specific block on that basis would present a
+  coin-flip as a fact. The ground-truth spot checks in §5.11 all landed
+  correctly, but spot checks on landmark condos are the easy case.
+- **The overlay covers only the watchlist's `planning_area` entries.** A
+  watchlist of individually-named projects and no area entry gets no overlay
+  at all, and logs why. The alternative — falling back to the whole island —
+  would ship 181 MB to draw context around five buildings.
+
+**If a new plan is gazetted:** run `--refresh-masterplan`, then check the log
+for the "land uses not in any bucket" warning. A revision that adds a land-use
+category still draws it (as `Other`) and names it in that warning; add it to
+`BUCKETS` in `masterplan.py` and to the coverage test's list of 33.

@@ -48,7 +48,10 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/transactions.db web/data.json data/exports
+          # masterplan.json is listed even though the weekly run does not
+          # rebuild it (see --refresh-masterplan): when someone does refresh it
+          # after a new plan is gazetted, the next run carries it up.
+          git add data/transactions.db web/data.json data/exports web/masterplan.json
           if git diff --staged --quiet; then
             echo "No new transactions."
           else

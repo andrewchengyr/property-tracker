@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=27">
+<link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
 
@@ -56,6 +56,12 @@
       <button type="button" class="btn btn--ghost" id="schoolsToggle"
               aria-pressed="false" title="Show primary schools and their P1 distance rings">
         <span class="btn-glyph" aria-hidden="true">◎</span>Schools
+      </button>
+      <!-- The overlay is ~700 KB over the wire, so it is fetched on first use
+           rather than at boot. Disabled until that fetch has a file to offer. -->
+      <button type="button" class="btn btn--ghost" id="landToggle"
+              aria-pressed="false" title="Show URA Master Plan 2025 land use">
+        <span class="btn-glyph" aria-hidden="true">▦</span>Land use
       </button>
       <button type="button" class="btn btn--ghost" id="compareToggle"
               aria-pressed="false" aria-controls="compareBar"
@@ -154,6 +160,13 @@
         <i class="sk sk--legend" aria-hidden="true"></i>School
       </span>
     </div>
+    <!-- Three of the six land-use fills sit below 3:1 against the basemap, so
+         these labels are not decoration — they are the relief the palette
+         validation requires. Built from the file's own legend block. -->
+    <div class="legend-land" id="legendLand" hidden>
+      <p class="legend-title">Land use <span class="legend-src">Master Plan 2025</span></p>
+      <div class="legend-lu" id="legendLu"></div>
+    </div>
   </div>
 
   <!-- Lives in the stage rather than the map pane: Leaflet tooltips are
@@ -203,6 +216,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 </body>
 </html>

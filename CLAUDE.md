@@ -12,7 +12,7 @@ GitHub Actions (Mon 04:00 SGT).
 ## Quick orientation
 
 ```bash
-.venv/bin/python -m pytest tests/ -q          # 90 tests, offline, ~0.2s
+.venv/bin/python -m pytest tests/ -q          # 115 tests, offline, ~0.3s
 .venv/bin/python -m ingest.run --from-fixtures # offline run, no credentials
 .venv/bin/python -m ingest.run                 # live run
 python3 -m http.server 8123 --directory web    # then open localhost:8123
@@ -31,6 +31,12 @@ Add or remove properties by editing `config/watchlist.yaml` — no code changes.
   when nothing changed, because `data.json` carries a timestamp.
 - **Sources degrade, they never crash the run.** Keep it that way — this has
   been violated twice and both times took down unrelated sources.
+- **The land-use overlay is not rebuilt weekly.** `web/masterplan.json` is
+  committed and only regenerated with `--refresh-masterplan`; the source is
+  181 MB and the plan is gazetted about every five years. §5.11 and §11.
+- **Colour is validated against what is actually rendered.** For the map fills
+  that means the colour composited over the basemap, not the solid hex — §6.1
+  records why the obvious translucent design is not readable at any opacity.
 - **Don't commit or push unless asked.** Don't add watchlist entries that
   weren't requested.
 

@@ -330,6 +330,25 @@ class Store:
         }, indent=2))
         log.info("wrote %s (%d primary schools)", path, len(schools))
 
+    def export_masterplan(self, payload: dict[str, Any] | None, path: Path | str) -> None:
+        """Same rule as the schools export: written only when there is
+        something to write, so a failed download leaves the last good overlay
+        in place rather than emptying the map's land-use layer.
+
+        Written compactly rather than indented — this is 6k parcels of
+        geometry that nobody reads by eye, and the indentation costs about a
+        third of the file.
+        """
+        path = Path(path)
+        if not payload or not payload.get("features"):
+            log.warning("no master plan parcels to export — leaving %s as it is", path)
+            return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        body = dict(payload)
+        body["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path.write_text(json.dumps(body, separators=(",", ":")))
+        log.info("wrote %s (%d parcels)", path, len(body["features"]))
+
     def export_csv(self, directory: Path | str = EXPORT_DIR) -> Path:
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)

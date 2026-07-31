@@ -1,0 +1,122 @@
+{
+  "type": "FeatureCollection",
+  "name": "MasterPlan2025LandUseLayer",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 1,
+        "LU_DESC": "RESIDENTIAL",
+        "LU_TEXT": null,
+        "GPR": "2.8",
+        "WHI_Q_MX": null,
+        "GPR_B_MN": null,
+        "INC_CRC": "0000000000000001",
+        "FMEL_UPD_D": "20251229172155",
+        "SHAPE.AREA": 1234.5,
+        "SHAPE.LEN": 140.2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.84800000001, 1.33200000002], [103.8500, 1.3320], [103.8500, 1.3340], [103.8480, 1.3340], [103.8480, 1.3320]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 2,
+        "LU_DESC": "BUSINESS 1",
+        "GPR": "2.5",
+        "INC_CRC": "0000000000000002",
+        "SHAPE.AREA": 900.0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.8520, 1.3340], [103.8540, 1.3340], [103.8540, 1.3360], [103.8520, 1.3360], [103.8520, 1.3340]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 3,
+        "LU_DESC": "PARK",
+        "GPR": null,
+        "INC_CRC": "0000000000000003"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [[[[103.8560, 1.3320], [103.8580, 1.3320], [103.8580, 1.3340], [103.8560, 1.3340], [103.8560, 1.3320]]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 4,
+        "LU_DESC": "RESIDENTIAL",
+        "GPR": "LND",
+        "INC_CRC": "0000000000000004",
+        "_note": "straddles the western boundary of TOA PAYOH: two vertices inside, centroid outside — a centroid clip would wrongly drop it"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.8347, 1.3342], [103.8376, 1.3342], [103.8376, 1.3358], [103.8347, 1.3358], [103.8347, 1.3342]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 5,
+        "LU_DESC": "ROAD",
+        "GPR": "EVA",
+        "INC_CRC": "0000000000000005",
+        "_note": "decoy — Jurong, nowhere near either watched area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.7000, 1.3300], [103.7020, 1.3300], [103.7020, 1.3320], [103.7000, 1.3320], [103.7000, 1.3300]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 6,
+        "LU_DESC": "SOMETHING NEWLY GAZETTED",
+        "GPR": "3.0",
+        "INC_CRC": "0000000000000006",
+        "_note": "a land use no bucket knows about — must still be drawn, and logged"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.8500, 1.3300], [103.8510, 1.3300], [103.8510, 1.3310], [103.8500, 1.3310], [103.8500, 1.3300]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 7,
+        "LU_DESC": "COMMERCIAL",
+        "GPR": "4.2",
+        "INC_CRC": "0000000000000007",
+        "_note": "decoy — no geometry at all"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": []
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "OBJECTID": 8,
+        "LU_DESC": "EDUCATIONAL INSTITUTION",
+        "GPR": "1.4",
+        "INC_CRC": "0000000000000008",
+        "_note": "in BISHAN, so the clip is exercised across both watched areas"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[103.8400, 1.3500], [103.8420, 1.3500], [103.8420, 1.3520], [103.8400, 1.3520], [103.8400, 1.3500]]]
+      }
+    }
+  ]
+}

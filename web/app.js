@@ -28,6 +28,7 @@
     leaseHist: $("leaseHist"), leaseFh: $("leaseFh"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
     schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
+    landToggle: $("landToggle"), legendLand: $("legendLand"), legendLu: $("legendLu"),
     compareToggle: $("compareToggle"), compareBar: $("compareBar"),
     compareSearch: $("compareSearch"), compareResults: $("compareResults"),
     compareSlots: $("compareSlots"), compareHint: $("compareHint"),
@@ -51,6 +52,9 @@
     selectedId: null, markers: new Map(), chart: null,
     playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
+    // The land-use overlay is ~700 KB, so it is fetched on first use and then
+    // kept — `land` null means "not fetched yet", not "empty".
+    land: null, showLand: false, landPending: false,
     compareMode: false, compare: [], cmpChart: null,
     // Shared by the panel chart and the compare chart — they are mutually
     // exclusive views, so one preference rather than two that can disagree.
@@ -361,7 +365,11 @@
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
-    // Rings under the school markers, both under the property markers.
+    // Land parcels under the rings, rings under the school markers, all of
+    // them under the property markers — the properties are the subject and
+    // everything else is context. Added in that order because layers within
+    // the overlay pane stack by insertion.
+    landLayer = L.layerGroup().addTo(map);
     ringLayer = L.layerGroup().addTo(map);
     schoolLayer = L.layerGroup().addTo(map);
     layer = L.layerGroup().addTo(map);
@@ -404,15 +412,18 @@
   const CAN_HOVER = matchMedia("(hover: hover) and (pointer: fine)").matches;
   const HOVER_GAP = 15;
 
-  /** Sits above the marker, flipping below when there isn't room and clamping
-   *  to the stage horizontally, so it is never clipped at an edge. */
-  function showHoverCard(prop, txns, psf, marker) {
+  /** Sits above the point, flipping below when there isn't room and clamping
+   *  to the stage horizontally, so it is never clipped at an edge.
+   *
+   *  Takes a container point rather than a marker: property markers and land
+   *  parcels both hover, and one implementation of "flip and clamp" is the
+   *  point — two would drift apart at exactly the edges nobody tests. */
+  function placeHoverCard(html, pt) {
     const node = el.hoverCard;
     if (!node) return;        // cached older index.html — degrade, don't break
-    node.innerHTML = hoverCard(prop, txns, psf);
+    node.innerHTML = html;
     node.hidden = false;
 
-    const pt = map.latLngToContainerPoint(marker.getLatLng());
     const stage = el.stage.getBoundingClientRect();
     const card = node.getBoundingClientRect();
 
@@ -422,6 +433,11 @@
     left = Math.max(6, Math.min(left, stage.width - card.width - 6));
 
     node.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  }
+
+  function showHoverCard(prop, txns, psf, marker) {
+    placeHoverCard(hoverCard(prop, txns, psf),
+                   map.latLngToContainerPoint(marker.getLatLng()));
   }
 
   function hideHoverCard() {
@@ -1104,6 +1120,149 @@
     } else if (e.key === "Escape") {
       hideResults();
     }
+  }
+
+  // ── master plan land use ──────────────────────────────────────────────
+
+  let landLayer, landGeo = null;
+
+  /** Residential is the ground, not one of the categories.
+   *
+   *  It is 82% of parcels in these areas, and the map's whole subject is
+   *  residential property — so painting it as one of six competing hues would
+   *  spend the palette's scarcest resource on its least informative class.
+   *  Drawn as a quiet tint the basemap reads through, which also keeps most of
+   *  the map's streets legible while the layer is on. The six exception
+   *  buckets are near-opaque because the measurement said so: composited at
+   *  40% over the basemap, the worst pair of any six-colour set falls to
+   *  ΔE 9.7 against a hard floor of 15 — a translucent wash of this many
+   *  categories is not a readable encoding at any hue. */
+  const LU_GROUND = "homes";
+  const LU_GROUND_OPACITY = 0.34;
+  const LU_FILL_OPACITY = 0.82;
+
+  const luColour = (bucket) => cssVar(`--lu-${bucket}`) || cssVar("--lu-other");
+
+  function luStyle(feature) {
+    const bucket = feature.properties.b;
+    const ground = bucket === LU_GROUND;
+    return {
+      fillColor: luColour(bucket),
+      fillOpacity: ground ? LU_GROUND_OPACITY : LU_FILL_OPACITY,
+      // A hairline in the surface colour separates two parcels of the same
+      // use, which would otherwise merge into one shapeless blob. The ground
+      // gets none: 5,000 landed lots' worth of hairlines is a grid, not a map.
+      color: cssVar("--surface-1"),
+      weight: ground ? 0 : 0.5,
+      opacity: ground ? 0 : 0.45,
+      interactive: true,
+    };
+  }
+
+  /** Gross plot ratio, or the plan's shorthand where it isn't a number. */
+  function gprHtml(gpr, codes) {
+    if (!gpr) return "";
+    const decoded = codes[gpr];
+    if (decoded) return `<p class="lu-gpr">${escapeHtml(decoded)}</p>`;
+    if (!Number.isFinite(Number(gpr))) {
+      return `<p class="lu-gpr">Plot ratio <b>${escapeHtml(gpr)}</b></p>`;
+    }
+    return `<p class="lu-gpr">Plot ratio <b>${escapeHtml(gpr)}</b>
+      <span class="lu-note">— floor area allowed per unit of land</span></p>`;
+  }
+
+  /** The exact land use, never just the bucket. The six buckets are a drawing
+   *  decision made to keep the palette readable; the plan's own wording is
+   *  what the reader actually came for, so it leads. */
+  function landCard(props) {
+    const codes = (state.land && state.land.gpr_codes) || {};
+    const labels = luLabels();
+    return `<div class="hover-card">
+      <div class="lu-head">
+        <i class="lu-swatch" style="background:${luColour(props.b)}" aria-hidden="true"></i>
+        <span class="lu-bucket">${escapeHtml(labels[props.b] || "Land use")}</span>
+      </div>
+      <p class="lu-use">${escapeHtml(props.lu || "Not stated")}</p>
+      ${gprHtml(props.gpr, codes)}
+      <p class="lu-note">URA Master Plan 2025 · zoning, not what is built today</p>
+    </div>`;
+  }
+
+  function luLabels() {
+    const out = {};
+    for (const row of (state.land && state.land.legend) || []) out[row.key] = row.label;
+    return out;
+  }
+
+  function toggleLand() {
+    if (state.landPending) return;
+    if (!state.land) return loadLand();       // fetch, then turn on
+    setLand(!state.showLand);
+  }
+
+  function setLand(on) {
+    state.showLand = on;
+    el.landToggle.classList.toggle("is-on", on);
+    el.landToggle.setAttribute("aria-pressed", String(on));
+    if (el.legendLand) el.legendLand.hidden = !on;
+    renderLand();
+  }
+
+  async function loadLand() {
+    state.landPending = true;
+    el.landToggle.classList.add("is-busy");
+    el.landToggle.disabled = true;
+    try {
+      const res = await fetch("masterplan.json", { cache: "force-cache" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      state.land = await res.json();
+      renderLandLegend();
+      setLand(true);
+    } catch (err) {
+      // A missing or broken overlay costs the map nothing else — drop the
+      // control rather than leaving a button that can only fail.
+      console.warn("no masterplan.json — land-use layer disabled", err);
+      el.landToggle.hidden = true;
+    } finally {
+      state.landPending = false;
+      el.landToggle.classList.remove("is-busy");
+      el.landToggle.disabled = false;
+    }
+  }
+
+  function renderLand() {
+    landLayer.clearLayers();
+    landGeo = null;
+    if (!state.showLand || !state.land) return;
+
+    // Canvas, not SVG: 6,000-odd parcels as DOM nodes stalls the whole map on
+    // a phone, and these are fills with no per-parcel interaction beyond a
+    // hover. Rebuilt on toggle so a dark-mode switch re-reads the colours.
+    landGeo = L.geoJSON(
+      { type: "FeatureCollection", features: state.land.features },
+      { style: luStyle, renderer: L.canvas({ padding: 0.3 }) },
+    );
+
+    landGeo.on("mouseover", (e) => {
+      if (!CAN_HOVER) return;
+      placeHoverCard(landCard(e.layer.feature.properties), e.containerPoint);
+    });
+    landGeo.on("mouseout", hideHoverCard);
+    landGeo.addTo(landLayer);
+  }
+
+  /** Only the buckets actually present, so the legend describes this map
+   *  rather than the plan's full vocabulary. */
+  function renderLandLegend() {
+    if (!el.legendLu || !state.land) return;
+    const counts = state.land.counts || {};
+    el.legendLu.innerHTML = (state.land.legend || [])
+      .filter((row) => counts[row.key])
+      .map((row) => `<span class="legend-lu-row"
+          title="${counts[row.key]} parcel${counts[row.key] === 1 ? "" : "s"}">
+          <i class="legend-lu-sw" style="background:${luColour(row.key)}"
+             aria-hidden="true"></i><span>${escapeHtml(row.label)}</span></span>`)
+      .join("");
   }
 
   // ── schools & P1 distance rings ───────────────────────────────────────
@@ -1993,6 +2152,7 @@
     el.minLease.addEventListener("input", onLeaseInput);
     el.moreToggle.addEventListener("click", toggleMoreFilters);
     el.schoolsToggle.addEventListener("click", toggleSchools);
+    el.landToggle.addEventListener("click", toggleLand);
     el.compareToggle.addEventListener("click", toggleCompare);
     el.compareClear.addEventListener("click", clearCompare);
     el.compareClose.addEventListener("click", toggleCompare);
@@ -2017,6 +2177,10 @@
     // inheriting a filtered version of the light one.
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
       renderMarkers();
+      // Parcel colours were baked into the canvas at draw time, and dark mode
+      // has its own steps rather than a filtered version of the light ones.
+      renderLand();
+      renderLandLegend();
       if (state.selectedId) renderPanel();
     });
     addEventListener("resize", () => {
@@ -2038,6 +2202,16 @@
     } else {
       el.schoolsToggle.title =
         `Show ${state.schools.length} primary schools and their P1 distance rings`;
+    }
+
+    // HEAD, not GET: this only decides whether the button is worth showing,
+    // and the file itself is ~700 KB that most visits never open.
+    try {
+      const res = await fetch("masterplan.json", { method: "HEAD" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      console.warn("no masterplan.json — land-use layer disabled", err);
+      el.landToggle.hidden = true;
     }
   }
 

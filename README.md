@@ -193,6 +193,41 @@ and geocoded by postal code into the same cached `geo` table the properties
 use — 179 lookups once, none afterwards. `--skip-schools` skips the layer; if
 `web/schools.json` is missing the map just hides the control.
 
+### Land use (URA Master Plan 2025)
+
+**Land use** in the top bar overlays the gazetted zoning for the planning areas
+your watchlist covers. Hover a parcel for its exact land use and its **gross
+plot ratio** — how much floor area may be built per unit of land, which is the
+closest thing to an answer for "what could go up next door".
+
+Six colours, not twenty-two. The plan uses 33 land-use descriptions island-wide
+(22 in Toa Payoh and Bishan alone) and no palette stays readable at that many,
+so they fold into six buckets — and the hover always names the *exact*
+description, so the grouping never costs you the detail.
+
+**Residential is drawn as quiet ground rather than as a seventh colour.** It is
+82% of parcels here and it is what the whole map is about; the six buckets are
+the *exceptions* — what is around your flat that isn't housing. A side effect
+is that most of the basemap stays readable while the layer is on.
+
+It is **zoning, not what is built today**: a plot zoned for 4.2 plot ratio may
+hold a 40-year-old walk-up. Read it as headroom, not as inventory.
+
+The overlay is about 700 KB gzipped, so it is fetched the first time you turn
+the layer on rather than at page load. If `web/masterplan.json` is missing the
+map just hides the control.
+
+**Refreshing it is opt-in:**
+
+```bash
+.venv/bin/python -m ingest.run --refresh-masterplan
+```
+
+The source file is 181 MB and the plan is gazetted about every five years (2019,
+then 1 Dec 2025), so the weekly refresh deliberately leaves it alone — otherwise
+every run would spend the download and commit a 3.3 MB diff to reproduce a file
+that hasn't changed. Run the flag after a new plan is gazetted.
+
 ### Growth rate
 
 The panel and hover card show **compound annual growth in median psf** across
@@ -252,15 +287,18 @@ a workflow artifact instead of by branch folder.)
 | [URA Data Service](https://eservice.ura.gov.sg/maps/api/) | private residential caveats, rolling 5 years, 4 district batches | access key → daily token |
 | [data.gov.sg](https://data.gov.sg/) `d_8b84c4ee58e3cfc0ece0d773c8ca6abc` | HDB resale, Jan 2017 onwards | none |
 | [OneMap](https://www.onemap.gov.sg/) | geocoding HDB block + street | account → ~3-day token |
+| [data.gov.sg](https://data.gov.sg/) `d_a8c3546b26712e35021f3a681d0353ae` | URA Master Plan 2025 land use, 113,394 parcels island-wide | none |
 
 ## Layout
 
 ```
 config/watchlist.yaml   the control panel — edit this
 ingest/                 run.py (entrypoint), ura.py, hdb.py, geocode.py, store.py, models.py
+                        schools.py, planning.py, masterplan.py (reference layers)
 data/transactions.db    canonical store (committed)
 data/exports/           CSV export
-web/                    the site — index.html, app.js, style.css, data.json
+web/                    the site — index.html, app.js, style.css, data.json,
+                        schools.json, masterplan.json
 tests/                  offline tests + saved API fixtures
 ```
 

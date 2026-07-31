@@ -23,6 +23,7 @@ import yaml
 from dotenv import load_dotenv
 
 from . import hdb as hdb_mod
+from . import masterplan as masterplan_mod
 from . import planning
 from . import schools as schools_mod
 from . import ura as ura_mod
@@ -39,6 +40,7 @@ WATCHLIST = Path("config/watchlist.yaml")
 # excluded unless an entry names them explicitly.
 DEFAULT_PRIVATE_TYPES = ("CONDOMINIUM", "APARTMENT", "EXECUTIVE CONDOMINIUM")
 SCHOOLS_JSON = Path("web/schools.json")
+MASTERPLAN_JSON = Path("web/masterplan.json")
 FIXTURES = Path("tests/fixtures")
 
 
@@ -456,6 +458,65 @@ def collect_schools(
     return located
 
 
+def watchlist_areas(entries: list[dict[str, Any]]) -> list[str]:
+    """Planning areas the watchlist selects by name, in stable order."""
+    seen: list[str] = []
+    for entry in entries:
+        area = entry.get("planning_area")
+        if area and area not in seen:
+            seen.append(area)
+    return seen
+
+
+def collect_masterplan(
+    entries: list[dict[str, Any]],
+    from_fixtures: bool,
+    errors: list[str] | None = None,
+) -> dict[str, Any] | None:
+    """URA Master Plan 2025 land use, clipped to the watchlist's planning areas.
+
+    Reference data like the schools layer: it never touches the transactions
+    table, and a failure here must cost nothing else in the run.
+
+    The clip uses the committed OneMap polygons (`planning.load()` with no
+    token), so this needs no credentials at all — data.gov.sg serves the plan
+    unauthenticated.
+    """
+    wanted = watchlist_areas(entries)
+    if not wanted:
+        log.info(
+            "no planning_area entries in the watchlist — skipping the land-use "
+            "overlay (it is clipped to those areas, so there is nothing to clip to)"
+        )
+        return None
+
+    try:
+        if from_fixtures:
+            path = FIXTURES / "masterplan.json"
+            if not path.exists():
+                return None
+            features = (json.loads(path.read_text()).get("features") or [])
+        else:
+            features = masterplan_mod.fetch()
+
+        areas = planning.load()
+        selected = {name: areas[name] for name in wanted if name in areas}
+        missing = [name for name in wanted if name not in areas]
+        if missing:
+            log.warning("no boundary for planning area(s) %s — not overlaid",
+                        ", ".join(missing))
+        if not selected:
+            log.error("no planning area boundaries available — skipping the overlay")
+            return None
+
+        return masterplan_mod.build(features, selected)
+    except Exception as exc:  # noqa: BLE001 — the properties still matter
+        log.error("master plan pull failed, keeping the last export: %s", exc)
+        if errors is not None:
+            errors.append(f"master plan pull failed: {exc}")
+        return None
+
+
 def _seed_fixture_geocodes(store: Store, txns: list[Transaction]) -> None:
     """Offline runs read coordinates from a saved OneMap response so the
     fixture path produces a complete, map-ready dataset."""
@@ -510,6 +571,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--skip-schools", action="store_true",
                         help="skip the MOE primary-school layer")
     parser.add_argument("--schools-out", default=str(SCHOOLS_JSON))
+    # Off by default on purpose. The Master Plan is gazetted about every five
+    # years, the source file is 181 MB, and the export is committed — so
+    # rebuilding it weekly would spend the download and churn a 3.4 MB diff to
+    # reproduce a file that hasn't changed. Pass this after a new gazette.
+    parser.add_argument(
+        "--refresh-masterplan",
+        action="store_true",
+        help="re-download the 181 MB URA Master Plan and rebuild the land-use "
+             "overlay (only needed after a new plan is gazetted)",
+    )
+    parser.add_argument("--masterplan-out", default=str(MASTERPLAN_JSON))
     parser.add_argument("--no-csv", action="store_true")
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args(argv)
@@ -533,6 +605,15 @@ def main(argv: list[str] | None = None) -> int:
         if not args.skip_schools:
             store.export_schools(
                 collect_schools(store, args.from_fixtures, errors), args.schools_out)
+
+        # Rebuilt only when asked, or when the export doesn't exist yet — a
+        # fresh clone with no overlay should get one on its first run without
+        # having to know the flag.
+        if args.refresh_masterplan or not Path(args.masterplan_out).exists():
+            store.export_masterplan(
+                collect_masterplan(watchlist["private"], args.from_fixtures, errors),
+                args.masterplan_out,
+            )
 
         added, updated = store.upsert_many(txns)
         top_years = {

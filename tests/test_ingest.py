@@ -13,6 +13,7 @@ import requests
 from ingest import datagov
 from ingest import hdb as hdb_mod
 from ingest import geocode as geocode_mod
+from ingest import masterplan
 from ingest import planning
 from ingest import schools as schools_mod
 from ingest import ura as ura_mod
@@ -24,7 +25,7 @@ from ingest.models import (
     parse_hdb_month,
     parse_ura_contract_date,
 )
-from ingest.run import load_watchlist
+from ingest.run import collect_masterplan, load_watchlist, watchlist_areas
 from ingest.store import Store, slugify
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -483,6 +484,235 @@ def test_onemap_token_failure_message_points_at_throttling(monkeypatch, tmp_path
 
 def test_planning_load_without_cache_or_token_is_empty(tmp_path):
     assert planning.load(token=None, cache=tmp_path / "missing.json") == {}
+
+
+# ---------------------------------------------------- master plan land use ---
+
+@pytest.fixture
+def mp_features():
+    return json.loads((FIXTURES / "masterplan.json").read_text())["features"]
+
+
+@pytest.fixture
+def mp_areas():
+    """The real committed boundaries, so the clip is tested against the same
+    polygons it runs against. Offline — these are cached in the repo."""
+    areas = planning.load()
+    return {name: areas[name] for name in ("TOA PAYOH", "BISHAN")}
+
+
+def test_every_island_wide_land_use_has_a_bucket():
+    """All 33 descriptions the live 2025 layer carries are mapped. A new one
+    would fall to OTHER and be logged — this guards the ones we know about."""
+    known = [
+        "RESIDENTIAL", "ROAD", "COMMERCIAL", "BUSINESS 2",
+        "RESIDENTIAL WITH COMMERCIAL AT 1ST STOREY", "PARK", "BUSINESS 1",
+        "UTILITY", "WATERBODY", "RESIDENTIAL / INSTITUTION",
+        "COMMERCIAL & RESIDENTIAL", "OPEN SPACE", "CIVIC & COMMUNITY INSTITUTION",
+        "PLACE OF WORSHIP", "RESERVE SITE", "EDUCATIONAL INSTITUTION",
+        "COMMERCIAL / INSTITUTION", "TRANSPORT FACILITIES", "HOTEL", "AGRICULTURE",
+        "SPORTS & RECREATION", "HEALTH & MEDICAL CARE", "WHITE", "BUSINESS PARK",
+        "SPECIAL USE", "MASS RAPID TRANSIT", "PORT / AIRPORT", "BUSINESS 1 - WHITE",
+        "BEACH AREA", "BUSINESS 2 - WHITE", "CEMETERY", "LIGHT RAPID TRANSIT",
+        "BUSINESS PARK - WHITE",
+    ]
+    assert len(known) == 33
+    unmapped = [u for u in known if masterplan.bucket_of(u) == masterplan.OTHER]
+    assert unmapped == []
+
+
+def test_residential_is_the_ground_not_a_bucket():
+    """Residential is 82% of parcels; it is drawn as ground, so it must not be
+    one of the six categorical buckets competing for a colour."""
+    assert masterplan.bucket_of("RESIDENTIAL") == masterplan.GROUND
+    assert masterplan.GROUND not in [key for key, _, _ in masterplan.BUCKETS]
+    assert len(masterplan.BUCKETS) == 6
+
+
+def test_bucket_lookup_is_case_and_space_insensitive():
+    assert masterplan.bucket_of("  business 1  ") == "business"
+    assert masterplan.bucket_of("Park") == "green"
+
+
+def test_an_unknown_land_use_is_kept_not_dropped(mp_features, mp_areas):
+    """A future gazette can add a category. It still gets drawn — silently
+    losing parcels would leave a hole that reads as missing data."""
+    built = masterplan.build(mp_features, mp_areas)
+    others = [f for f in built["features"] if f["properties"]["b"] == masterplan.OTHER]
+    assert [f["properties"]["lu"] for f in others] == ["SOMETHING NEWLY GAZETTED"]
+
+
+def test_unknown_land_uses_are_logged_by_name(mp_features, mp_areas, caplog):
+    with caplog.at_level("WARNING", logger="ingest.masterplan"):
+        masterplan.build(mp_features, mp_areas)
+    assert "SOMETHING NEWLY GAZETTED" in caplog.text
+
+
+def test_parcels_outside_the_area_are_clipped_away(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas)
+    # The ROAD decoy sits at (5, 5), well outside the area.
+    assert "ROAD" not in [f["properties"]["lu"] for f in built["features"]]
+
+
+def test_a_parcel_that_merely_touches_the_area_is_not_dragged_in(mp_features, mp_areas):
+    """The Central Catchment is one OPEN SPACE parcel 8.1 km across. Because it
+    touches Bishan, a "keep it if any vertex is inside" clip pulled the whole
+    thing onto the map — a green mass from Bukit Panjang to Thomson on an
+    overlay that covers two planning areas. Caught by looking at the render,
+    not the code. The fixture's straddler stands in for it: two vertices
+    inside TOA PAYOH, centre outside."""
+    built = masterplan.build(mp_features, mp_areas)
+    straddlers = [f for f in built["features"]
+                  if f["properties"]["lu"] == "RESIDENTIAL"
+                  and f["properties"]["gpr"] == "LND"]
+    assert straddlers == []
+
+
+def test_representative_point_stays_on_a_concave_parcel():
+    """An L-shaped parcel's centroid falls outside it, which would assign the
+    parcel to whichever area that empty spot belongs to."""
+    ell = {"type": "Polygon", "coordinates": [[
+        [0, 0], [3, 0], [3, 1], [1, 1], [1, 3], [0, 3], [0, 0]]]}
+    lng, lat = masterplan.representative_point(ell)
+    assert masterplan._point_in_ring(lng, lat, ell["coordinates"][0])
+
+
+def test_representative_point_uses_the_largest_part_of_a_multipolygon():
+    """A parcel with a big part in one area and a speck in another belongs to
+    the area holding the bulk of it."""
+    geom = {"type": "MultiPolygon", "coordinates": [
+        [_square(0, 0, 0.1, 0.1)],          # speck
+        [_square(10, 10, 12, 12)],          # the bulk
+    ]}
+    lng, lat = masterplan.representative_point(geom)
+    assert 10 < lng < 12 and 10 < lat < 12
+
+
+def test_representative_point_of_an_empty_geometry_is_none():
+    assert masterplan.representative_point({"type": "Polygon", "coordinates": []}) is None
+
+
+def test_a_parcel_with_no_geometry_is_skipped(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas)
+    assert "COMMERCIAL" not in [f["properties"]["lu"] for f in built["features"]]
+
+
+def test_export_keeps_only_the_fields_the_map_draws(mp_features, mp_areas):
+    """The source ships ten properties per parcel; at this many parcels the
+    ones nobody draws cost more than the geometry."""
+    built = masterplan.build(mp_features, mp_areas)
+    assert {k for f in built["features"] for k in f["properties"]} == {"b", "lu", "gpr"}
+
+
+def test_coordinates_are_rounded(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas, precision=6)
+    first = built["features"][0]["geometry"]["coordinates"][0][0]
+    assert first == [103.848, 1.332]   # from 103.84800000001 / 1.33200000002
+
+
+def test_multipolygon_geometry_survives_the_round_trip(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas)
+    park = next(f for f in built["features"] if f["properties"]["lu"] == "PARK")
+    assert park["geometry"]["type"] == "MultiPolygon"
+    assert park["geometry"]["coordinates"][0][0][0] == [103.856, 1.332]
+
+
+def test_null_gpr_becomes_an_empty_string_not_the_word_none(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas)
+    park = next(f for f in built["features"] if f["properties"]["lu"] == "PARK")
+    assert park["properties"]["gpr"] == ""
+
+
+def test_build_carries_the_legend_and_counts(mp_features, mp_areas):
+    built = masterplan.build(mp_features, mp_areas)
+    assert built["areas"] == ["BISHAN", "TOA PAYOH"]
+    assert built["counts"]["homes"] == 1
+    assert built["counts"]["business"] == 1
+    assert built["counts"]["civic"] == 1      # the Bishan parcel — both areas clip
+    # The legend drives the frontend's swatch list, so every bucket drawn must
+    # have a label to put beside it.
+    labelled = {row["key"] for row in built["legend"]}
+    assert set(built["counts"]) <= labelled
+
+
+def test_build_without_an_area_refuses_rather_than_exporting_the_island(mp_features):
+    with pytest.raises(masterplan.MasterPlanError):
+        masterplan.build(mp_features, {})
+
+
+def test_gpr_codes_cover_the_non_numeric_values_the_plan_uses():
+    assert set(masterplan.GPR_CODES) == {"LND", "EVA", "SDP"}
+
+
+def test_export_masterplan_writes_compact_json(store, mp_features, mp_areas, tmp_path):
+    out = tmp_path / "masterplan.json"
+    store.export_masterplan(masterplan.build(mp_features, mp_areas), out)
+    body = out.read_text()
+    assert '", "' not in body                 # separators=(",", ":")
+    payload = json.loads(body)
+    assert payload["generated_at"].endswith("Z")
+    assert len(payload["features"]) == 5
+
+
+def test_a_failed_pull_leaves_the_last_good_overlay_alone(store, tmp_path):
+    """Same rule as the schools export: an empty result must not blank a file
+    that is still perfectly good."""
+    out = tmp_path / "masterplan.json"
+    out.write_text('{"features": ["previous"]}')
+    store.export_masterplan(None, out)
+    store.export_masterplan({"features": []}, out)
+    assert json.loads(out.read_text())["features"] == ["previous"]
+
+
+def test_download_url_reads_the_poll_response(monkeypatch):
+    class _R:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return {"code": 0, "data": {"url": "https://example/x.geojson"}}
+
+    class _S:
+        def get(self, url, **kw): return _R()
+
+    assert masterplan.download_url(_S()) == "https://example/x.geojson"
+
+
+def test_download_url_without_a_url_raises_rather_than_returning_none(monkeypatch):
+    class _R:
+        def raise_for_status(self): pass
+        def json(self): return {"code": 1, "data": {}, "errorMsg": "nope"}
+
+    class _S:
+        def get(self, url, **kw): return _R()
+
+    with pytest.raises(masterplan.MasterPlanError):
+        masterplan.download_url(_S())
+
+
+def test_watchlist_areas_are_deduped_in_order():
+    entries = [
+        {"planning_area": "TOA PAYOH"},
+        {"project": "TREVISTA"},
+        {"planning_area": "BISHAN"},
+        {"planning_area": "TOA PAYOH"},
+    ]
+    assert watchlist_areas(entries) == ["TOA PAYOH", "BISHAN"]
+
+
+def test_no_planning_area_means_no_overlay_rather_than_the_whole_island():
+    """The overlay is defined by the clip. With nothing to clip to, exporting
+    all 113,394 island-wide parcels would be the wrong kind of "helpful"."""
+    assert collect_masterplan([{"project": "TREVISTA"}], from_fixtures=True) is None
+
+
+def test_a_master_plan_failure_is_collected_not_raised(monkeypatch):
+    def boom():
+        raise RuntimeError("data.gov.sg is down")
+    monkeypatch.setattr(masterplan, "fetch", boom)
+
+    errors = []
+    got = collect_masterplan([{"planning_area": "BISHAN"}], False, errors)
+    assert got is None
+    assert errors and "data.gov.sg is down" in errors[0]
 
 
 # ----------------------------------------------------------------- HDB ------

@@ -46,6 +46,27 @@
   --psf-5: #104281;
   --psf-none: #b8b7b0;
 
+  /* Master Plan land use. Six categorical buckets, validated all-pairs (a map
+     is an all-pairs form — any two uses can abut) against the OSM basemap
+     rather than the page surface: worst CVD ΔE 11.0, worst normal-vision 19.0,
+     both modes. Hues sit in the arcs the psf ramp (h≈255) and the school pins
+     (h≈41) leave free, so a parcel can never be mistaken for a price or a
+     school. Three fall below 3:1 on the basemap, which is why the layer ships
+     a labelled legend — that is the required relief, not decoration.
+
+     `--lu-homes` is deliberately outside that set. Residential is 82% of
+     parcels here, and the map's whole subject is residential property, so it
+     is the ground the rest is drawn on: a near-neutral tint at low opacity
+     that lets the basemap read through. It is a surface, not a category. */
+  --lu-homes: #b3a894;
+  --lu-mixed: #968cff;
+  --lu-commerce: #bf3272;
+  --lu-business: #803ccb;
+  --lu-civic: #29c5d9;
+  --lu-green: #3c9713;
+  --lu-infra: #beb455;
+  --lu-other: #8a8a8a;
+
   --r-sm: 6px;
   --r-md: 10px;
   --r-lg: 16px;
@@ -83,6 +104,23 @@
     --psf-4: #256abf;
     --psf-5: #184f95;
     --psf-none: #55544f;
+
+    /* Selected for the dark surface, not flipped: the tile pane is inverted in
+       dark mode but the overlay pane is not, so these are validated against
+       the dark-filtered basemap (#22201d). Same hues, own steps. */
+    --lu-homes: #5d564a;
+    --lu-mixed: #8b7dff;
+    --lu-commerce: #b64674;
+    --lu-business: #762fbf;
+    --lu-civic: #0ba6b8;
+    --lu-green: #43af09;
+    /* Held at the chroma floor deliberately. Infra is roads, rail and
+       utilities — the things the basemap already draws — so it should be the
+       most recessive of the six. A stronger dark olive turned the Bishan depot
+       and the PIE corridor into a mustard mass that outshouted the parcels
+       that matter. Re-validated as a set: CVD ΔE 9.4, normal-vision 17.6. */
+    --lu-infra: #7c741c;
+    --lu-other: #77746c;
   }
 }
 
@@ -394,6 +432,9 @@ body.filters-closed .filters--more { display: none; }
   min-height: 34px;
   border-radius: var(--r-sm);
   cursor: pointer;
+  /* Two-word labels ("Land use") otherwise wrap on a narrow viewport, which
+     makes one button taller than the row and knocks the others out of line. */
+  white-space: nowrap;
   transition: background .12s, border-color .12s;
 }
 
@@ -645,6 +686,90 @@ body.filters-closed .filters--more { display: none; }
   font-size: 10px;
   color: var(--text-muted);
   text-align: center;
+}
+
+/* ── Master Plan land use ────────────────────────────────────────────── */
+
+/* The land-use hover reuses the property hover card's shell and positioning,
+   so there is one implementation of "a card that flips and clamps at the
+   stage edge" rather than two that drift apart. */
+.lu-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 7px;
+}
+
+.lu-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+}
+
+.lu-bucket {
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The exact LU_DESC, not the bucket it was folded into — the grouping is a
+   drawing decision and must not become the only thing the reader can learn. */
+.lu-use {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.lu-gpr { margin: 8px 0 0; font-size: 12px; color: var(--text-secondary); }
+.lu-gpr b { font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.lu-note { margin: 7px 0 0; font-size: 10.5px; color: var(--text-muted); }
+
+/* Land-use rows in the legend. These labels are load-bearing: three of the six
+   fills sit below 3:1 against the basemap, and a labelled legend is the relief
+   the palette validation requires for that. */
+.legend-land {
+  grid-column: 1 / -1;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+}
+
+.legend-src {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.legend-lu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 10px;
+  margin-top: 6px;
+}
+
+.legend-lu-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.legend-lu-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.legend-lu-sw {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
 }
 
 /* ── Schools & P1 rings ──────────────────────────────────────────────── */
@@ -1317,8 +1442,19 @@ table.p-table {
   }
 
   .filters { gap: 10px 12px; flex: 1 1 100%; align-items: center; }
-  .filter--actions { margin-left: auto; }
   .filter--range { order: 3; flex: 1 1 100%; }   /* full-width row of its own */
+
+  /* Six actions don't fit a phone's width. Same answer the model chips got:
+     one scrolling row rather than a wrap, so the header keeps its height and
+     nothing is silently cut off past the right edge. */
+  .filter--actions {
+    flex: 1 1 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+
+  .filter--actions .btn { flex: 0 0 auto; }
 
   .btn { padding: 6px 11px; min-height: 32px; }
 
