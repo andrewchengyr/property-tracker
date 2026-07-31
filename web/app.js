@@ -18,8 +18,8 @@
     stage: document.querySelector(".stage"), hoverCard: $("hoverCard"),
     panel: $("panel"), panelBody: $("panelBody"), panelClose: $("panelClose"),
     scrim: $("scrim"), rangeStart: $("rangeStart"), rangeEnd: $("rangeEnd"),
-    rangeLabel: $("rangeLabel"), drFill: $("drFill"), play: $("play"),
-    playGlyph: $("playGlyph"), playText: $("playText"), reset: $("reset"),
+    rangeLabel: $("rangeLabel"), drFill: $("drFill"),
+    reset: $("reset"),
     moreFilters: $("moreFilters"), moreToggle: $("moreToggle"),
     filterCount: $("filterCount"), emptyNote: $("emptyNote"),
     minSqft: $("minSqft"), maxSqft: $("maxSqft"),
@@ -50,7 +50,6 @@
     // numeric filters use, rather than pre-selecting everything.
     models: new Set(), allModels: [],
     selectedId: null, markers: new Map(), chart: null,
-    playing: false, timer: null,
     schools: [], showSchools: false, selectedSchool: null,
     // The land-use overlay is ~700 KB, so it is fetched on first use and then
     // kept — `land` null means "not fetched yet", not "empty".
@@ -84,6 +83,11 @@
   // Anchored to the newest month in the data, not to today: the datasets lag
   // reality by weeks, so "1Y" from today would clip the most recent month.
   // `years` follows the same-date-last-year convention used by price charts.
+  // The period the map opens on, and the one Reset returns to. Recent prices
+  // are the ones worth looking at first; the full history is one chip away.
+  // Falls back to the full range when there isn't a year of data yet.
+  const DEFAULT_PERIOD = "1y";
+
   const PERIOD_PRESETS = [
     { id: "ytd", label: "YTD" },
     { id: "1y", label: "1Y", years: 1 },
@@ -297,11 +301,34 @@
     return lease(prop).yearsLeft;
   }
 
+  /** Several HDB flat models answer the same question, so the chips group them.
+   *
+   *  `Improved`, `Model A` and `Standard` are HDB's generational names for the
+   *  ordinary flat — nobody shortlists by which decade the layout dates from —
+   *  and a maisonette is a maisonette whether or not HDB called it `Model A`.
+   *  Collapsing them turns eleven chips into seven and puts the counts where a
+   *  decision actually gets made.
+   *
+   *  Grouping is a *filtering* decision only. Detail views (the panel, compare
+   *  columns, the search list) keep showing the exact model, the same way the
+   *  land-use layer buckets its colours but names the precise use on hover —
+   *  the grouping must never cost you the underlying fact. */
+  const MODEL_GROUPS = {
+    "Improved": "HDB",
+    "Model A": "HDB",
+    "Standard": "HDB",
+    "Maisonette": "Maisonette",
+    "Model A-Maisonette": "Maisonette",
+  };
+
   /** Property-level filters. Lease is a fact about the building, not about any
    *  one transaction, so it hides the property outright. Freehold and
    *  unknown-lease properties pass any minimum — a freehold outlasts every
    *  threshold, and hiding what we can't assess would quietly lose data. */
-  const modelOf = (p) => p.model || p.flat_model || p.type || "";
+  const modelOf = (p) => {
+    const raw = p.model || p.flat_model || p.type || "";
+    return MODEL_GROUPS[raw] || raw;
+  };
 
   /** Property-level filters, with one optionally skipped.
    *
@@ -340,6 +367,16 @@
     if (state.models.size) n++;
     if (state.startIdx > 0 || state.endIdx < state.months.length - 1) n++;
     return n;
+  }
+
+  /** One writer for the badge, called by both filter paths *and* by boot —
+   *  the period no longer starts at the full range, so a badge that was only
+   *  written on the first interaction would sit empty over a filtered map and
+   *  then pop to 1 the moment anything was touched. */
+  function syncFilterBadge() {
+    const n = activeFilterCount();
+    el.filterCount.textContent = String(n);
+    el.filterCount.hidden = n === 0;
   }
 
   /** Great-circle distance in metres. Straight-line "as the crow flies" is
@@ -1719,6 +1756,15 @@
     return idx === -1 ? null : idx;
   }
 
+  /** Where the period starts on load and after Reset. `presetStart` returns
+   *  null when the history is shorter than the preset, so a young dataset
+   *  opens on everything it has rather than on nothing. */
+  function defaultStartIdx() {
+    const preset = PERIOD_PRESETS.find((p) => p.id === DEFAULT_PERIOD);
+    const start = preset ? presetStart(preset) : null;
+    return start == null ? 0 : start;
+  }
+
   function buildPresets() {
     el.presets.innerHTML = PERIOD_PRESETS.map((p) => {
       const start = presetStart(p);
@@ -1737,7 +1783,6 @@
     const preset = PERIOD_PRESETS.find((p) => p.id === id);
     const start = preset && presetStart(preset);
     if (start === null || start === undefined) return;
-    stopPlay();                       // a preset is an explicit choice
     state.startIdx = start;
     state.endIdx = state.months.length - 1;
     applyRange();
@@ -1876,9 +1921,7 @@
   function applyFilters() {
     updateModelCounts();
     renderLeaseHistogram();
-    const n = activeFilterCount();
-    el.filterCount.textContent = String(n);
-    el.filterCount.hidden = n === 0;
+    syncFilterBadge();
     renderMarkers();
     refreshDetailViews();
   }
@@ -2017,9 +2060,7 @@
       const prop = state.properties.find((p) => p.id === state.selectedId);
       if (prop && source !== "ALL" && prop.source !== source) closePanel();
     }
-    const n = activeFilterCount();
-    el.filterCount.textContent = String(n);
-    el.filterCount.hidden = n === 0;
+    syncFilterBadge();
     updateModelCounts();
     renderLeaseHistogram();
     renderMarkers({ fit: true });
@@ -2029,47 +2070,10 @@
     refreshDetailViews();
   }
 
-  // Sweeps a fixed-width window forward through time, then loops.
-  function togglePlay() {
-    state.playing ? stopPlay() : startPlay();
-  }
-
-  function startPlay() {
-    const last = state.months.length - 1;
-    if (last < 1) return;
-    let width = state.endIdx - state.startIdx;
-    if (width < 1 || width >= last) width = Math.max(1, Math.round((last + 1) / 4));
-
-    state.playing = true;
-    el.playGlyph.textContent = "❚❚";
-    el.playText.textContent = "Pause";
-    state.startIdx = 0;
-    state.endIdx = width;
-    applyRange();
-
-    state.timer = setInterval(() => {
-      if (state.endIdx >= last) {
-        state.startIdx = 0;
-        state.endIdx = width;
-      } else {
-        state.startIdx += 1;
-        state.endIdx += 1;
-      }
-      applyRange();
-    }, 420);
-  }
-
-  function stopPlay() {
-    state.playing = false;
-    clearInterval(state.timer);
-    state.timer = null;
-    el.playGlyph.textContent = "▶";
-    el.playText.textContent = "Play";
-  }
-
   function resetView() {
-    stopPlay();
-    state.startIdx = 0;
+    // Back to how the page opens, which is the default period — not the full
+    // range. "Reset" means "as I found it".
+    state.startIdx = defaultStartIdx();
     state.endIdx = state.months.length - 1;
     state.minSqft = state.maxSqft = state.minPrice = state.maxPrice = null;
     state.minLease = 0;
@@ -2123,7 +2127,7 @@
 
     const last = state.months.length - 1;
     for (const input of [el.rangeStart, el.rangeEnd]) input.max = String(last);
-    state.startIdx = 0;
+    state.startIdx = defaultStartIdx();
     state.endIdx = last;
 
     // Cap the lease slider at the longest lease actually present, so the top
@@ -2141,6 +2145,7 @@
     syncRangeUI();
     syncPresets();
     syncLeaseUI();
+    syncFilterBadge();
     syncFiltersAria();
     renderMarkers({ fit: true });
 
@@ -2163,7 +2168,6 @@
     }
     el.compareSearch.addEventListener("blur", () => setTimeout(hideResults, 120));
     renderCompare();
-    el.play.addEventListener("click", togglePlay);
     el.reset.addEventListener("click", resetView);
     el.panelClose.addEventListener("click", closePanel);
     el.scrim.addEventListener("click", closePanel);

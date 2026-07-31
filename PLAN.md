@@ -40,7 +40,7 @@ web/data.json + web/schools.json ──► Leaflet + Chart.js on GitHub Pages
 GitHub Actions (weekly cron) ───────┘
 ```
 
-**Current state:** 410 properties, 7,699 transactions (Jan 2017 – Jul 2026),
+**Current state:** 410 properties, 7,701 transactions (Jan 2017 – Jul 2026),
 179 primary schools, 6,361 land-use parcels, 691 cached geocodes. 115 tests,
 all offline. 46 commits (22 of them automated refreshes).
 
@@ -142,7 +142,7 @@ the git author address, which is normal but worth knowing.
 Buildless — `index.html`, `app.js`, `style.css`, CDN Leaflet + Chart.js.
 
 **Bump `?v=N` on both asset links whenever `app.js` or `style.css` changes.**
-Currently `v=28`. Without it a browser or CDN edge serves a stale script
+Currently `v=29`. Without it a browser or CDN edge serves a stale script
 against fresh markup, which fails confusingly rather than cleanly — this cost
 real debugging time twice.
 
@@ -375,10 +375,33 @@ that part still needs eyes.
 
 ## 7. Frontend behaviour worth not breaking
 
-- **Filters.** Type and lease are *property*-level; period, size and price are
-  *transaction*-level (a property vanishes only when none of its transactions
-  qualify). Empty means unbounded — `0` is a real bound, so `Number(v) || null`
-  would be wrong.
+- **Filters.** Type, model and lease are *property*-level; period, size and
+  price are *transaction*-level (a property vanishes only when none of its
+  transactions qualify). Empty means unbounded — `0` is a real bound, so
+  `Number(v) || null` would be wrong.
+- **The map opens on 1Y (`DEFAULT_PERIOD`), and Reset returns there**, not to
+  the full range — "reset" means "as I found it". `defaultStartIdx()` falls
+  back to the full range when the history is shorter than the preset, so a
+  young dataset never opens on nothing. Consequence to keep in mind: the
+  filter badge reads `1` on load, because the period genuinely is narrowing
+  the view. That is why `syncFilterBadge()` is also called from `boot` — with
+  the old full-range default the badge was written only on the first
+  interaction, which was invisible then and would now leave an empty badge
+  sitting over a filtered map until something was touched.
+- **Model chips group several raw models** (`MODEL_GROUPS` in `app.js`):
+  Improved / Model A / Standard → **HDB**, Maisonette / Model A-Maisonette →
+  **Maisonette**. Eleven chips became seven. The grouping lives entirely in
+  `modelOf()`, so the chips, the facet counts and the filter all read it and
+  cannot disagree — *and detail views deliberately do not*. The panel, compare
+  columns and search list show `prop.model` raw, the same split the land-use
+  layer uses between its six buckets and the exact `LU_DESC` on hover: group
+  to make the control usable, never to hide the fact. Note the **HDB** model
+  chip and the **HDB** source chip mean different things — DBSS, maisonettes
+  and adjoined flats are HDB too and keep their own chips.
+- **There is no Play button.** It swept a fixed window forward through time.
+  Removed on request for header space, along with all of its machinery — if it
+  ever comes back, note that `applyPreset` and `resetView` used to call
+  `stopPlay()` first so an explicit choice wouldn't fight the timer.
 - **`refreshDetailViews()`** is called by *both* filter paths (`applyFilters`
   and `setSource`, where Reset ends). Reset left a stale detail view **twice**
   because one path refreshed the drawer and forgot the panel. Add new detail

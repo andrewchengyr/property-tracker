@@ -94,14 +94,17 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
 - Marker **colour** is median price per sqft (fixed scale, so moving the time
   slider changes a marker's value and never the meaning of a colour).
 - Marker **shape** is the source — circle for private, square for HDB.
-- The **period slider** rescopes every marker, chart and growth rate; **Play**
-  sweeps it forward through time. Presets (**YTD, 1Y … 10Y, All**) sit under
-  it, anchored to the newest month in the data rather than to today — the
-  datasets lag reality by weeks, so "1Y from today" would clip the latest
-  month. A preset longer than the history available is disabled rather than
-  silently behaving as "All".
-- **Filters** (size, price, lease) sit behind the disclosure in the top bar,
-  with a badge showing how many are active. **Reset** clears all of them.
+- The **period slider** rescopes every marker, chart and growth rate. Presets
+  (**YTD, 1Y … 10Y, All**) sit under it, anchored to the newest month in the
+  data rather than to today — the datasets lag reality by weeks, so "1Y from
+  today" would clip the latest month. A preset longer than the history
+  available is disabled rather than silently behaving as "All".
+- **The map opens on the last 1 year**, not the full history: recent prices are
+  the ones worth seeing first, and everything else is one chip away. The filter
+  badge shows `1` on load because the period genuinely is narrowing the view.
+  **Reset** returns here rather than to the full range.
+- **Filters** (model, size, price, lease) sit behind the disclosure in the top
+  bar, with a badge showing how many are active. **Reset** clears all of them.
 - **Hover a marker** for a summary card: median psf, growth rate, a sparkline,
   transaction count, median price and latest month.
 - **Click a marker** for the full panel — growth, property facts, the
@@ -136,7 +139,8 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
 | Filter | Scope | Empty / zero means |
 |---|---|---|
 | Type | property | all sources |
-| Period | transaction | full history |
+| Model | property | all models |
+| Period | transaction | full history (opens on 1Y) |
 | Size (sqft) | transaction | no lower / upper bound |
 | Price (SGD) | transaction | no lower / upper bound |
 | Lease remaining | property | no minimum |
@@ -146,6 +150,22 @@ only once *none* of its transactions qualify — which is what makes "5-room
 over 1,100 sqft under $1.4M" a question the map can answer. A transaction with
 no recorded floor area can't satisfy a size bound and is excluded rather than
 silently passed through.
+
+**The model chips group several HDB flat models.** `Improved`, `Model A` and
+`Standard` are HDB's generational names for the ordinary flat — nobody
+shortlists by which decade the layout dates from — so they share one **HDB**
+chip; `Maisonette` and `Model A-Maisonette` share one **Maisonette** chip. That
+turns eleven chips into seven and puts the counts where a decision gets made.
+
+Grouping only affects *filtering*. The panel, compare columns and search list
+all keep showing the exact model, the same way the land-use layer buckets its
+colours but names the precise use on hover — the grouping must never cost you
+the underlying fact. The mapping is `MODEL_GROUPS` in `web/app.js`.
+
+Note the **HDB** model chip is a different thing from the **HDB** chip in the
+Type row above it: the first means "an ordinary flat model", the second means
+"the source is HDB rather than URA". DBSS, maisonettes and adjoined flats are
+HDB too, and stay on their own chips.
 
 A **histogram sits above the lease slider**, on the same scale, so each bar
 stands over the position that selects it. Bars below the current minimum stay
