@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31T14:37:05Z",
+  "generated_at": "2026-08-02T21:05:14Z",
   "properties": [
     {
       "id": "hdb-10-joo-seng-rd-5-room-improved",
@@ -35737,6 +35737,13 @@
           "area_sqft": 1334.7,
           "psf": 530.5,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 768000.0,
+          "area_sqft": 1345.5,
+          "psf": 570.8,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -35745,8 +35752,8 @@
       "flat_model": "Improved",
       "top_year": 1993,
       "model": "Improved",
-      "latest_psf": 530.5,
-      "txn_count": 7
+      "latest_psf": 570.8,
+      "txn_count": 8
     },
     {
       "id": "hdb-304-tampines-st-32-5-room-model-a",
@@ -59173,6 +59180,13 @@
           "area_sqft": 1216.3,
           "psf": 785.1,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 880000.0,
+          "area_sqft": 1216.3,
+          "psf": 723.5,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -59181,8 +59195,8 @@
       "flat_model": "Improved",
       "top_year": 2021,
       "model": "Improved",
-      "latest_psf": 785.1,
-      "txn_count": 9
+      "latest_psf": 754.3,
+      "txn_count": 10
     },
     {
       "id": "hdb-619b-tampines-st-61-5-room-improved",
@@ -59817,6 +59831,13 @@
           "area_sqft": 1280.9,
           "psf": 644.1,
           "storey": "16 TO 18"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 760000.0,
+          "area_sqft": 1291.7,
+          "psf": 588.4,
+          "storey": "01 TO 03"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -59825,8 +59846,8 @@
       "flat_model": "Improved",
       "top_year": 1997,
       "model": "Improved",
-      "latest_psf": 644.1,
-      "txn_count": 10
+      "latest_psf": 588.4,
+      "txn_count": 11
     },
     {
       "id": "hdb-706-tampines-st-71-5-room-improved",
@@ -63065,6 +63086,13 @@
           "area_sqft": 1313.2,
           "psf": 594.5,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-07-01",
+          "price": 795000.0,
+          "area_sqft": 1313.2,
+          "psf": 605.4,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -63073,8 +63101,8 @@
       "flat_model": "Improved",
       "top_year": 1997,
       "model": "Improved",
-      "latest_psf": 594.5,
-      "txn_count": 7
+      "latest_psf": 605.4,
+      "txn_count": 8
     },
     {
       "id": "hdb-742-tampines-st-72-5-room-improved",
