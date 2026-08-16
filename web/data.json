@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T15:33:14Z",
+  "generated_at": "2026-08-16T20:33:35Z",
   "properties": [
     {
       "id": "hdb-10-joo-seng-rd-5-room-improved",
@@ -2925,7 +2925,13 @@
       "lease_years": 99,
       "flat_model": "Improved",
       "top_year": 2021,
-      "rents": [],
+      "rents": [
+        {
+          "date": "2023-07-01",
+          "psf": 2.302,
+          "n": 1
+        }
+      ],
       "model": "Improved",
       "latest_psf": 1192.1,
       "txn_count": 1
@@ -100269,7 +100275,7 @@
       "rents": [
         {
           "date": "2023-05-01",
-          "psf": 2.942,
+          "psf": 3.124,
           "n": 1
         }
       ],
@@ -100311,7 +100317,7 @@
       "rents": [
         {
           "date": "2023-05-01",
-          "psf": 2.942,
+          "psf": 3.124,
           "n": 1
         }
       ],
