@@ -56,6 +56,19 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_txn_property ON transactions (source, property_name);
 CREATE INDEX IF NOT EXISTS idx_txn_date     ON transactions (txn_date);
 
+-- Rent per sqft per month, per property per month. Its own table rather than
+-- columns on transactions: a rental and a sale are different events, and a
+-- property can have one without the other.
+CREATE TABLE IF NOT EXISTS rentals (
+    source        TEXT NOT NULL,
+    property_name TEXT NOT NULL,
+    property_type TEXT NOT NULL,
+    period        TEXT NOT NULL,
+    rent_psf      REAL NOT NULL,
+    contracts     INTEGER,
+    PRIMARY KEY (source, property_name, property_type, period)
+);
+
 CREATE TABLE IF NOT EXISTS geo (
     address     TEXT PRIMARY KEY,
     lat         REAL NOT NULL,
@@ -186,6 +199,38 @@ class Store:
             found.update(r["dedup_key"] for r in rows)
         return found
 
+    def upsert_rentals(self, rows: Sequence[tuple[str, str, str, str, float, int]]) -> int:
+        """(source, name, type, period, rent_psf, contracts). Idempotent on the
+        natural key, like transactions."""
+        if not rows:
+            return 0
+        self.conn.executemany(
+            "INSERT INTO rentals (source, property_name, property_type, period, "
+            "rent_psf, contracts) VALUES (?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(source, property_name, property_type, period) DO UPDATE SET "
+            "rent_psf = excluded.rent_psf, contracts = excluded.contracts",
+            rows,
+        )
+        self.conn.commit()
+        return len(rows)
+
+    def median_areas_sqft(self) -> dict:
+        """(property_name, property_type) -> median floor area, for turning
+        HDB's per-unit rent into a per-sqft figure."""
+        out: dict = {}
+        rows = self.conn.execute(
+            "SELECT property_name, property_type, area_sqft FROM transactions "
+            "WHERE source = 'HDB' AND area_sqft IS NOT NULL"
+        ).fetchall()
+        buckets: dict = {}
+        for r in rows:
+            buckets.setdefault((r["property_name"], r["property_type"]), []).append(
+                r["area_sqft"])
+        for key, values in buckets.items():
+            values.sort()
+            out[key] = values[len(values) // 2]
+        return out
+
     def backfill_coords(self, property_name: str, source: str, lat: float, lng: float) -> int:
         """Apply a late geocode to rows already stored without coordinates."""
         cur = self.conn.execute(
@@ -288,6 +333,20 @@ class Store:
             if top is None and source == "HDB":
                 top = facts.get("lease_start")
             prop["top_year"] = top
+
+            # Rent per sqft per month, so the frontend can period-match it to
+            # the sale psf and derive a gross yield for whatever range is shown.
+            rents = self.conn.execute(
+                "SELECT period, rent_psf, contracts FROM rentals "
+                "WHERE source = ? AND property_name = ? AND property_type = ? "
+                "ORDER BY period",
+                (source, name, ptype),
+            ).fetchall()
+            prop["rents"] = [
+                {"date": r["period"], "psf": round(r["rent_psf"], 3),
+                 "n": r["contracts"]}
+                for r in rents
+            ]
 
             # One label spanning both sources, for the frontend's model filter:
             # HDB's flat model (DBSS / Improved / Maisonette / Apartment), or

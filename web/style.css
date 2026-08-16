@@ -826,6 +826,155 @@ body.filters-closed .filters--more { display: none; }
   color: var(--text-muted);
 }
 
+/* ── Multi-school catchment ──────────────────────────────────────────── */
+
+.sp-picks {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sp-picks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 6px;
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+}
+
+/* The number here is the same number that labels each distance in the table —
+   it is the only thing tying a column of metres back to a school name. */
+.sp-pick-n {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--school);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.sp-pick-name { flex: 1; min-width: 0; }
+
+.sp-pick-x {
+  flex: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.sp-pick-x:hover { color: var(--text-primary); }
+
+.sp-scope { margin-bottom: 16px; }
+
+/* One school per line. Side by side, a reader has to work out where one
+   distance ends and the next school's index begins. */
+.sp-dists {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px;
+}
+
+.sp-d {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sp-d-n {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--school-halo);
+  color: var(--school-strong);
+  font-size: 9px;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Inside 1 km is the registration priority band, so it is the one distinction
+   the table has to make legible. Weight carries it; colour only agrees. */
+.sp-d--1km .sp-d-v { font-weight: 680; color: var(--text-primary); }
+.sp-d--1km .sp-d-n { background: var(--school); color: #fff; }
+
+.sp-nearby {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sp-nearby button {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  background: var(--surface-1);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sp-nearby button:hover {
+  border-color: var(--school);
+  background: var(--school-halo);
+}
+
+.sp-nb-name { min-width: 0; }
+
+.sp-nb-d {
+  flex: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* Four columns in a ~340px panel. Left to itself the project name claims 214px
+   and pushes psf and TOP off the edge, so the name is the column that gives —
+   it wraps, the numbers never do. */
+.sp-table { table-layout: fixed; width: 100%; }
+/* `.p-table td` sets white-space: nowrap for the transaction table, where
+   every cell is a short number. Project names are not, and without this they
+   run straight over the distance column instead of wrapping. */
+.sp-table th:first-child, .sp-table td:first-child {
+  width: 44%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.sp-table td:first-child .sp-model { white-space: normal; }
+.sp-table th:nth-child(2), .sp-table td:nth-child(2) { width: 23%; }
+.sp-table th:nth-child(3), .sp-table td:nth-child(3) { width: 20%; }
+.sp-table th:last-child,   .sp-table td:last-child   { width: 13%; }
+.sp-table th, .sp-table td { padding-left: 6px; padding-right: 6px; }
+.sp-table td.num, .sp-table th.num { white-space: nowrap; }
+
 /* ── Compare ─────────────────────────────────────────────────────────── */
 
 .compare-bar {
@@ -1095,6 +1244,11 @@ body.filters-closed .filters--more { display: none; }
 
 .cmp-rows dt:last-of-type, .cmp-rows dd:last-of-type { border-bottom: 0; }
 .cmp-sub { display: block; font-size: 10px; font-weight: 400; color: var(--text-muted); }
+
+/* Compare columns are already colour-coded by slot, so the phase must not
+   lean on colour to be read — the word carries it and the tint only echoes. */
+.cmp-phase.is-momentum { color: var(--delta-up); }
+.cmp-phase.is-cooling  { color: var(--delta-down); }
 .cmp-empty { font-size: 12.5px; color: var(--text-muted); padding: 16px 0; text-align: center; }
 
 /* Bottom sheet on narrow screens; a side panel once there's width for it.
@@ -1315,6 +1469,83 @@ body.filters-closed .filters--more { display: none; }
   color: var(--text-muted);
   padding: 13px;
 }
+
+/* ── Price phase & rental yield ──────────────────────────────────────── */
+
+.p-phase,
+.p-yield {
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-sm);
+  padding: 10px 13px;
+  margin-bottom: 20px;
+}
+
+.p-phase-head,
+.p-yield-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.p-phase-tag,
+.p-yield-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.p-phase-label {
+  font-size: 17px;
+  font-weight: 640;
+  letter-spacing: -0.01em;
+}
+
+/* The word is the label; colour only reinforces it. A reader who can't
+   separate these hues still reads "Momentum" / "Peaked" / "Cooling". */
+.p-phase.is-momentum { border-left: 3px solid var(--delta-up); }
+.p-phase.is-cooling  { border-left: 3px solid var(--delta-down); }
+.p-phase.is-peaked   { border-left: 3px solid var(--baseline); }
+.p-phase.is-momentum .p-phase-label { color: var(--delta-up); }
+.p-phase.is-cooling  .p-phase-label { color: var(--delta-down); }
+
+.p-yield-value {
+  font-size: 22px;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.p-phase-note,
+.p-yield-note {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* The caveats are the point, not decoration — they stay legible rather than
+   shrinking away to fine print. */
+.p-phase-caveat,
+.p-yield-caveat {
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.p-phase--empty,
+.p-yield--empty {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.p-phase--empty .p-phase-tag,
+.p-yield--empty .p-yield-tag { display: block; margin-bottom: 3px; }
 
 /* ── Property facts ──────────────────────────────────────────────────── */
 

@@ -25,6 +25,7 @@ from dotenv import load_dotenv
 from . import hdb as hdb_mod
 from . import masterplan as masterplan_mod
 from . import planning
+from . import rental as rental_mod
 from . import schools as schools_mod
 from . import ura as ura_mod
 from .geocode import Geocoder, OneMapClient, svy21_to_wgs84
@@ -458,6 +459,92 @@ def collect_schools(
     return located
 
 
+def collect_rentals(
+    watchlist: dict[str, list[dict[str, Any]]],
+    store: Store,
+    from_fixtures: bool,
+    errors: list[str] | None = None,
+) -> int:
+    """Rent per sqft per month for anything on the watchlist we can match.
+
+    Reference data like the schools: it feeds the yield figure but never the
+    transactions table. Each source is guarded on its own so a URA throttle
+    doesn't cost us the HDB rents as well.
+    """
+    rows: list[tuple[str, str, str, str, float, int]] = []
+
+    def _medians(series: dict, source: str, targets_of) -> None:
+        """`targets_of` returns every (name, property_type) the series applies
+        to — a URA project name can carry more than one type, and the export
+        groups on type, so a single target would leave the others blank."""
+        for key, points in series.items():
+            by_month: dict[str, list[float]] = {}
+            for month, psf in points:
+                by_month.setdefault(month, []).append(psf)
+            for month, values in sorted(by_month.items()):
+                values.sort()
+                mid = len(values) // 2
+                median = (values[mid] if len(values) % 2
+                          else (values[mid - 1] + values[mid]) / 2)
+                for name, ptype in targets_of(key):
+                    rows.append((source, name, ptype, month, median, len(values)))
+
+    # --- HDB: per-unit rent, so it needs our own floor areas to become psf ---
+    towns = sorted({_upper(_entry_value(e, "town")) for e in watchlist["hdb"]} - {""})
+    if towns:
+        areas = store.median_areas_sqft()
+        for town in towns:
+            try:
+                if from_fixtures:
+                    path = FIXTURES / f"hdb_rental_{town.lower().replace(' ', '_')}.json"
+                    if not path.exists():
+                        continue
+                    records = (json.loads(path.read_text()).get("result") or {}).get(
+                        "records") or []
+                else:
+                    records = rental_mod.fetch_hdb(town)
+                _medians(rental_mod.hdb_series(records, areas), SOURCE_HDB,
+                         lambda k: [(k[0], k[1])])
+            except Exception as exc:  # noqa: BLE001
+                log.error("HDB rentals for %s failed, yield will be blank there: %s",
+                          town, exc)
+                if errors is not None:
+                    errors.append(f"HDB rentals {town} failed: {exc}")
+
+    # --- URA: already psf/month, quarterly, only where enough contracts ------
+    wanted = {r["property_name"] for r in store.conn.execute(
+        "SELECT DISTINCT property_name FROM transactions WHERE source = ?",
+        (SOURCE_URA,))}
+    if wanted:
+        try:
+            if from_fixtures:
+                path = FIXTURES / "ura_rental_median.json"
+                projects = json.loads(path.read_text()).get("Result") or [] \
+                    if path.exists() else []
+            else:
+                projects = rental_mod.fetch_ura()
+            series = {k: v for k, v in rental_mod.ura_series(projects).items()
+                      if k in wanted}
+            types: dict[str, list[tuple[str, str]]] = {}
+            for r in store.conn.execute(
+                "SELECT DISTINCT property_name, property_type FROM transactions "
+                "WHERE source = ?", (SOURCE_URA,)
+            ):
+                types.setdefault(r["property_name"], []).append(
+                    (r["property_name"], r["property_type"] or ""))
+            log.info("URA rental medians matched %d of %d watchlist projects",
+                     len(series), len(wanted))
+            _medians(series, SOURCE_URA, lambda k: types.get(k, []))
+        except Exception as exc:  # noqa: BLE001
+            log.error("URA rentals failed, private yield will be blank: %s", exc)
+            if errors is not None:
+                errors.append(f"URA rentals failed: {exc}")
+
+    written = store.upsert_rentals(rows)
+    log.info("rentals: %d property-months stored", written)
+    return written
+
+
 def watchlist_areas(
     watchlist: dict[str, list[dict[str, Any]]],
     known: set[str] | None = None,
@@ -599,6 +686,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--skip-ura", action="store_true", help="skip private residential")
     parser.add_argument("--skip-hdb", action="store_true", help="skip HDB resale")
+    parser.add_argument("--skip-rentals", action="store_true",
+                        help="skip rental data (yield goes blank, prices unaffected)")
     parser.add_argument("--skip-schools", action="store_true",
                         help="skip the MOE primary-school layer")
     parser.add_argument("--schools-out", default=str(SCHOOLS_JSON))
@@ -632,6 +721,11 @@ def main(argv: list[str] | None = None) -> int:
             txns.extend(collect_private(watchlist["private"], store, args.from_fixtures, errors))
         if not args.skip_hdb:
             txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures, errors))
+
+        # After both transaction sources: HDB rents need our floor areas, and
+        # URA rents are matched against the project names we actually hold.
+        if not args.skip_rentals:
+            collect_rentals(watchlist, store, args.from_fixtures, errors)
 
         if not args.skip_schools:
             store.export_schools(

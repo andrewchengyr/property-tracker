@@ -101,6 +101,9 @@ conversationally.
 | — | Compare | `d205cb0`→`24301a1` | 3-way side-by-side, growth mode, CAGR tooltips |
 | — | Lease histogram | `7d07795` | Distribution above the lease slider |
 | — | Master Plan overlay | — | MP2025 land use, clipped to the watched areas; §5.11, §6, §11 |
+| — | Rental yield | — | New `ingest/rental.py` + `rentals` table; §5.12, §12.1 |
+| — | Price phase | — | Momentum / Peaked / Cooling from a log-linear fit; §12.2 |
+| — | Compare Schools | — | Multi-school catchment intersection; §12.3 |
 
 ---
 
@@ -287,6 +290,35 @@ five-yearly cycle. A weekly rebuild would spend the 181 MB download *and*
 commit a 3.3 MB diff to reproduce a file that hadn't changed. The run does
 build it automatically when the export is missing, so a fresh clone doesn't
 need to know the flag.
+
+### 5.12 The HDB rental dataset spells flat types differently
+
+`Renting Out of Flats` (`d_c9f57187485a850908655db0e8cfe651`) writes
+**`5-ROOM`** with a hyphen; the resale dataset writes **`5 ROOM`** with a
+space. Joining the two on the raw string matches **zero** rows and reports no
+error — the same failure mode as the street abbreviations in §5.4, found the
+same way (checking a known block's output, not reading the code).
+`rental.canonical_flat_type` normalises it, and a test asserts the fixture
+still *contains* the hyphen form so the guard can't quietly become a no-op.
+
+**Coverage is partial by design, in both sources.**
+
+- URA `PMI_Resi_Rental_Median` publishes a project's median only where enough
+  contracts closed that quarter: **39 of our 67 private projects** are covered.
+  It runs 2023Q3–2026Q2 — **three years, quarterly**, not the five the sale
+  caveats span.
+- HDB covers **683 of 839** blocks, monthly, from 2021-01.
+
+So ~20% of the map has no yield and never will. The panel says which of the
+two reasons applies rather than showing a blank or a zero.
+
+**URA's `median` is already psf per month.** No area conversion is applied to
+it, and a test pins the plausible range so nobody later "fixes" it by dividing
+by a floor area. HDB publishes rent *per unit* with no area at all, so its psf
+is derived from the block's own median resale floor area — approximate within
+a flat type, and the only way HDB yields exist at all.
+
+---
 
 ## 6. Colour decisions (all measured)
 
@@ -552,3 +584,86 @@ future session can change one on purpose rather than "fix" it by accident.
 for the "land uses not in any bucket" warning. A revision that adds a land-use
 category still draws it (as `Other`) and names it in that warning; add it to
 `BUCKETS` in `masterplan.py` and to the coverage test's list of 33.
+
+---
+
+## 12. Yield, phase and school comparison
+
+### 12.1 Gross rental yield
+
+    gross yield = rent psf x 12 / sale psf
+
+Per-sqft on both sides, so floor area cancels and an HDB block quoted per unit
+means the same thing as a condo quoted per sqft. Stored in its own `rentals`
+table — a lease and a sale are different events, and a property can have one
+without the other — keyed `(source, name, type, period)` and upserted, so a
+re-run is idempotent like transactions.
+
+Held deliberately:
+
+- **Gross, never net.** No maintenance, tax, agent fee or vacancy. Labelled as
+  such in the panel, because a 6.9% HDB figure is meaningfully different from
+  what an owner actually banks.
+- **The rent window is period-matched to the prices where it can be.** Where
+  the selected price period predates published rents entirely, it falls back
+  to the latest quarters *and says so* rather than silently pairing 2019
+  prices with 2024 rents.
+- **Only HDB quotes a contract count.** URA publishes a quarterly median and
+  not the number of leases behind it, so the private card says "12 quarterly
+  medians". Calling those 12 contracts would overstate what is known — this
+  was in the first cut and was wrong.
+
+### 12.2 Price phase — Momentum / Peaked / Cooling
+
+A least-squares line fitted to **log(psf)** against time over the monthly
+medians. Logs because a straight line in log space *is* a constant percentage
+growth rate, which is what "rising" means for a price; the slope converts
+directly to an annual rate.
+
+The classification turns on **statistical significance, not an invented
+threshold**. If the slope's t-statistic can't clear 2, the trend is not
+distinguishable from flat and "Peaked" is reported — so a thin, noisy history
+lands on Peaked instead of being talked into a direction. Under 6 months of
+sales or 18 months of span there is no verdict at all.
+
+Two things this must keep doing:
+
+- **Show the fitted rate in every case, including Peaked.** A reader who
+  disagrees can see the number the verdict came from.
+- **Say it is not a forecast.** It describes prices already transacted. The
+  wording was chosen so it cannot be read as prediction, and the caveat line
+  is not decoration.
+
+Sanity check on the current data — the distribution shifts from
+momentum-dominant over 5Y (262 vs 36) to peaked-dominant over 2Y (40 vs 18),
+which is the market actually cooling and is evidence the significance test is
+doing work. Only one property classifies as Cooling; that is honest, not a bug
+— Singapore residential prices have risen near-continuously since 2021.
+
+### 12.3 Compare Schools
+
+Clicking a school **toggles** it in or out of a comparison set, so one school
+is just the one-element case rather than a separate mode.
+
+- **Scope defaults to "Near all"** — the intersection. Finding properties in
+  the overlap of several catchments is the stated purpose; "Near any" is
+  offered as the union.
+- **Ranked by the *farthest* school, not the nearest.** A property 200 m from
+  one school and 1.9 km from another is a worse joint catchment than one
+  1.1 km from both, and ranking on the nearest would put it first.
+- **"Add another school" ranks candidates the same way** — by distance to the
+  farthest existing pick, because a candidate only widens a usable
+  intersection if it is near all of them.
+- The index badge beside each distance is a **boxed element on its own line**.
+  Inline, `1` immediately before `368 m` reads as `1368 m`; that was in the
+  first cut and is the kind of thing only looking at rendered output catches.
+- `.p-table td` sets `white-space: nowrap` for the transaction table. Project
+  names are not short numbers, so the catchment table overrides it — without
+  that, long names run over the distance column instead of wrapping.
+
+**`refreshDetailViews()` now refreshes three views, not two.** The catchment
+table is built from `visibleProperties()` and their median psf, so it goes
+stale on every filter and period change exactly like the panel and the compare
+drawer. This list is the single place that knowledge lives; it has been the
+source of the same bug twice already (§7), so **anything new that reads the
+filters belongs in it.**

@@ -1,0 +1,187 @@
+{
+ "result": {
+  "records": [
+   {
+    "_id": 19388,
+    "rent_approval_date": "2021-06",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2200"
+   },
+   {
+    "_id": 25888,
+    "rent_approval_date": "2021-08",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2800"
+   },
+   {
+    "_id": 35222,
+    "rent_approval_date": "2021-11",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 44596,
+    "rent_approval_date": "2022-02",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2500"
+   },
+   {
+    "_id": 47805,
+    "rent_approval_date": "2022-03",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2250"
+   },
+   {
+    "_id": 53558,
+    "rent_approval_date": "2022-05",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3600"
+   },
+   {
+    "_id": 96836,
+    "rent_approval_date": "2023-08",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "4100"
+   },
+   {
+    "_id": 102761,
+    "rent_approval_date": "2023-10",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 105772,
+    "rent_approval_date": "2023-11",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3900"
+   },
+   {
+    "_id": 113371,
+    "rent_approval_date": "2024-02",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 116865,
+    "rent_approval_date": "2024-03",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3600"
+   },
+   {
+    "_id": 120160,
+    "rent_approval_date": "2024-04",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3600"
+   },
+   {
+    "_id": 134990,
+    "rent_approval_date": "2024-09",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3600"
+   },
+   {
+    "_id": 156086,
+    "rent_approval_date": "2025-04",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3850"
+   },
+   {
+    "_id": 177810,
+    "rent_approval_date": "2025-10",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3900"
+   },
+   {
+    "_id": 178301,
+    "rent_approval_date": "2025-10",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 190206,
+    "rent_approval_date": "2026-02",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3300"
+   },
+   {
+    "_id": 191911,
+    "rent_approval_date": "2026-03",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3800"
+   },
+   {
+    "_id": 194260,
+    "rent_approval_date": "2026-03",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3800"
+   },
+   {
+    "_id": 195988,
+    "rent_approval_date": "2026-04",
+    "town": "TOA PAYOH",
+    "block": "10",
+    "street_name": "JOO SENG RD",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3800"
+   }
+  ],
+  "total": 20
+ }
+}

@@ -50,7 +50,10 @@
     // numeric filters use, rather than pre-selecting everything.
     models: new Set(), allModels: [],
     selectedId: null, markers: new Map(), chart: null,
-    schools: [], showSchools: false, selectedSchool: null,
+    schools: [], showSchools: false,
+    // Multi-select: the catchment question is about overlap, so one school
+    // is just the one-element case rather than a separate mode.
+    schoolPicks: [], schoolScope: "all",
     // The land-use overlay is ~700 KB, so it is fetched on first use and then
     // kept — `land` null means "not fetched yet", not "empty".
     land: null, showLand: false, landPending: false,
@@ -193,6 +196,123 @@
     if (v == null) return "—";
     const s = (v * 100).toFixed(1);
     return (v > 0 ? "+" : "") + s + "%";
+  }
+
+  /** Gross rental yield: a year of rent as a share of capital value.
+   *
+   *      annual rent psf / sale psf
+   *
+   *  Both sides are per sqft, so floor area cancels and an HDB block quoted
+   *  per unit means the same thing as a condo quoted per sqft.
+   *
+   *  **Gross, not net** — no maintenance, tax, agent fee or vacancy. And the
+   *  rent window rarely matches the price window: URA publishes quarterly
+   *  medians only from 2023, HDB monthly from 2021, so a 10-year price filter
+   *  has no rent to pair with its early years. Rather than silently blending
+   *  2019 prices with 2024 rents, the rent is taken from the overlap and the
+   *  span actually used is reported back for the caption to state. */
+  function rentalYield(prop, txns) {
+    const rents = prop.rents || [];
+    if (!rents.length || !txns.length) return null;
+
+    const psf = medianPsf(txns);
+    if (!psf) return null;
+
+    const from = txns[0].date;
+    const to = txns[txns.length - 1].date;
+    let window = rents.filter((r) => r.date >= from && r.date <= to);
+
+    // No overlap at all — the price period predates published rents. Fall back
+    // to the most recent four quarters and say so, because a yield from the
+    // freshest rent is more use than no yield.
+    const matched = window.length > 0;
+    if (!matched) window = rents.slice(-4);
+    if (!window.length) return null;
+
+    const rent = median(window.map((r) => r.psf));
+    if (!rent) return null;
+
+    return {
+      value: (rent * 12) / psf,
+      rentPsf: rent,
+      psf,
+      matched,
+      months: window.length,
+      contracts: window.reduce((a, r) => a + (r.n || 0), 0),
+      firstDate: window[0].date,
+      lastDate: window[window.length - 1].date,
+    };
+  }
+
+  /** Where the price trend sits: Momentum (rising), Peaked (stabilised),
+   *  Cooling (falling).
+   *
+   *  This describes prices that have already happened. It is not a forecast,
+   *  and it is deliberately built so it cannot pretend to be one.
+   *
+   *  A least-squares line is fitted to log(psf) against time, over the monthly
+   *  medians — logs because a straight line in log space *is* a constant
+   *  percentage growth rate, which is what "rising" means for a price. The
+   *  slope converts directly to an annual rate.
+   *
+   *  The classification then turns on statistical significance rather than an
+   *  invented threshold. If the slope's t-statistic can't clear 2 — roughly a
+   *  95% interval that excludes zero — the trend is not distinguishable from
+   *  flat, and flat is what gets reported. Thin or noisy histories therefore
+   *  land on "Peaked" rather than being talked into a direction, and anything
+   *  under 6 months of sales or 18 months of span gets no verdict at all. */
+  const PHASE_MIN_MONTHS = 6;
+  const PHASE_MIN_SPAN_YEARS = 1.5;
+  const PHASE_T = 2;
+
+  function phase(txns) {
+    const series = monthlyMedians(txns).filter(([, v]) => v > 0);
+    if (series.length < PHASE_MIN_MONTHS) return null;
+
+    const t0 = Date.parse(series[0][0]);
+    const xs = series.map(([d]) => (Date.parse(d) - t0) / MS_PER_YEAR);
+    const ys = series.map(([, v]) => Math.log(v));
+    const span = xs[xs.length - 1];
+    if (span < PHASE_MIN_SPAN_YEARS) return null;
+
+    const n = xs.length;
+    const mx = xs.reduce((a, b) => a + b, 0) / n;
+    const my = ys.reduce((a, b) => a + b, 0) / n;
+    let sxx = 0, sxy = 0;
+    for (let i = 0; i < n; i++) {
+      sxx += (xs[i] - mx) ** 2;
+      sxy += (xs[i] - mx) * (ys[i] - my);
+    }
+    if (sxx <= 0) return null;
+
+    const slope = sxy / sxx;
+    const intercept = my - slope * mx;
+
+    // Residual spread gives the standard error of the slope, and with it the
+    // honest answer to "could this line just as easily be flat?"
+    let sse = 0, sst = 0;
+    for (let i = 0; i < n; i++) {
+      sse += (ys[i] - (intercept + slope * xs[i])) ** 2;
+      sst += (ys[i] - my) ** 2;
+    }
+    const se = Math.sqrt(sse / (n - 2) / sxx);
+    const t = se > 0 ? slope / se : 0;
+
+    const significant = Math.abs(t) >= PHASE_T;
+    const key = !significant ? "peaked" : slope > 0 ? "momentum" : "cooling";
+
+    return {
+      key,
+      label: { momentum: "Momentum", peaked: "Peaked", cooling: "Cooling" }[key],
+      annual: Math.exp(slope) - 1,     // the fitted rate, shown either way
+      t,
+      significant,
+      r2: sst > 0 ? Math.max(0, 1 - sse / sst) : 0,
+      months: n,
+      years: span,
+      firstDate: series[0][0],
+      lastDate: series[series.length - 1][0],
+    };
   }
 
   /** Lease position as of today, so the countdown stays right between runs. */
@@ -855,10 +975,23 @@
       </article>`;
     }
 
+    const ph = phase(txns);
+    const y = rentalYield(prop, txns);
+
     const rows = [
       ["Median psf", psfText(medianPsf(txns))],
       ["Growth", g ? `${pct(g.annual != null ? g.annual : g.total)}` +
         `<span class="cmp-sub">${g.annual != null ? "per year" : "over period"}</span>` : "—"],
+      // Same two metrics as the panel, on the same period — the whole point of
+      // Compare is that nothing is computed differently here.
+      ["Phase", ph
+        ? `<span class="cmp-phase is-${ph.key}">${ph.label}</span>` +
+          `<span class="cmp-sub">${pct(ph.annual)} a year fitted</span>`
+        : `—<span class="cmp-sub">too few months</span>`],
+      ["Gross yield", y
+        ? `${(y.value * 100).toFixed(2)}%<span class="cmp-sub">` +
+          `${y.rentPsf.toFixed(2)} psf/mo rent</span>`
+        : `—<span class="cmp-sub">no rent published</span>`],
       ["Transactions", num.format(txns.length)],
       ["Median price", prices.length ? compactMoney(median(prices)) : "—"],
       ["Latest", monthLabel(txns[txns.length - 1].date)],
@@ -1321,7 +1454,7 @@
 
     for (const school of state.schools) {
       if (school.lat == null || school.lng == null) continue;
-      const selected = state.selectedSchool && state.selectedSchool.postal === school.postal;
+      const selected = isPicked(school);
       const marker = L.marker([school.lat, school.lng], {
         icon: L.divIcon({
           className: "sk-wrap" + (selected ? " is-selected" : ""),
@@ -1329,7 +1462,7 @@
           iconSize: [18, 18],
           iconAnchor: [9, 9],
         }),
-        title: `${school.name} — click for the 1 km P1 radius`,
+        title: `${school.name} — click to ${selected ? "remove from" : "add to"} the catchment comparison`,
         // Below property markers: the properties are the subject, schools the
         // reference layer.
         zIndexOffset: -500,
@@ -1342,115 +1475,242 @@
     }
   }
 
+  const isPicked = (school) =>
+    state.schoolPicks.some((s) => s.postal === school.postal);
+
+  /** Clicking a school toggles it in or out of the comparison set.
+   *
+   *  Toggling rather than replacing is what makes the intersection question
+   *  askable at all, and it keeps the escape hatch: clicking the only picked
+   *  school again clears everything. */
   function selectSchool(school) {
-    // Clicking the same school again clears it, so there's a way out that
-    // doesn't require finding the close button.
-    if (state.selectedSchool && state.selectedSchool.postal === school.postal) {
+    state.schoolPicks = isPicked(school)
+      ? state.schoolPicks.filter((s) => s.postal !== school.postal)
+      : [...state.schoolPicks, school];
+
+    if (!state.schoolPicks.length) {
       clearSchoolSelection();
       renderSchools();
       return;
     }
-    state.selectedSchool = school;
-    drawRings(school);
+    state.selectedId = null;          // the panel shows one thing at a time
+    drawRings(state.schoolPicks);
     renderSchools();
-    renderSchoolPanel(school);
+    renderSchoolPanel();
+    renderMarkers();
   }
 
   function clearSchoolSelection() {
-    state.selectedSchool = null;
+    state.schoolPicks = [];
     ringLayer.clearLayers();
     if (!state.selectedId) closePanel();
   }
 
-  function drawRings(school) {
+  function drawRings(schools) {
     ringLayer.clearLayers();
-    const centre = [school.lat, school.lng];
-    // Outer first so the 1 km ring paints over it.
-    for (const radius of [...P1_BANDS].reverse()) {
-      L.circle(centre, {
-        radius,
-        className: radius === 1000 ? "ring ring--1km" : "ring ring--2km",
-        interactive: false,
-      }).addTo(ringLayer);
+    const points = [];
+    for (const school of schools) {
+      const centre = [school.lat, school.lng];
+      points.push(centre);
+      // Outer first so the 1 km ring paints over it.
+      for (const radius of [...P1_BANDS].reverse()) {
+        L.circle(centre, {
+          radius,
+          className: radius === 1000 ? "ring ring--1km" : "ring ring--2km",
+          interactive: false,
+        }).addTo(ringLayer);
+      }
     }
+    if (!points.length) return;
+
     // latLng.toBounds() takes the box's full width in metres and needs no map.
     // Circle.getBounds() would be the obvious call, but it reads this._map and
     // throws on a circle that hasn't been added yet.
     const outer = P1_BANDS[P1_BANDS.length - 1];
-    map.fitBounds(L.latLng(centre).toBounds(outer * 2.4), { maxZoom: 16 });
+    let bounds = L.latLng(points[0]).toBounds(outer * 2.4);
+    for (const pt of points.slice(1)) {
+      bounds = bounds.extend(L.latLng(pt).toBounds(outer * 2.4));
+    }
+    map.fitBounds(bounds, { maxZoom: 16 });
   }
 
-  /** Which watched properties fall in each P1 band. Uses the visible set, so
-   *  the other filters still apply — "5-room under $1.2M within 1 km of this
-   *  school" is the question worth answering. */
-  function propertiesNear(school) {
+  const OUTER_BAND = P1_BANDS[P1_BANDS.length - 1];
+
+  /** Watched properties measured against every picked school.
+   *
+   *  `scope` decides what qualifies: "all" keeps only properties inside the
+   *  outer band of *every* school — the intersection, which is the point of
+   *  picking more than one — while "any" keeps a property near at least one.
+   *
+   *  Ranked by the **farthest** school, not the nearest. A property 200 m from
+   *  one school and 1.9 km from the other is a worse joint catchment than one
+   *  sitting 1.1 km from both, and ranking on the nearest would put it first.
+   *
+   *  Runs over the visible set, so every other filter still applies. */
+  function propertiesNearSchools(schools, scope = state.schoolScope) {
     const out = [];
     for (const prop of visibleProperties()) {
       if (prop.lat == null || prop.lng == null) continue;
-      if (!matchingTxns(prop).length) continue;
-      const d = distanceM(school.lat, school.lng, prop.lat, prop.lng);
-      if (d <= P1_BANDS[P1_BANDS.length - 1]) out.push({ prop, d });
+      const txns = matchingTxns(prop);
+      if (!txns.length) continue;
+
+      const dists = schools.map((s) => distanceM(s.lat, s.lng, prop.lat, prop.lng));
+      const worst = Math.max(...dists);
+      const best = Math.min(...dists);
+      const qualifies = scope === "all" ? worst <= OUTER_BAND : best <= OUTER_BAND;
+      if (!qualifies) continue;
+
+      out.push({
+        prop, dists, worst, best, txns,
+        within1: dists.filter((d) => d <= P1_BANDS[0]).length,
+      });
     }
-    return out.sort((a, b) => a.d - b.d);
+    return out.sort((a, b) => (scope === "all" ? a.worst - b.worst : a.best - b.best));
   }
 
-  function renderSchoolPanel(school) {
-    const near = propertiesNear(school);
-    const within1 = near.filter((n) => n.d <= P1_BANDS[0]);
-    const band2 = near.filter((n) => n.d > P1_BANDS[0]);
+  /** Schools worth adding next: ranked by how far they are from the *farthest*
+   *  already-picked school, because a candidate only widens a usable
+   *  intersection if it is close to all of them, not just to one. */
+  function schoolsNearPicks(schools, limit = 8) {
+    const out = [];
+    for (const cand of state.schools) {
+      if (isPicked(cand) || cand.lat == null || cand.lng == null) continue;
+      const dists = schools.map((s) => distanceM(s.lat, s.lng, cand.lat, cand.lng));
+      const worst = Math.max(...dists);
+      // Beyond two outer bands apart there is no overlap left to find.
+      if (worst > OUTER_BAND * 2) continue;
+      out.push({ school: cand, worst, dists });
+    }
+    return out.sort((a, b) => a.worst - b.worst).slice(0, limit);
+  }
 
-    const rows = (list) => list.map(({ prop, d }) => {
-      const txns = matchingTxns(prop);
-      return `<tr>
-        <td>${escapeHtml(prop.name)}<span class="sp-model">${escapeHtml(prop.model || "")}</span></td>
-        <td class="num">${Math.round(d)} m</td>
-        <td class="num">${psfText(medianPsf(txns))}</td>
-      </tr>`;
+  function renderSchoolPanel() {
+    const picks = state.schoolPicks;
+    if (!picks.length) return;
+
+    const multi = picks.length > 1;
+    const scope = state.schoolScope;
+    const near = propertiesNearSchools(picks);
+    const nearby = schoolsNearPicks(picks);
+    const shown = visibleProperties().length;
+
+    // The index badge must not run into the number: "1" next to "368 m" reads
+    // as 1368 m. It gets its own boxed element and a gap, and each school sits
+    // on its own line, so the digit can only be read as a label.
+    const distCell = (n) => picks.map((s, i) => {
+      const d = n.dists[i];
+      const cls = d <= P1_BANDS[0] ? "sp-d sp-d--1km" : "sp-d";
+      return `<span class="${cls}" title="${escapeHtml(s.name)}">${
+        multi ? `<i class="sp-d-n" aria-hidden="true">${i + 1}</i>` : ""
+      }<span class="sp-d-v">${fmtDist(d)}</span></span>`;
     }).join("");
 
+    const rows = near.map((n) => `<tr>
+        <td>${escapeHtml(n.prop.name)}
+          <span class="sp-model">${escapeHtml(
+            [n.prop.address && n.prop.address !== n.prop.name ? n.prop.address : "",
+             n.prop.model].filter(Boolean).join(" · "))}</span></td>
+        <td class="sp-dists">${distCell(n)}</td>
+        <td class="num">${psfText(medianPsf(n.txns))}</td>
+        <td class="num">${n.prop.top_year || "—"}</td>
+      </tr>`).join("");
+
     el.panelBody.innerHTML = `
-      <p class="p-eyebrow"><i class="sk sk--legend" aria-hidden="true"></i>Primary school</p>
-      <h2 class="p-name">${escapeHtml(school.name)}</h2>
-      <p class="p-sub">${escapeHtml(school.address)} · S(${escapeHtml(school.postal)})</p>
+      <p class="p-eyebrow"><i class="sk sk--legend" aria-hidden="true"></i>${
+        multi ? `${picks.length} primary schools` : "Primary school"}</p>
+      <h2 class="p-name">${multi ? "School catchment overlap"
+                                 : escapeHtml(picks[0].name)}</h2>
+      <p class="p-sub">${multi
+        ? "Properties measured against every school below"
+        : `${escapeHtml(picks[0].address)} · S(${escapeHtml(picks[0].postal)})`}</p>
+
+      <ol class="sp-picks">${picks.map((s, i) => `<li>
+        <span class="sp-pick-n">${i + 1}</span>
+        <span class="sp-pick-name">${escapeHtml(s.name)}</span>
+        <button type="button" class="sp-pick-x" data-unpick="${escapeHtml(s.postal)}"
+                aria-label="Remove ${escapeHtml(s.name)}">&times;</button>
+      </li>`).join("")}</ol>
 
       <div class="p-hero">
-        <span class="p-hero-value">${within1.length}</span>
-        <span class="p-hero-unit">within 1 km</span>
+        <span class="p-hero-value">${near.length}</span>
+        <span class="p-hero-unit">within 2 km${
+          multi ? (scope === "all" ? " of all" : " of any") : ""}</span>
       </div>
       <p class="p-hero-label">
-        Of the ${visibleProperties().length} watched propert${visibleProperties().length === 1 ? "y" : "ies"}
-        currently shown${band2.length ? ` · ${band2.length} more in the 1–2 km band` : ""}
+        Of the ${num.format(shown)} watched propert${shown === 1 ? "y" : "ies"}
+        currently shown${near.filter((n) => n.within1 === picks.length).length
+          ? ` · ${near.filter((n) => n.within1 === picks.length).length} inside 1 km${
+              multi ? " of every school" : ""}`
+          : ""}
       </p>
 
-      <h3 class="p-h3">Within 1 km</h3>
-      <p class="p-h3-sub">Straight-line distance, as MOE measures it</p>
-      ${within1.length ? `<div class="p-table-wrap"><table class="p-table">
-        <thead><tr><th>Property</th><th class="num">Distance</th><th class="num">PSF</th></tr></thead>
-        <tbody>${rows(within1)}</tbody></table></div>`
-        : `<p class="p-empty">No watched properties within 1 km.</p>`}
+      ${multi ? `<div class="chips sp-scope" role="group" aria-label="Catchment scope">
+        <button type="button" class="chip${scope === "all" ? " is-on" : ""}"
+                data-scope="all" aria-pressed="${scope === "all"}">Near all</button>
+        <button type="button" class="chip${scope === "any" ? " is-on" : ""}"
+                data-scope="any" aria-pressed="${scope === "any"}">Near any</button>
+      </div>` : ""}
 
-      ${band2.length ? `<h3 class="p-h3" style="margin-top:20px">1–2 km</h3>
-        <p class="p-h3-sub">Second priority band</p>
-        <div class="p-table-wrap"><table class="p-table">
-        <thead><tr><th>Property</th><th class="num">Distance</th><th class="num">PSF</th></tr></thead>
-        <tbody>${rows(band2)}</tbody></table></div>` : ""}
+      <h3 class="p-h3">Properties${multi ? " in the overlap" : " within 2 km"}</h3>
+      <p class="p-h3-sub">${multi
+        ? `Sorted by the ${scope === "all" ? "farthest" : "nearest"} of the ${picks.length} schools`
+        : "Sorted by distance"} · bold = inside 1 km</p>
+      ${near.length ? `<div class="p-table-wrap"><table class="p-table sp-table">
+        <thead><tr><th>Project / address</th><th>Distance</th>
+          <th class="num">Median psf</th><th class="num">TOP</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`
+        : `<p class="p-empty">No watched property is within 2 km of ${
+            multi && scope === "all" ? "all of these schools" : "this selection"}.${
+            multi && scope === "all" ? " Try “Near any”, or drop a school." : ""}</p>`}
 
-      ${school.url ? `<p class="sp-link"><a href="${escapeHtml(school.url)}"
-         target="_blank" rel="noopener noreferrer">School website ↗</a></p>` : ""}
-      <p class="sp-note">Distances are computed from the school's registered
-        postal code to each block's geocoded position, so treat them as
-        indicative near the 1 km boundary — check MOE's own tool before
-        relying on it.</p>
+      <h3 class="p-h3" style="margin-top:22px">Add another school</h3>
+      <p class="p-h3-sub">Nearest to ${multi ? "all picks" : "this school"}${
+        multi ? ", by the farthest of them" : ""} — click to add</p>
+      ${nearby.length ? `<ul class="sp-nearby">${nearby.map((n) => `<li>
+          <button type="button" data-pick="${escapeHtml(n.school.postal)}">
+            <span class="sp-nb-name">${escapeHtml(n.school.name)}</span>
+            <span class="sp-nb-d">${fmtDist(n.worst)}</span>
+          </button></li>`).join("")}</ul>`
+        : `<p class="p-empty">No other school is close enough to overlap.</p>`}
+
+      <p class="sp-note">Straight-line distance from each school's registered
+        postal code to each block's geocoded position — MOE measures the same
+        way, but treat anything near the 1 km boundary as indicative and check
+        MOE's own tool before relying on it. Being inside 1 km is a
+        registration priority, not a guarantee of a place.</p>
     `;
+
+    for (const btn of el.panelBody.querySelectorAll("[data-unpick]")) {
+      btn.addEventListener("click", () => {
+        const s = picks.find((p) => p.postal === btn.dataset.unpick);
+        if (s) selectSchool(s);           // toggling off, same code path
+      });
+    }
+    for (const btn of el.panelBody.querySelectorAll("[data-pick]")) {
+      btn.addEventListener("click", () => {
+        const s = state.schools.find((p) => p.postal === btn.dataset.pick);
+        if (s) selectSchool(s);
+      });
+    }
+    for (const btn of el.panelBody.querySelectorAll("[data-scope]")) {
+      btn.addEventListener("click", () => {
+        state.schoolScope = btn.dataset.scope;
+        renderSchoolPanel();
+      });
+    }
+
     el.panel.hidden = false;
     el.scrim.hidden = false;
     if (state.chart) { state.chart.destroy(); state.chart = null; }
   }
 
+  const fmtDist = (m) =>
+    m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`;
+
   // ── panel ─────────────────────────────────────────────────────────────
 
   function selectProperty(id) {
-    state.selectedSchool = null;      // the panel shows one thing at a time
+    state.schoolPicks = [];           // the panel shows one thing at a time
     ringLayer.clearLayers();
     renderSchools();
     state.selectedId = id;
@@ -1465,8 +1725,8 @@
     el.panel.hidden = true;
     el.scrim.hidden = true;
     if (state.chart) { state.chart.destroy(); state.chart = null; }
-    if (state.selectedSchool) {
-      state.selectedSchool = null;
+    if (state.schoolPicks.length) {
+      state.schoolPicks = [];
       ringLayer.clearLayers();
       renderSchools();
     }
@@ -1512,6 +1772,8 @@
       </div>
 
       ${growthHtml(growth(txns))}
+      ${phaseHtml(phase(txns))}
+      ${yieldHtml(rentalYield(prop, txns), prop)}
       ${factsHtml(prop)}
 
       <div class="cmp-chart-head">
@@ -1567,6 +1829,68 @@
         ${monthLabel(g.firstDate)} – ${monthLabel(g.lastDate)}
         ${annual ? `(${g.years.toFixed(1)} yrs)` : ""}
       </p>
+    </div>`;
+  }
+
+  /** The phase verdict. The rate is shown in every case, including "Peaked" —
+   *  a reader who disagrees with the classification can see the number it was
+   *  drawn from, and the wording never implies the trend will continue. */
+  function phaseHtml(p) {
+    if (!p) {
+      return `<div class="p-phase p-phase--empty">
+        <span class="p-phase-tag">Price phase</span>
+        Needs at least ${PHASE_MIN_MONTHS} months of sales spanning
+        ${PHASE_MIN_SPAN_YEARS} years to classify. Widen the period.
+      </div>`;
+    }
+    const note = p.significant
+      ? `Trend of ${pct(p.annual)} a year is clear of the noise in this history`
+      : `Fitted trend is ${pct(p.annual)} a year, but the scatter is wide enough
+         that flat is just as consistent with the data`;
+
+    return `<div class="p-phase is-${p.key}">
+      <div class="p-phase-head">
+        <span class="p-phase-tag">Price phase</span>
+        <span class="p-phase-label">${p.label}</span>
+      </div>
+      <p class="p-phase-note">${note} ·
+        ${p.months} months over ${p.years.toFixed(1)} yrs ·
+        fit R²&nbsp;${p.r2.toFixed(2)}</p>
+      <p class="p-phase-caveat">Describes prices already transacted, not a forecast.</p>
+    </div>`;
+  }
+
+  function yieldHtml(y, prop) {
+    if (!y) {
+      const why = (prop.rents || []).length
+        ? "No rental contracts overlap this period."
+        : prop.source === "HDB"
+          ? "No approved rentals published for this block and flat type."
+          : "URA publishes a median only where a project had enough rental contracts.";
+      return `<div class="p-yield p-yield--empty">
+        <span class="p-yield-tag">Gross rental yield</span> ${why}</div>`;
+    }
+    // URA publishes a median per quarter and not the number of leases behind
+    // it, so only HDB can honestly quote a contract count. Reporting the
+    // quarter count as "contracts" would overstate what is known.
+    const depth = prop.source === "HDB"
+      ? (y.contracts ? ` · ${num.format(y.contracts)} contracts` : "")
+      : ` · ${y.months} quarterly medians`;
+    const src = prop.source === "HDB"
+      ? `HDB approved rentals, converted to psf using this block's median floor area`
+      : `URA median rent for the project`;
+    return `<div class="p-yield">
+      <div class="p-yield-head">
+        <span class="p-yield-tag">Gross rental yield</span>
+        <span class="p-yield-value">${(y.value * 100).toFixed(2)}%</span>
+      </div>
+      <p class="p-yield-note">
+        ${y.rentPsf.toFixed(2)} psf/month × 12 ÷ ${psfText(y.psf)} ·
+        ${src} · ${monthLabel(y.firstDate)} – ${monthLabel(y.lastDate)}${depth}
+      </p>
+      <p class="p-yield-caveat">Before maintenance, tax, agent fees and vacancy.${
+        y.matched ? "" : " Rent taken from the latest published quarters — " +
+          "the selected price period predates published rental data."}</p>
     </div>`;
   }
 
@@ -1939,6 +2263,11 @@
     // deliberately kept — a filter that hides a compared property shows an
     // empty column rather than dropping the choice.
     if (state.compareMode) renderCompare();
+    // The catchment table is built from visibleProperties() and their median
+    // psf, so it goes stale on every filter and period change exactly like the
+    // other two. Every view that reads the filters must be refreshed here —
+    // this list has been the source of the same bug twice already.
+    if (state.schoolPicks.length) renderSchoolPanel();
   }
 
   const filtersOpen = () => getComputedStyle(el.moreFilters).display !== "none";
