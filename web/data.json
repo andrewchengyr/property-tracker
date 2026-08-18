@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T20:33:35Z",
+  "generated_at": "2026-08-18T15:42:00Z",
   "properties": [
     {
       "id": "hdb-10-joo-seng-rd-5-room-improved",
@@ -2269,6 +2269,35 @@
       "model": "Improved",
       "latest_psf": 506.4,
       "txn_count": 6
+    },
+    {
+      "id": "hdb-107b-bidadari-pk-dr-5-room-improved",
+      "name": "107B BIDADARI PK DR",
+      "source": "HDB",
+      "type": "5 ROOM",
+      "segment": "TOA PAYOH",
+      "address": "107B BIDADARI PK DR",
+      "district_town": "TOA PAYOH",
+      "lat": null,
+      "lng": null,
+      "txns": [
+        {
+          "date": "2026-08-01",
+          "price": 1380000.0,
+          "area_sqft": 1216.3,
+          "psf": 1134.6,
+          "storey": "04 TO 06"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 2021,
+      "lease_years": 99,
+      "flat_model": "Improved",
+      "top_year": 2021,
+      "rents": [],
+      "model": "Improved",
+      "latest_psf": 1134.6,
+      "txn_count": 1
     },
     {
       "id": "hdb-108-simei-st-1-5-room-improved",
@@ -46003,6 +46032,13 @@
           "area_sqft": 1431.6,
           "psf": 544.9,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 750000.0,
+          "area_sqft": 1431.6,
+          "psf": 523.9,
+          "storey": "01 TO 03"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -46143,8 +46179,8 @@
         }
       ],
       "model": "Model A",
-      "latest_psf": 544.9,
-      "txn_count": 17
+      "latest_psf": 523.9,
+      "txn_count": 18
     },
     {
       "id": "hdb-270-bishan-st-24-5-room-model-a",
@@ -94618,6 +94654,13 @@
           "area_sqft": 1313.2,
           "psf": 533.0,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 763000.0,
+          "area_sqft": 1313.2,
+          "psf": 581.0,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -94627,8 +94670,8 @@
       "top_year": 1986,
       "rents": [],
       "model": "Improved",
-      "latest_psf": 533.0,
-      "txn_count": 15
+      "latest_psf": 581.0,
+      "txn_count": 16
     },
     {
       "id": "hdb-841-tampines-st-83-5-room-improved",
@@ -97067,6 +97110,13 @@
           "area_sqft": 1313.2,
           "psf": 525.4,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 765000.0,
+          "area_sqft": 1313.2,
+          "psf": 582.5,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -97172,8 +97222,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 525.4,
-      "txn_count": 12
+      "latest_psf": 582.5,
+      "txn_count": 13
     },
     {
       "id": "hdb-857a-tampines-st-83-5-room-improved",
