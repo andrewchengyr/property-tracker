@@ -180,8 +180,368 @@
     "street_name": "JOO SENG RD",
     "flat_type": "5-ROOM",
     "monthly_rent": "3800"
+   },
+   {
+    "_id": 2867,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "201",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2450"
+   },
+   {
+    "_id": 2868,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "203",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1900"
+   },
+   {
+    "_id": 2869,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2200"
+   },
+   {
+    "_id": 2870,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2150"
+   },
+   {
+    "_id": 2871,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1800"
+   },
+   {
+    "_id": 2872,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1750"
+   },
+   {
+    "_id": 2873,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 2874,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "206",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1900"
+   },
+   {
+    "_id": 2875,
+    "rent_approval_date": "2021-01",
+    "town": "TOA PAYOH",
+    "block": "207",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1850"
+   },
+   {
+    "_id": 5668,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "200",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2200"
+   },
+   {
+    "_id": 5669,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "200",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2050"
+   },
+   {
+    "_id": 5670,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "202",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2150"
+   },
+   {
+    "_id": 5671,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2400"
+   },
+   {
+    "_id": 5672,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2200"
+   },
+   {
+    "_id": 5673,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2700"
+   },
+   {
+    "_id": 5674,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1800"
+   },
+   {
+    "_id": 5675,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "206",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2100"
+   },
+   {
+    "_id": 5676,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "207",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 5677,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "207",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1800"
+   },
+   {
+    "_id": 5688,
+    "rent_approval_date": "2021-02",
+    "town": "TOA PAYOH",
+    "block": "139A",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2500"
+   },
+   {
+    "_id": 9393,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "200",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2400"
+   },
+   {
+    "_id": 9394,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "200",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2200"
+   },
+   {
+    "_id": 9395,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "202",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "1850"
+   },
+   {
+    "_id": 9396,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "204",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2150"
+   },
+   {
+    "_id": 9397,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 9398,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1650"
+   },
+   {
+    "_id": 9420,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "138A",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 9421,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "138A",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 9422,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "138C",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3000"
+   },
+   {
+    "_id": 9423,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "138C",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2900"
+   },
+   {
+    "_id": 9424,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "138C",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3100"
+   },
+   {
+    "_id": 9425,
+    "rent_approval_date": "2021-03",
+    "town": "TOA PAYOH",
+    "block": "139B",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "2700"
+   },
+   {
+    "_id": 12627,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "203",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1600"
+   },
+   {
+    "_id": 12628,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 12629,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "205",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "1800"
+   },
+   {
+    "_id": 12630,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "206",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "3-ROOM",
+    "monthly_rent": "2060"
+   },
+   {
+    "_id": 12644,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "138C",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2650"
+   },
+   {
+    "_id": 12645,
+    "rent_approval_date": "2021-04",
+    "town": "TOA PAYOH",
+    "block": "138C",
+    "street_name": "LOR 1A TOA PAYOH",
+    "flat_type": "5-ROOM",
+    "monthly_rent": "3400"
+   },
+   {
+    "_id": 16149,
+    "rent_approval_date": "2021-05",
+    "town": "TOA PAYOH",
+    "block": "200",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2000"
+   },
+   {
+    "_id": 16150,
+    "rent_approval_date": "2021-05",
+    "town": "TOA PAYOH",
+    "block": "201",
+    "street_name": "TOA PAYOH NTH",
+    "flat_type": "4-ROOM",
+    "monthly_rent": "2200"
    }
   ],
-  "total": 20
+  "total": 60
  }
 }

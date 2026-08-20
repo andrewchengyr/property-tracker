@@ -99,3 +99,76 @@ hdb:
   # is rebuilt — see PLAN §11 and `--refresh-masterplan`.
   - town: "TAMPINES"
     flat_type: "5 ROOM"
+
+  # ── Central Region: every 5-room and executive ─────────────────────────
+  #
+  # Requested as "CCR and RCR". Those are URA *private property* market
+  # segments — the HDB dataset has no such field, only `town`. The mapping
+  # used here: CCR ∪ RCR is by definition the whole **Central Region**, so
+  # asking for both together sidesteps the CCR/RCR boundary entirely and the
+  # question becomes "which HDB towns sit in the Central Region?".
+  #
+  # Those nine towns are Bishan, Bukit Merah, Bukit Timah, Central Area,
+  # Geylang, Kallang/Whampoa, Marine Parade, Queenstown and Toa Payoh. Bishan
+  # and Toa Payoh are already covered by the entries above, so only the other
+  # seven appear here.
+  #
+  # CAVEAT ON BUKIT TIMAH: the Bukit Timah *planning area* is in the Central
+  # Region, but the HDB stock in it (Toh Yi Drive) sits in postal District 21,
+  # which URA's district-based rule calls OCR. Central Region by area, OCR by
+  # district. Included on the area reading; delete the two entries to take the
+  # district reading instead.
+  #
+  # `flat_type: EXECUTIVE` is left unnarrowed, as above: Maisonette and
+  # Apartment are what it returns, which is what was asked for. It also picks
+  # up 7 "Adjoined flat" executives across Bukit Merah, Central Area and
+  # Kallang — add `flat_model` to an entry to exclude them.
+  #
+  # These towns sit outside the two planning areas the land-use overlay
+  # covers, so their markers have no parcels beneath them until it is rebuilt
+  # with --refresh-masterplan — same situation as Tampines. PLAN §11.
+
+  - town: "BUKIT MERAH"          # 1,927 five-room across 164 blocks
+    flat_type: "5 ROOM"
+  - town: "BUKIT MERAH"          # only 3, all Adjoined flat
+    flat_type: "EXECUTIVE"
+
+  - town: "BUKIT TIMAH"          # see the district caveat above
+    flat_type: "5 ROOM"
+  - town: "BUKIT TIMAH"
+    flat_type: "EXECUTIVE"
+
+  - town: "CENTRAL AREA"         # 270 five-room; 197 of them Type S2 (Pinnacle)
+    flat_type: "5 ROOM"
+  - town: "CENTRAL AREA"
+    flat_type: "EXECUTIVE"
+
+  - town: "GEYLANG"
+    flat_type: "5 ROOM"
+  - town: "GEYLANG"              # 172 maisonettes + 45 apartments
+    flat_type: "EXECUTIVE"
+
+  - town: "KALLANG/WHAMPOA"
+    flat_type: "5 ROOM"
+  - town: "KALLANG/WHAMPOA"
+    flat_type: "EXECUTIVE"
+
+  # No EXECUTIVE entry for Marine Parade: the town has none at all, and an
+  # entry matching nothing only adds a warning to every future run.
+  - town: "MARINE PARADE"        # 377 five-room, 369 of them Standard
+    flat_type: "5 ROOM"
+
+  - town: "QUEENSTOWN"
+    flat_type: "5 ROOM"
+  - town: "QUEENSTOWN"
+    flat_type: "EXECUTIVE"
+
+  # "3-Gen" is two different things in this dataset, and neither is a flat_type
+  # called 3GEN. The modern 3Gen flats (2013 onward) are recorded as flat_type
+  # 5 ROOM with flat_model "3Gen", so the 5-room entries above already carry
+  # them — though in fact the Central Region has none; that stock is all in
+  # Tampines, Yishun and Punggol. The 1980s multi-generation flats are their
+  # own flat_type, and Bishan holds the only ones in the region: 13
+  # transactions across 2 blocks.
+  - town: "BISHAN"
+    flat_type: "MULTI-GENERATION"

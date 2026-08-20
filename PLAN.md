@@ -104,6 +104,7 @@ conversationally.
 | — | Rental yield | — | New `ingest/rental.py` + `rentals` table; §5.12, §12.1 |
 | — | Price phase | — | Momentum / Peaked / Cooling from a log-linear fit; §12.2 |
 | — | Compare Schools | — | Multi-school catchment intersection; §12.3 |
+| — | Central Region HDB | — | 7 towns added; exposed §5.13 and §5.14 |
 
 ---
 
@@ -317,6 +318,44 @@ it, and a test pins the plausible range so nobody later "fixes" it by dividing
 by a floor area. HDB publishes rent *per unit* with no area at all, so its psf
 is derived from the block's own median resale floor area — approximate within
 a flat type, and the only way HDB yields exist at all.
+
+### 5.13 The two HDB datasets disagree on names — assume nothing, enumerate
+
+Resale and "Renting Out of Flats" describe the same flats and spell three
+fields differently. Each one was found the same way: a join returned nothing,
+silently, and only a coverage number that looked wrong gave it away.
+
+| Field | Resale | Rental | Handled in |
+|---|---|---|---|
+| Street | `LORONG 1A TOA PAYOH` | (same abbreviations) | `hdb.canonical_street` |
+| Flat type | `5 ROOM` | `5-ROOM` | `rental.canonical_flat_type` |
+| Town | `CENTRAL AREA` | `CENTRAL` | `rental.canonical_town` |
+
+The town one is the nastiest, because the filter is applied **server-side**: a
+wrong town returns an empty `200`, not an error, so Central Area simply had no
+yield while every other town sat at 72-100%. `fetch_hdb` now warns on an empty
+result for exactly this reason.
+
+**The rule: before joining these datasets on any field, enumerate the distinct
+values on both sides.** Both town lists were enumerated to confirm CENTRAL AREA
+is the only divergence (the rental set also has TENGAH, which has no resale
+stock yet); a test pins the other nine names as shared verbatim, because an
+alias added on a guess would silently point a town at nothing.
+
+### 5.14 Rentals must be collected after the upsert, not after collection
+
+`collect_rentals` derives HDB rent-psf from floor areas read out of the
+**database** (`median_areas_sqft`). Transactions live in an in-memory list
+until `upsert_many` runs, so a rental step placed merely after `collect_hdb`
+sees only what previous runs committed.
+
+The failure is invisible on a populated database: every town already committed
+still matches, and only towns added *since the last run* come back empty. It
+surfaced when seven Central Region towns were added at once and coverage fell
+from 80% to 49%. The regression test therefore runs against a **fresh
+database** — the only condition that exposes it — and the two HDB fixtures had
+to be made to overlap first, because they covered different blocks and so
+could never have caught it offline.
 
 ---
 

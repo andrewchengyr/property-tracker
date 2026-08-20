@@ -32,6 +32,28 @@ def test_rental_flat_type_uses_a_hyphen_where_resale_uses_a_space():
     assert rental.canonical_flat_type("5-ROOM") == "5 ROOM"
 
 
+def test_central_area_is_renamed_for_the_rental_dataset():
+    """Resale calls it CENTRAL AREA, the rental dataset calls it CENTRAL.
+
+    The town filter is applied server-side, so the wrong name returns an empty
+    200 rather than an error and the town just quietly has no yield — which is
+    exactly how this shipped. Third field where these two datasets disagree,
+    after street abbreviations and flat types.
+    """
+    assert rental.canonical_town("CENTRAL AREA") == "CENTRAL"
+    assert rental.canonical_town(" central area ") == "CENTRAL"
+
+
+@pytest.mark.parametrize("town", ["TOA PAYOH", "BISHAN", "BUKIT MERAH",
+                                  "KALLANG/WHAMPOA", "QUEENSTOWN", "GEYLANG",
+                                  "MARINE PARADE", "BUKIT TIMAH", "TAMPINES"])
+def test_every_other_town_name_is_shared_verbatim(town):
+    """Only CENTRAL AREA differs; both datasets were enumerated to confirm it.
+    An alias added here without checking the real values would silently point a
+    town at nothing."""
+    assert rental.canonical_town(town) == town
+
+
 @pytest.mark.parametrize(
     "raw,expected",
     [("5-ROOM", "5 ROOM"), ("5 ROOM", "5 ROOM"), ("EXECUTIVE", "EXECUTIVE"),
@@ -57,7 +79,10 @@ def test_hdb_series_skips_blocks_with_no_known_area():
 def test_hdb_series_converts_rent_to_psf_per_month():
     areas = {("10 JOO SENG RD", "5 ROOM"): 1200.0}
     series = rental.hdb_series(hdb_records(), areas)[("10 JOO SENG RD", "5 ROOM")]
-    rents = [float(r["monthly_rent"]) for r in hdb_records()]
+    # Scoped to the one block the areas dict knows about — the fixture also
+    # carries other blocks, and their rents are not converted with this area.
+    rents = [float(r["monthly_rent"]) for r in hdb_records()
+             if f"{r['block']} {r['street_name']}".upper() == "10 JOO SENG RD"]
     assert min(series, key=lambda p: p[1])[1] == pytest.approx(min(rents) / 1200.0)
     # Sanity: Singapore HDB rents land in single-digit psf, not hundreds.
     assert all(0.5 < psf < 12 for _, psf in series)
@@ -145,3 +170,35 @@ def test_median_areas_sqft_only_reads_hdb(tmp_path):
             "VALUES ('k1','URA','SOME CONDO','Condominium','2024-01-01',1e6,1000)")
         store.conn.commit()
         assert store.median_areas_sqft() == {}
+
+
+# --- ordering ---------------------------------------------------------------
+
+def test_rentals_are_collected_after_transactions_are_stored(tmp_path, monkeypatch):
+    """The HDB psf conversion reads floor areas out of the *database*, so the
+    rental step has to run after upsert_many — not merely after collection.
+
+    Only a database that starts empty catches this. With a committed db the
+    previous run's rows stand in for the current one's and every town already
+    present still matches, which is exactly why the bug shipped: it showed up
+    only on towns added since the last run.
+    """
+    from ingest import run as run_mod
+
+    db = tmp_path / "fresh.db"
+    argv = ["--from-fixtures", "--no-csv", "--skip-schools",
+            "--db", str(db), "--json-out", str(tmp_path / "out.json")]
+    monkeypatch.setattr(run_mod, "MASTERPLAN_JSON", tmp_path / "mp.json")
+    run_mod.main(argv + ["--masterplan-out", str(tmp_path / "mp.json")])
+
+    with Store(db) as store:
+        txns = store.conn.execute(
+            "SELECT COUNT(*) c FROM transactions WHERE source='HDB'").fetchone()["c"]
+        rents = store.conn.execute(
+            "SELECT COUNT(*) c FROM rentals WHERE source='HDB'").fetchone()["c"]
+
+    assert txns > 0, "fixture run stored no HDB transactions — test is not exercising anything"
+    assert rents > 0, (
+        "no HDB rentals on a fresh database: the rental step ran before the "
+        "transactions it derives floor areas from were written"
+    )

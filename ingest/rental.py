@@ -45,6 +45,24 @@ def _norm(v: Any) -> str:
     return str(v or "").strip().upper()
 
 
+# The resale and rental datasets disagree on this town's name, and on nothing
+# else — every other town string is identical across the two. Verified by
+# enumerating both; see the test.
+TOWN_ALIASES = {"CENTRAL AREA": "CENTRAL"}
+
+
+def canonical_town(value: Any) -> str:
+    """Resale town name -> the name the rental dataset uses.
+
+    Third field in a row where these two HDB datasets spell the same thing
+    differently (streets in hdb.py, flat types below, now towns). The filter is
+    applied server-side, so a wrong name returns an empty 200 and the town
+    simply has no yield — assume nothing here without checking the values.
+    """
+    town = _norm(value)
+    return TOWN_ALIASES.get(town, town)
+
+
 def canonical_flat_type(value: Any) -> str:
     """The rental dataset writes `5-ROOM`; resale writes `5 ROOM`.
 
@@ -67,7 +85,7 @@ def fetch_hdb(town: str, session: requests.Session | None = None) -> list[dict[s
                 "resource_id": HDB_RESOURCE_ID,
                 "limit": HDB_PAGE,
                 "offset": offset,
-                "filters": json.dumps({"town": town}),
+                "filters": json.dumps({"town": canonical_town(town)}),
             },
             session=session,
         )
@@ -79,6 +97,9 @@ def fetch_hdb(town: str, session: requests.Session | None = None) -> list[dict[s
         if not page or (total is not None and len(records) >= total):
             break
         offset += len(page)
+    if not records:
+        log.warning("HDB rentals %s: no records — check the town name against "
+                    "the rental dataset's own spelling", town)
     log.info("HDB rentals %s: %d records", town, len(records))
     return records
 

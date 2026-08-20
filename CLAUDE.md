@@ -12,7 +12,7 @@ GitHub Actions (Mon 04:00 SGT).
 ## Quick orientation
 
 ```bash
-.venv/bin/python -m pytest tests/ -q          # 143 tests, offline, ~0.4s
+.venv/bin/python -m pytest tests/ -q          # 154 tests, offline, ~0.7s
 .venv/bin/python -m ingest.run --from-fixtures # offline run, no credentials
 .venv/bin/python -m ingest.run                 # live run
 python3 -m http.server 8123 --directory web    # then open localhost:8123
@@ -35,10 +35,18 @@ Add or remove properties by editing `config/watchlist.yaml` — no code changes.
   It refreshes the property panel, the compare drawer *and* the school
   catchment table. A view left out of it silently shows stale numbers after a
   filter change — this exact bug has shipped twice. §12.3.
-- **Rental coverage is partial and always will be** — ~20% of properties have
+- **Rental coverage is partial and always will be** — ~18% of properties have
   no published rent. Yield shows an explicit reason, never a blank or a zero.
-  The HDB rental dataset spells flat types `5-ROOM`; resale says `5 ROOM`.
   §5.12.
+- **The two HDB datasets spell three shared fields differently** — streets,
+  flat types (`5-ROOM` vs `5 ROOM`) and towns (`CENTRAL` vs `CENTRAL AREA`).
+  Enumerate the distinct values on both sides before joining on any field; the
+  town filter is server-side, so a wrong name returns an empty 200, not an
+  error. §5.13.
+- **Rentals are collected after `upsert_many`, not after `collect_hdb`.** They
+  read floor areas out of the database, so anything still in the in-memory
+  `txns` list is invisible to them. Only a *fresh* database exposes a
+  regression here. §5.14.
 - **The land-use overlay is not rebuilt weekly.** `web/masterplan.json` is
   committed and only regenerated with `--refresh-masterplan`; the source is
   181 MB and the plan is gazetted about every five years. §5.11 and §11.

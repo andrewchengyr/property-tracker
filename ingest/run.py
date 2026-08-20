@@ -722,11 +722,6 @@ def main(argv: list[str] | None = None) -> int:
         if not args.skip_hdb:
             txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures, errors))
 
-        # After both transaction sources: HDB rents need our floor areas, and
-        # URA rents are matched against the project names we actually hold.
-        if not args.skip_rentals:
-            collect_rentals(watchlist, store, args.from_fixtures, errors)
-
         if not args.skip_schools:
             store.export_schools(
                 collect_schools(store, args.from_fixtures, errors), args.schools_out)
@@ -741,6 +736,17 @@ def main(argv: list[str] | None = None) -> int:
             )
 
         added, updated = store.upsert_many(txns)
+
+        # Rentals come *after* the upsert, not merely after collection. HDB
+        # publishes rent per unit with no floor area, so the psf conversion
+        # reads median_areas_sqft() out of the database — and a transaction
+        # that is still sitting in the in-memory `txns` list is not in the
+        # database yet. Collected-but-unstored looked close enough to stored
+        # that the first version ran here on the wrong side of this line, and
+        # every town not already committed silently produced no yield at all.
+        if not args.skip_rentals:
+            collect_rentals(watchlist, store, args.from_fixtures, errors)
+
         top_years = {
             e["project"]: e["top_year"]
             for e in watchlist["private"]
