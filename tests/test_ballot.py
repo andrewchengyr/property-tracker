@@ -233,3 +233,24 @@ def test_fetch_gives_up_rather_than_looping(monkeypatch):
     with pytest.raises(ballot.BallotError, match="no schoolData"):
         ballot.fetch(session=session)
     assert len(session.urls) == ballot.FETCH_ATTEMPTS
+
+
+def test_a_waf_challenge_is_named_not_retried(monkeypatch):
+    """AWS WAF answers with a 202 carrying its own globals. Retrying it is
+    pointless and solving it would mean defeating bot detection, so it has to
+    fail immediately with a message that says what happened — otherwise it
+    reads as a parse error and invites someone to "fix" the parser."""
+    monkeypatch.setattr(ballot.time, "sleep", lambda *_: None)
+    challenge = ('<!DOCTYPE html><html><head><script>'
+                 'window.awsWafCookieDomainList = []; window.gokuProps = {"key":"x"};'
+                 '</script></head><body></body></html>')
+    session = _FakeSession([challenge, html()])
+    with pytest.raises(ballot.BlockedError, match="WAF bot challenge"):
+        ballot.fetch(session=session)
+    assert len(session.urls) == 1, "a challenge must not be retried"
+
+
+def test_blocked_is_a_ballot_error_so_the_run_still_degrades():
+    """collect_ballot catches BallotError and keeps the archived years; a
+    separate exception type here would take the whole run down."""
+    assert issubclass(ballot.BlockedError, ballot.BallotError)

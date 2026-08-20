@@ -76,8 +76,19 @@ def normalise_name(name: Any) -> str:
 
 # ---------------------------------------------------------------- fetch -----
 
-FETCH_ATTEMPTS = 4
+FETCH_ATTEMPTS = 3
 FETCH_BACKOFF = 4
+
+# AWS WAF serves its bot challenge as a 202 carrying these globals. Retrying it
+# is pointless — the challenge is the answer — and solving it would mean
+# defeating bot detection, which this project does not do (PLAN §9, the same
+# line drawn over PropertyGuru). Detected so the failure names itself instead
+# of looking like a parse error.
+WAF_MARKERS = ("awsWafCookieDomainList", "gokuProps", "awswaf")
+
+
+class BlockedError(BallotError):
+    """The host challenged the request rather than serving the page."""
 
 
 def fetch(session: requests.Session | None = None, url: str = URL) -> str:
@@ -108,6 +119,14 @@ def fetch(session: requests.Session | None = None, url: str = URL) -> str:
         r = session.get(f"{url}?cb={attempt}", headers=headers, timeout=TIMEOUT)
         r.raise_for_status()
         last = r.text
+        if any(m in last for m in WAF_MARKERS):
+            raise BlockedError(
+                f"MOE served an AWS WAF bot challenge (HTTP {r.status_code}, "
+                f"{len(last)} chars) instead of the page. This is what GitHub's "
+                f"runners get; the same request from a residential connection "
+                f"returns the full page. Refresh this source locally instead — "
+                f"solving the challenge is not something this project does."
+            )
         if '"schoolData"' in _flight_payload(last):
             if attempt > 1:
                 log.info("MOE page carried the payload on attempt %d", attempt)

@@ -47,10 +47,11 @@ Add or remove properties by editing `config/watchlist.yaml` — no code changes.
   read floor areas out of the database, so anything still in the in-memory
   `txns` list is invisible to them. Only a *fresh* database exposes a
   regression here. §5.14.
-- **P1 balloting is scraped from a Next.js payload, not an API** — the most
-  fragile source here, and MOE replaces the page each year, so `p1_ballot`
-  accumulates and is never deleted. 2023/2024 are gone for good; archived
-  copies are shells. §5.16.
+- **P1 balloting cannot be pulled from CI** — MOE is behind AWS WAF and serves
+  GitHub's runners a bot challenge (202, `gokuProps`). Refresh it locally every
+  couple of months and commit the result, like the Master Plan overlay:
+  `python -m ingest.run --skip-ura --skip-hdb --skip-rentals`. The weekly job
+  passes `--skip-ballot`. §5.16.
 - **A balloting distance band is a cut-off, not a per-band flag.** "Balloted
   within 1km" means 1–2 km and beyond got *nothing*. §12.4.
 - **The land-use overlay is not rebuilt weekly.** `web/masterplan.json` is

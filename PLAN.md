@@ -384,13 +384,36 @@ The data is not an API. It is embedded in the page as a Next.js flight payload
 and parsed out of the HTML, which makes it the most fragile source here — a
 site rebuild breaks it.
 
-**A 200 does not mean the fetch worked.** The site sits behind CloudFront and
-varies on `rsc` and the Next.js router headers, so an edge can hold a variant
-of this URL that renders the shell with no `schoolData` in it. The first CI run
-got exactly that — a clean 200, no payload — while the identical request from
-another network returned the full 728 KB. `fetch` therefore checks for the
-payload rather than the status code, retries with a varied cache key and
-`Cache-Control: no-cache`, and only then gives up. It therefore degrades like the rest: a failed pull logs
+**This source cannot be fetched from CI, and that is settled.** MOE sits behind
+AWS WAF, which answers GitHub's runners with a bot challenge: HTTP 202, 2,407
+bytes, `window.awsWafCookieDomainList` and `gokuProps`. The same request from a
+residential connection returns the full 728 KB. Solving the challenge would
+mean defeating bot detection, which is the line already drawn over
+PropertyGuru in §9, so `fetch` detects the challenge, names it, and raises
+`BlockedError` immediately rather than retrying something unretryable.
+
+**So the refresh is a local step, like the Master Plan (§11):**
+
+```bash
+python -m ingest.run --skip-ura --skip-hdb --skip-rentals
+```
+
+then commit `data/transactions.db` and `web/schools.json`. The weekly job runs
+with `--skip-ballot`, and the archive in the committed database keeps feeding
+the schools export regardless.
+
+**Worth doing about every two months, not annually.** All 1,074 rows of the
+2025 exercise were created in January 2026 and revised into February, with
+folder-level edits into April, so a single yearly pull would miss the
+corrections.
+
+**Diagnosing this took two wrong guesses, both mine.** The first blamed a
+layout change (the parser raised "schoolData not found"); the second blamed a
+CloudFront cache variant and added a cache-busting retry on that basis. The
+retry then produced the fact that killed both theories — 2.4 KB is far too
+small to be even a shell of this page. The fetch now logs status, content-type
+and the head of the body on failure, which is what should have been captured
+before any theory was offered. It therefore degrades like the rest: a failed pull logs
 and keeps the archived years, and the export reads from the **database** rather
 than from the pull so previously stored years survive a year that cannot be
 fetched.
