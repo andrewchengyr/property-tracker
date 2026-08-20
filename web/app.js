@@ -1651,6 +1651,8 @@
                 data-scope="any" aria-pressed="${scope === "any"}">Near any</button>
       </div>` : ""}
 
+      ${picks.map((s, i) => p1Html(s, i, multi)).join("")}
+
       <h3 class="p-h3">Properties${multi ? " in the overlap" : " within 2 km"}</h3>
       <p class="p-h3-sub">${multi
         ? `Sorted by the ${scope === "all" ? "farthest" : "nearest"} of the ${picks.length} schools`
@@ -1662,8 +1664,6 @@
         : `<p class="p-empty">No watched property is within 2 km of ${
             multi && scope === "all" ? "all of these schools" : "this selection"}.${
             multi && scope === "all" ? " Try “Near any”, or drop a school." : ""}</p>`}
-
-      ${picks.map((s, i) => p1Html(s, i, multi)).join("")}
 
       <h3 class="p-h3" style="margin-top:22px">Add another school</h3>
       <p class="p-h3-sub">Nearest to ${multi ? "all picks" : "this school"}${
@@ -1753,33 +1753,39 @@
         // A phase with no vacancies was never run for this school; saying so
         // beats an em-dash the reader has to interpret.
         const notRun = !r.vacancies;
-        const ratio = notRun ? `<span class="p1-norun">Not conducted</span>`
+        const ratio = notRun ? "" 
           : `${num.format(r.applicants ?? 0)} for ${num.format(r.vacancies)}`;
 
-        const bands = notRun ? "" : r.bands
-          ? P1_BANDS_KEYS.map((b) => {
-              const o = P1_OUTCOME[r.bands[b]];
-              return o ? `<span class="p1-band ${o.cls}" title="${o.title}">
-                <b>${P1_BAND_LABEL[b]}</b>${o.text}</span>` : "";
-            }).join("")
-          : `<span class="p1-band is-unknown">Not stated by MOE</span>`;
+        // MOE's own sentence rides along as the row tooltip. The verdicts are
+        // derived, so the wording they came from stays reachable even though
+        // it is no longer printed under the table.
+        const src = r.note ? ` title="${escapeHtml(r.note)}"` : "";
 
-        return `<tr>
-          <td><b>${P1_PHASE_LABEL[r.phase]}</b></td>
-          <td class="num">${ratio}</td>
-          <td class="p1-bands">${bands}</td>
+        const cells = notRun
+          ? `<td class="p1-flat" colspan="3">Not conducted</td>`
+          : r.bands
+            ? P1_BANDS_KEYS.map((b) => {
+                const o = P1_OUTCOME[r.bands[b]];
+                return o ? `<td class="p1-cell ${o.cls}" title="${o.title}">${o.text}</td>`
+                         : `<td class="p1-cell">—</td>`;
+              }).join("")
+            : `<td class="p1-flat" colspan="3">Not stated by MOE</td>`;
+
+        return `<tr${src}>
+          <td class="p1-phase">${P1_PHASE_LABEL[r.phase]}</td>
+          <td class="num p1-ratio">${ratio}</td>
+          ${cells}
         </tr>`;
       }).join("");
 
-      const notes = forYear.filter((r) => r.note).map((r) =>
-        `<li><b>${P1_PHASE_LABEL[r.phase]}</b> ${escapeHtml(r.note)}</li>`).join("");
-
       return `<p class="p1-year">${year} exercise</p>
         <div class="p-table-wrap"><table class="p-table p1-table">
-          <thead><tr><th>Phase</th><th class="num">Applicants</th>
-            <th>Outcome by distance</th></tr></thead>
-          <tbody>${body}</tbody></table></div>
-        ${notes ? `<ul class="p1-notes">${notes}</ul>` : ""}`;
+          <thead><tr>
+            <th>Phase</th><th class="num">Applied</th>
+            ${P1_BANDS_KEYS.map((b) =>
+              `<th class="p1-cell">${P1_BAND_LABEL[b]}</th>`).join("")}
+          </tr></thead>
+          <tbody>${body}</tbody></table></div>`;
     }).join("");
 
     return `<h3 class="p-h3" style="margin-top:22px">${heading}</h3>

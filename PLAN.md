@@ -786,3 +786,26 @@ Held deliberately:
   admitted, which turned `0 for 0` into an encouraging green row.
 - **Only 2A/2B/2C/2C-Supp are shown.** Phases 0 and 1 are sibling and alumni
   phases with no distance rule, so bands against them would be noise.
+- **The bands are columns, not a stacked list**, so a phase reads across in one
+  line and the three bands can be compared down a column.
+- **MOE's sentence is the row tooltip, not a bullet list.** Printing it under
+  every table was clutter; the derived verdict still has to be checkable, so it
+  rides along on `title`.
+
+**The colours were measured, and the obvious choice failed.** These three sit
+in adjacent columns specifically to be compared across, so a traffic light is
+the intuitive pick — and it is unreadable. CIEDE2000 on the pair a reader
+compares most, "Balloted" against "Filled up":
+
+| palette | worst CVD pair |
+|---|---|
+| green / orange / red | **3.9** (deuteranopia, light) |
+| green / orange / grey | 5.7 |
+| blue / orange / grey | **20.5** — shipped |
+
+Red was wrong on meaning too: "Filled up" is not an error, it is "the school
+never reached your band", which is what a recessive grey says. Blue for the
+admitted state gives up the green-means-good intuition, but the word carries
+that and the psf ramp never appears in this table. All three are existing role
+tokens, so no new hex entered the palette. Same lesson as §6.1 — the intuitive
+palette was rejected by measurement, not by taste.
