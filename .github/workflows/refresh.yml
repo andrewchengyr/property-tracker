@@ -55,7 +55,12 @@ jobs:
           URA_ACCESS_KEY: ${{ secrets.URA_ACCESS_KEY }}
           ONEMAP_EMAIL: ${{ secrets.ONEMAP_EMAIL }}
           ONEMAP_PASSWORD: ${{ secrets.ONEMAP_PASSWORD }}
-        run: python -m ingest.run
+        # --skip-ballot: MOE publishes annually and cannot currently be
+        # fetched from a runner, so it lives in ballot.yml on a two-monthly
+        # cron. Pulling it here made this job red every week and buried the
+        # failures that matter. The archive in the committed database still
+        # feeds the schools export either way.
+        run: python -m ingest.run --skip-ballot
 
       - name: Commit if anything changed
         run: |

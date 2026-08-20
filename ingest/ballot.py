@@ -112,10 +112,16 @@ def fetch(session: requests.Session | None = None, url: str = URL) -> str:
             if attempt > 1:
                 log.info("MOE page carried the payload on attempt %d", attempt)
             return last
+        # Log what actually came back. The first version of this guessed at a
+        # CDN cache variant and was wrong: the body is ~2.4 KB, far too small
+        # to be even a shell of this page, so it is a different response
+        # entirely. Never diagnose this from the size alone again.
         log.warning(
-            "MOE page returned %d chars with no schoolData (attempt %d/%d) — "
-            "probably a CDN variant; retrying",
-            len(last), attempt, FETCH_ATTEMPTS,
+            "MOE page returned %d chars with no schoolData (attempt %d/%d); "
+            "status %s, content-type %s, body starts: %s",
+            len(last), attempt, FETCH_ATTEMPTS, r.status_code,
+            r.headers.get("content-type", "?"),
+            " ".join(last[:400].split())[:300],
         )
         if attempt < FETCH_ATTEMPTS:
             time.sleep(FETCH_BACKOFF * attempt)

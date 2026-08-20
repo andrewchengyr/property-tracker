@@ -189,7 +189,12 @@ def test_a_phase_with_no_vacancies_is_not_reported_as_easy():
 # --- fetch resilience ------------------------------------------------------
 
 class _FakeResponse:
-    def __init__(self, text): self.text = text
+    """Carries status and headers because the failure path logs them — a
+    double that omits them hides a real AttributeError behind a passing test."""
+    def __init__(self, text):
+        self.text = text
+        self.status_code = 200
+        self.headers = {"content-type": "text/html"}
     def raise_for_status(self): pass
 
 
