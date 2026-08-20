@@ -22,6 +22,7 @@ from typing import Any
 import yaml
 from dotenv import load_dotenv
 
+from . import ballot as ballot_mod
 from . import hdb as hdb_mod
 from . import masterplan as masterplan_mod
 from . import planning
@@ -459,6 +460,38 @@ def collect_schools(
     return located
 
 
+def collect_ballot(
+    store: Store, from_fixtures: bool, errors: list[str] | None = None
+) -> int:
+    """P1 vacancies and balloting from MOE.
+
+    Scraped from a Next.js payload rather than an API, so it is the most
+    fragile source here — a site rebuild breaks it. It therefore degrades like
+    every other source: the archive already in the database keeps feeding the
+    export, and only this year's update is lost.
+    """
+    try:
+        if from_fixtures:
+            path = FIXTURES / "moe_ballot.html"
+            if not path.exists():
+                return 0
+            html = path.read_text()
+        else:
+            html = ballot_mod.fetch()
+        rows = ballot_mod.parse(html)
+    except Exception as exc:  # noqa: BLE001
+        log.error("MOE balloting pull failed, keeping the archived years: %s", exc)
+        if errors is not None:
+            errors.append(f"MOE balloting pull failed: {exc}")
+        return 0
+
+    written = store.upsert_ballot(rows)
+    years = sorted({r["year"] for r in rows})
+    log.info("P1 balloting: %d rows stored, years now %s",
+             written, ", ".join(sorted(store.ballot_years())) or "none")
+    return written
+
+
 def collect_rentals(
     watchlist: dict[str, list[dict[str, Any]]],
     store: Store,
@@ -688,6 +721,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--skip-hdb", action="store_true", help="skip HDB resale")
     parser.add_argument("--skip-rentals", action="store_true",
                         help="skip rental data (yield goes blank, prices unaffected)")
+    parser.add_argument("--skip-ballot", action="store_true",
+                        help="skip the MOE P1 balloting pull (archive is kept)")
     parser.add_argument("--skip-schools", action="store_true",
                         help="skip the MOE primary-school layer")
     parser.add_argument("--schools-out", default=str(SCHOOLS_JSON))
@@ -721,6 +756,10 @@ def main(argv: list[str] | None = None) -> int:
             txns.extend(collect_private(watchlist["private"], store, args.from_fixtures, errors))
         if not args.skip_hdb:
             txns.extend(collect_hdb(watchlist["hdb"], store, args.from_fixtures, errors))
+
+        # Before the schools export, which attaches the history to each school.
+        if not args.skip_ballot:
+            collect_ballot(store, args.from_fixtures, errors)
 
         if not args.skip_schools:
             store.export_schools(

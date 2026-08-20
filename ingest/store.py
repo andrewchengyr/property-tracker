@@ -69,6 +69,26 @@ CREATE TABLE IF NOT EXISTS rentals (
     PRIMARY KEY (source, property_name, property_type, period)
 );
 
+-- P1 registration outcomes, one row per school/year/phase. Accumulating by
+-- design: MOE publishes only the current exercise and replaces it each year,
+-- so like the transaction archive this is the only copy of anything older.
+-- Nothing here is ever deleted.
+CREATE TABLE IF NOT EXISTS p1_ballot (
+    school_key         TEXT NOT NULL,
+    school_name        TEXT NOT NULL,
+    year               TEXT NOT NULL,
+    phase              TEXT NOT NULL,
+    vacancies          INTEGER,
+    applicants         INTEGER,
+    balloted           INTEGER,
+    vacancies_balloted INTEGER,
+    applicants_balloted INTEGER,
+    cutoff_band        TEXT,
+    cohort             TEXT,
+    note               TEXT,
+    PRIMARY KEY (school_key, year, phase)
+);
+
 CREATE TABLE IF NOT EXISTS geo (
     address     TEXT PRIMARY KEY,
     lat         REAL NOT NULL,
@@ -213,6 +233,46 @@ class Store:
         )
         self.conn.commit()
         return len(rows)
+
+    def upsert_ballot(self, rows: Sequence[dict[str, Any]]) -> int:
+        """Idempotent on (school, year, phase). MOE corrects this data after
+        publication, so a conflict updates in place rather than being ignored —
+        same reasoning as the URA caveat revisions."""
+        if not rows:
+            return 0
+        self.conn.executemany(
+            "INSERT INTO p1_ballot (school_key, school_name, year, phase, "
+            "vacancies, applicants, balloted, vacancies_balloted, "
+            "applicants_balloted, cutoff_band, cohort, note) "
+            "VALUES (:school_key, :school_name, :year, :phase, :vacancies, "
+            ":applicants, :balloted, :vacancies_balloted, :applicants_balloted, "
+            ":cutoff_band, :cohort, :note) "
+            "ON CONFLICT(school_key, year, phase) DO UPDATE SET "
+            "vacancies=excluded.vacancies, applicants=excluded.applicants, "
+            "balloted=excluded.balloted, "
+            "vacancies_balloted=excluded.vacancies_balloted, "
+            "applicants_balloted=excluded.applicants_balloted, "
+            "cutoff_band=excluded.cutoff_band, cohort=excluded.cohort, "
+            "note=excluded.note",
+            [{**r, "balloted": int(bool(r.get("balloted")))} for r in rows],
+        )
+        self.conn.commit()
+        return len(rows)
+
+    def ballot_years(self) -> set:
+        return {r["year"] for r in self.conn.execute(
+            "SELECT DISTINCT year FROM p1_ballot")}
+
+    def ballot_by_school(self) -> dict:
+        """school_key -> rows, newest year first. Read from the database, not
+        from the pull, so previously archived years survive a year in which the
+        MOE page cannot be parsed."""
+        out: dict = {}
+        for r in self.conn.execute(
+            "SELECT * FROM p1_ballot ORDER BY year DESC, phase ASC"
+        ):
+            out.setdefault(r["school_key"], []).append(dict(r))
+        return out
 
     def median_areas_sqft(self) -> dict:
         """(property_name, property_type) -> median floor area, for turning
@@ -383,6 +443,29 @@ class Store:
             log.warning("no schools to export — leaving %s as it is", path)
             return
         path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Attach whatever P1 history the archive holds. Joined on the
+        # normalised name because MOE's balloting page and the school
+        # directory punctuate differently — see ballot.normalise_name.
+        from .ballot import band_outcomes, normalise_name
+        history = self.ballot_by_school()
+        attached = 0
+        for school in schools:
+            rows = history.get(normalise_name(school["name"]))
+            if not rows:
+                continue
+            attached += 1
+            school["p1"] = [{
+                "year": r["year"], "phase": r["phase"],
+                "vacancies": r["vacancies"], "applicants": r["applicants"],
+                "balloted": bool(r["balloted"]),
+                "vacancies_balloted": r["vacancies_balloted"],
+                "applicants_balloted": r["applicants_balloted"],
+                "cohort": r["cohort"], "note": r["note"],
+                "bands": band_outcomes(r),
+            } for r in rows]
+        log.info("P1 balloting attached to %d of %d schools", attached, len(schools))
+
         path.write_text(json.dumps({
             "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "schools": sorted(schools, key=lambda s: s["name"]),

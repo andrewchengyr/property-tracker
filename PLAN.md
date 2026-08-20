@@ -105,6 +105,7 @@ conversationally.
 | — | Price phase | — | Momentum / Peaked / Cooling from a log-linear fit; §12.2 |
 | — | Compare Schools | — | Multi-school catchment intersection; §12.3 |
 | — | Central Region HDB | — | 7 towns added; exposed §5.13 and §5.14 |
+| — | P1 balloting | — | MOE vacancies/balloting per school; §5.15, §5.16, §12.4 |
 
 ---
 
@@ -356,6 +357,46 @@ from 80% to 49%. The regression test therefore runs against a **fresh
 database** — the only condition that exposes it — and the two HDB fixtures had
 to be made to overlap first, because they covered different blocks and so
 could never have caught it offline.
+
+### 5.15 `mainlevel_code == "PRIMARY"` misses three P1 schools
+
+Catholic High, CHIJ St. Nicholas Girls' and Maris Stella High are through-train
+schools coded **`MIXED LEVEL (P1-S4)`** in the school directory. They run the
+P1 registration exercise like any other primary school and are among the most
+sought-after in the country — and the exact-string filter left all three off
+the map from the day the school layer was built. Found only when their names
+turned up on MOE's balloting page with no counterpart on our side.
+
+`schools.takes_p1` now matches "takes P1 students" rather than one literal
+code, so a future level string that still starts at P1 is included instead of
+silently dropped. 179 → 182 schools.
+
+### 5.16 MOE publishes one P1 exercise and replaces it
+
+The balloting page always shows the most recent exercise; there is no 2024 page
+and no year parameter. Archived copies of the older pages exist but are
+**shells** — the data used to be fetched client-side and no crawler kept it, so
+2023 and 2024 are simply not recoverable. Same shape as URA's rolling five-year
+window (§5.1) and the same answer: `p1_ballot` accumulates and is never
+deleted, so each year's run adds one permanently.
+
+The data is not an API. It is embedded in the page as a Next.js flight payload
+and parsed out of the HTML, which makes it the most fragile source here — a
+site rebuild breaks it. It therefore degrades like the rest: a failed pull logs
+and keeps the archived years, and the export reads from the **database** rather
+than from the pull so previously stored years survive a year that cannot be
+fetched.
+
+**Fourth name-matching join in this project** (after §5.13's three): MOE's
+balloting page appends `(Primary)` to through-train schools and punctuates
+differently from the directory (`CHIJ St. Nicholas Girls'` vs `CHIJ ST.
+NICHOLAS GIRLS'`). Normalising handles all but one; `St Andrew's Junior School`
+vs `ST ANDREW'S SCHOOL (JUNIOR)` needs an explicit alias. Both lists were
+enumerated to establish that, per the rule in §5.13.
+
+Three schools on our map have no balloting data at all — Damai, Kranji and
+Townsville, which are not taking a P1 intake. They say so rather than showing
+an empty table.
 
 ---
 
@@ -706,3 +747,34 @@ stale on every filter and period change exactly like the panel and the compare
 drawer. This list is the single place that knowledge lives; it has been the
 source of the same bug twice already (§7), so **anything new that reads the
 filters belongs in it.**
+
+### 12.4 P1 balloting: the cut-off is not a flag
+
+MOE states one sentence per phase naming the distance band the school filled
+at. **That band is a cut-off, not a yes/no per band.** "Balloting conducted for
+children residing within 1km" means the school ran out *inside* 1 km — so
+applicants in 1–2 km and beyond got nothing at all. Rendered as three
+independent yes/no flags it tells the reader close to the opposite of what
+happened, and this is the row someone makes a purchase decision on.
+
+`band_outcomes` therefore returns one of three states per band:
+
+| | |
+|---|---|
+| `in` | admitted without balloting — the cut-off was further out |
+| `ballot` | balloting decided it — this is the cut-off band |
+| `none` | the school filled before reaching this band |
+
+Held deliberately:
+
+- **MOE's own sentence is printed under every table.** The verdict is derived,
+  so the source it was derived from stays visible — same principle as showing
+  the fitted rate under the price phase.
+- **An unrecognised sentence gets no verdict.** One 2025 note explains a PR
+  intake cap and names no distance; it shows verbatim with no bands rather
+  than a guess, and logs a warning so a new wording is noticed.
+- **Zero vacancies means "not conducted", never "everyone got in."** The phase
+  did not run. The first cut derived `applicants <= vacancies` → all bands
+  admitted, which turned `0 for 0` into an encouraging green row.
+- **Only 2A/2B/2C/2C-Supp are shown.** Phases 0 and 1 are sibling and alumni
+  phases with no distance rule, so bands against them would be noise.

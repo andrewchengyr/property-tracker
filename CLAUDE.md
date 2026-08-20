@@ -12,7 +12,7 @@ GitHub Actions (Mon 04:00 SGT).
 ## Quick orientation
 
 ```bash
-.venv/bin/python -m pytest tests/ -q          # 154 tests, offline, ~0.7s
+.venv/bin/python -m pytest tests/ -q          # 175 tests, offline, ~0.5s
 .venv/bin/python -m ingest.run --from-fixtures # offline run, no credentials
 .venv/bin/python -m ingest.run                 # live run
 python3 -m http.server 8123 --directory web    # then open localhost:8123
@@ -47,6 +47,12 @@ Add or remove properties by editing `config/watchlist.yaml` — no code changes.
   read floor areas out of the database, so anything still in the in-memory
   `txns` list is invisible to them. Only a *fresh* database exposes a
   regression here. §5.14.
+- **P1 balloting is scraped from a Next.js payload, not an API** — the most
+  fragile source here, and MOE replaces the page each year, so `p1_ballot`
+  accumulates and is never deleted. 2023/2024 are gone for good; archived
+  copies are shells. §5.16.
+- **A balloting distance band is a cut-off, not a per-band flag.** "Balloted
+  within 1km" means 1–2 km and beyond got *nothing*. §12.4.
 - **The land-use overlay is not rebuilt weekly.** `web/masterplan.json` is
   committed and only regenerated with `--refresh-masterplan`; the source is
   181 MB and the plan is gazetted about every five years. §5.11 and §11.

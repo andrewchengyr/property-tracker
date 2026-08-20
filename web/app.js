@@ -1663,6 +1663,8 @@
             multi && scope === "all" ? "all of these schools" : "this selection"}.${
             multi && scope === "all" ? " Try “Near any”, or drop a school." : ""}</p>`}
 
+      ${picks.map((s, i) => p1Html(s, i, multi)).join("")}
+
       <h3 class="p-h3" style="margin-top:22px">Add another school</h3>
       <p class="p-h3-sub">Nearest to ${multi ? "all picks" : "this school"}${
         multi ? ", by the farthest of them" : ""} — click to add</p>
@@ -1706,6 +1708,86 @@
 
   const fmtDist = (m) =>
     m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(2)} km`;
+
+  // ── P1 registration outcomes ──────────────────────────────────────────
+
+  const P1_BANDS_KEYS = ["within_1km", "1_2km", "outside_2km"];
+  const P1_BAND_LABEL = { within_1km: "≤1 km", "1_2km": "1–2 km", outside_2km: ">2 km" };
+  const P1_OUTCOME = {
+    in:     { text: "No ballot", cls: "is-in",     title: "All applicants in this band were placed" },
+    ballot: { text: "Balloted",  cls: "is-ballot", title: "Balloting decided places in this band" },
+    none:   { text: "Filled up", cls: "is-none",   title: "The school filled before reaching this band" },
+  };
+  // Phases with a distance rule. 0 and 1 are sibling and alumni phases, where
+  // distance plays no part, so showing bands against them would be noise.
+  const P1_PHASES = ["2A", "2B", "2C", "2CS"];
+  const P1_PHASE_LABEL = { "2A": "2A", "2B": "2B", "2C": "2C", "2CS": "2C Supp" };
+
+  /** Past P1 outcomes for one school, newest year first.
+   *
+   *  The band row is the point. MOE states a single cut-off — the band the
+   *  school filled at — and everything nearer got in outright while everything
+   *  further away got nothing. Presented as three separate yes/no flags it
+   *  would read as the opposite of what it means, so each band is labelled
+   *  with what actually happened to it and MOE's own sentence is printed
+   *  underneath for anyone who wants to check the reading. */
+  function p1Html(school, index, multi) {
+    const rows = (school.p1 || []).filter((r) => P1_PHASES.includes(r.phase));
+    const heading = multi
+      ? `<span class="sp-pick-n">${index + 1}</span> ${escapeHtml(school.name)}`
+      : "P1 registration outcomes";
+
+    if (!rows.length) {
+      return `<h3 class="p-h3" style="margin-top:22px">${heading}</h3>
+        <p class="p-empty">MOE published no P1 registration data for this school
+          — schools that are merging or not taking a P1 intake are left out.</p>`;
+    }
+
+    const years = [...new Set(rows.map((r) => r.year))].sort().reverse();
+    const blocks = years.map((year) => {
+      const forYear = P1_PHASES
+        .map((ph) => rows.find((r) => r.year === year && r.phase === ph))
+        .filter(Boolean);
+
+      const body = forYear.map((r) => {
+        // A phase with no vacancies was never run for this school; saying so
+        // beats an em-dash the reader has to interpret.
+        const notRun = !r.vacancies;
+        const ratio = notRun ? `<span class="p1-norun">Not conducted</span>`
+          : `${num.format(r.applicants ?? 0)} for ${num.format(r.vacancies)}`;
+
+        const bands = notRun ? "" : r.bands
+          ? P1_BANDS_KEYS.map((b) => {
+              const o = P1_OUTCOME[r.bands[b]];
+              return o ? `<span class="p1-band ${o.cls}" title="${o.title}">
+                <b>${P1_BAND_LABEL[b]}</b>${o.text}</span>` : "";
+            }).join("")
+          : `<span class="p1-band is-unknown">Not stated by MOE</span>`;
+
+        return `<tr>
+          <td><b>${P1_PHASE_LABEL[r.phase]}</b></td>
+          <td class="num">${ratio}</td>
+          <td class="p1-bands">${bands}</td>
+        </tr>`;
+      }).join("");
+
+      const notes = forYear.filter((r) => r.note).map((r) =>
+        `<li><b>${P1_PHASE_LABEL[r.phase]}</b> ${escapeHtml(r.note)}</li>`).join("");
+
+      return `<p class="p1-year">${year} exercise</p>
+        <div class="p-table-wrap"><table class="p-table p1-table">
+          <thead><tr><th>Phase</th><th class="num">Applicants</th>
+            <th>Outcome by distance</th></tr></thead>
+          <tbody>${body}</tbody></table></div>
+        ${notes ? `<ul class="p1-notes">${notes}</ul>` : ""}`;
+    }).join("");
+
+    return `<h3 class="p-h3" style="margin-top:22px">${heading}</h3>
+      <p class="p-h3-sub">${years.length === 1
+        ? `${years[0]} only — MOE replaces this page each year, so later years accumulate here`
+        : `${years[years.length - 1]}–${years[0]}`}</p>
+      ${blocks}`;
+  }
 
   // ── panel ─────────────────────────────────────────────────────────────
 

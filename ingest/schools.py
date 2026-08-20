@@ -26,7 +26,20 @@ RESOURCE_ID = "d_688b934f82c1059ed0a6993d2a829089"
 
 PAGE_SIZE = 1000
 MAX_PAGES = 20
+
+# Not just mainlevel_code == "PRIMARY". Three of the most sought-after P1
+# schools — Catholic High, CHIJ St. Nicholas Girls' and Maris Stella High —
+# are through-train schools coded MIXED LEVEL (P1-S4). They run the P1
+# registration exercise like any other primary school, and filtering on the
+# bare string silently left all three off the map. Match on "takes P1
+# students" instead of on one exact code, so a future level string that still
+# starts at P1 is included rather than quietly dropped.
 PRIMARY = "PRIMARY"
+
+
+def takes_p1(mainlevel_code: Any) -> bool:
+    code = str(mainlevel_code or "").strip().upper()
+    return code == PRIMARY or "P1" in code
 
 # Courtesy pause between first-time geocodes; the cache makes this a one-off.
 GEOCODE_PAUSE = 0.12
@@ -66,7 +79,7 @@ def primary_schools(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Just the primary schools, normalised to what the map needs."""
     out = []
     for rec in records:
-        if str(rec.get("mainlevel_code") or "").strip().upper() != PRIMARY:
+        if not takes_p1(rec.get("mainlevel_code")):
             continue
         postal = str(rec.get("postal_code") or "").strip()
         name = str(rec.get("school_name") or "").strip()

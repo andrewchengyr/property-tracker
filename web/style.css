@@ -1788,3 +1788,63 @@ table.p-table {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ── P1 registration outcomes ────────────────────────────────────────── */
+
+.p1-year {
+  margin: 16px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.p1-table { table-layout: fixed; width: 100%; }
+.p1-table th:first-child, .p1-table td:first-child { width: 20%; }
+.p1-table th:nth-child(2), .p1-table td:nth-child(2) { width: 30%; }
+.p1-table th:last-child,  .p1-table td:last-child  { width: 50%; }
+.p1-table th, .p1-table td { padding-left: 6px; padding-right: 6px; }
+
+.p1-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 6px;
+  white-space: normal;
+}
+
+/* Each band says what happened to it in words. The colour is a second signal
+   only — "Filled up" against ">2 km" has to be readable without it, because
+   this is the row someone makes a purchase decision on. */
+.p1-band {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.p1-band b {
+  flex: none;
+  min-width: 44px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.p1-band.is-in     { color: var(--delta-up); }
+.p1-band.is-ballot { color: var(--school-strong); }
+.p1-band.is-none   { color: var(--delta-down); }
+.p1-band.is-unknown { color: var(--text-muted); font-style: italic; }
+
+.p1-notes {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.p1-notes b { color: var(--text-secondary); }
+.p1-norun { color: var(--text-muted); font-style: italic; }
