@@ -12,9 +12,22 @@ permissions:
   id-token: write   # deploy-pages uses OIDC
 
 # Never let a manual run and the cron fight over the same push.
+#
+# The newer run wins. Queueing the duplicate instead (cancel-in-progress:
+# false) looked safer and was not: a queued run still checks out the SHA from
+# its own dispatch time, so by the time it started the run ahead of it had
+# already pushed regenerated data, and the rebase below hit a merge conflict on
+# transactions.db and data.json. There is no merge driver for a SQLite file or
+# a 5 MB JSON, so that conflict is unresolvable by definition — the job died
+# and the site was never deployed.
+#
+# Cancelling is safe here because everything a run produces is derived: the
+# committed archive is only ever added to, and an abandoned run costs nothing
+# but the API calls. The deploy job needs the refresh job, so a cancelled run
+# simply leaves the previous deployment in place.
 concurrency:
   group: refresh
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   refresh:
