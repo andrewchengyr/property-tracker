@@ -184,3 +184,47 @@ def test_a_phase_with_no_vacancies_is_not_reported_as_easy():
     assert ballot.band_outcomes(
         {"cutoff_band": None, "balloted": False, "vacancies": 0, "applicants": 0}
     ) is None
+
+
+# --- fetch resilience ------------------------------------------------------
+
+class _FakeResponse:
+    def __init__(self, text): self.text = text
+    def raise_for_status(self): pass
+
+
+class _FakeSession:
+    """Serves a payload-less shell first, then the real page — the CDN-variant
+    case that CI hit while the same URL served 728 KB elsewhere."""
+    def __init__(self, bodies): self.bodies, self.urls = list(bodies), []
+    def get(self, url, **kw):
+        self.urls.append(url)
+        return _FakeResponse(self.bodies.pop(0) if self.bodies else "")
+
+
+def test_fetch_retries_when_the_page_comes_back_without_the_payload(monkeypatch):
+    monkeypatch.setattr(ballot.time, "sleep", lambda *_: None)
+    shell = "<html><body>no payload</body></html>"
+    session = _FakeSession([shell, shell, html()])
+    got = ballot.fetch(session=session)
+    assert '"schoolData"' in ballot._flight_payload(got)
+    assert len(session.urls) == 3, "should have retried past both empty bodies"
+
+
+def test_fetch_varies_the_cache_key_between_attempts(monkeypatch):
+    """Retrying the identical URL would just be served the same poisoned edge
+    object, so each attempt has to look like a different request."""
+    monkeypatch.setattr(ballot.time, "sleep", lambda *_: None)
+    session = _FakeSession(["<html></html>", html()])
+    ballot.fetch(session=session)
+    assert len(set(session.urls)) == len(session.urls)
+
+
+def test_fetch_gives_up_rather_than_looping(monkeypatch):
+    """A 200 with no payload is indistinguishable from a layout change, so it
+    must eventually raise — the caller keeps the archived years either way."""
+    monkeypatch.setattr(ballot.time, "sleep", lambda *_: None)
+    session = _FakeSession(["<html></html>"] * 10)
+    with pytest.raises(ballot.BallotError, match="no schoolData"):
+        ballot.fetch(session=session)
+    assert len(session.urls) == ballot.FETCH_ATTEMPTS

@@ -382,7 +382,15 @@ deleted, so each year's run adds one permanently.
 
 The data is not an API. It is embedded in the page as a Next.js flight payload
 and parsed out of the HTML, which makes it the most fragile source here — a
-site rebuild breaks it. It therefore degrades like the rest: a failed pull logs
+site rebuild breaks it.
+
+**A 200 does not mean the fetch worked.** The site sits behind CloudFront and
+varies on `rsc` and the Next.js router headers, so an edge can hold a variant
+of this URL that renders the shell with no `schoolData` in it. The first CI run
+got exactly that — a clean 200, no payload — while the identical request from
+another network returned the full 728 KB. `fetch` therefore checks for the
+payload rather than the status code, retries with a varied cache key and
+`Cache-Control: no-cache`, and only then gives up. It therefore degrades like the rest: a failed pull logs
 and keeps the archived years, and the export reads from the **database** rather
 than from the pull so previously stored years survive a year that cannot be
 fetched.

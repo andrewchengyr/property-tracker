@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from typing import Any, Iterable
 
 import requests
@@ -75,11 +76,54 @@ def normalise_name(name: Any) -> str:
 
 # ---------------------------------------------------------------- fetch -----
 
+FETCH_ATTEMPTS = 4
+FETCH_BACKOFF = 4
+
+
 def fetch(session: requests.Session | None = None, url: str = URL) -> str:
+    """Fetch the page, insisting that the payload is actually in it.
+
+    The site sits behind CloudFront and varies on `rsc` and the Next.js router
+    headers, so an edge can hold a variant of this URL that renders the shell
+    without `schoolData`. A 200 with no payload is what CI got while the same
+    request from a different network returned the full 728 KB — so a bare
+    status check is not enough to know the fetch worked.
+
+    Each attempt asks the CDN to revalidate and varies the cache key, then
+    retries on a body that came back without the payload. It still gives up
+    rather than looping: the caller keeps the archived years either way.
+    """
     session = session or requests.Session()
-    r = session.get(url, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
-    r.raise_for_status()
-    return r.text
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+
+    last = ""
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        # Vary the query string so a poisoned edge object is not reused. The
+        # page ignores unknown parameters.
+        r = session.get(f"{url}?cb={attempt}", headers=headers, timeout=TIMEOUT)
+        r.raise_for_status()
+        last = r.text
+        if '"schoolData"' in _flight_payload(last):
+            if attempt > 1:
+                log.info("MOE page carried the payload on attempt %d", attempt)
+            return last
+        log.warning(
+            "MOE page returned %d chars with no schoolData (attempt %d/%d) — "
+            "probably a CDN variant; retrying",
+            len(last), attempt, FETCH_ATTEMPTS,
+        )
+        if attempt < FETCH_ATTEMPTS:
+            time.sleep(FETCH_BACKOFF * attempt)
+
+    raise BallotError(
+        f"MOE page had no schoolData after {FETCH_ATTEMPTS} attempts "
+        f"(last body {len(last)} chars) — CDN variant, or the layout changed"
+    )
 
 
 def _flight_payload(html: str) -> str:
