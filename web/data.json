@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-20T16:18:07Z",
+  "generated_at": "2026-08-23T20:36:16Z",
   "properties": [
     {
       "id": "hdb-1-beach-rd-5-room-adjoined-flat",
@@ -39960,6 +39960,13 @@
           "area_sqft": 1431.6,
           "psf": 536.5,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 790000.0,
+          "area_sqft": 1431.6,
+          "psf": 551.8,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -40030,8 +40037,8 @@
         }
       ],
       "model": "Model A",
-      "latest_psf": 536.5,
-      "txn_count": 12
+      "latest_psf": 551.8,
+      "txn_count": 13
     },
     {
       "id": "hdb-143-jln-bt-merah-5-room-improved",
@@ -104169,6 +104176,13 @@
           "area_sqft": 1313.2,
           "psf": 516.3,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 645000.0,
+          "area_sqft": 1313.2,
+          "psf": 491.2,
+          "storey": "01 TO 03"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -104229,8 +104243,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 516.3,
-      "txn_count": 13
+      "latest_psf": 491.2,
+      "txn_count": 14
     },
     {
       "id": "hdb-369-tampines-st-34-5-room-improved",
@@ -107606,6 +107620,13 @@
           "area_sqft": 1259.4,
           "psf": 578.1,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 828000.0,
+          "area_sqft": 1259.4,
+          "psf": 657.5,
+          "storey": "19 TO 21"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -107681,8 +107702,8 @@
         }
       ],
       "model": "Standard",
-      "latest_psf": 578.1,
-      "txn_count": 18
+      "latest_psf": 657.5,
+      "txn_count": 19
     },
     {
       "id": "hdb-39-upp-boon-keng-rd-5-room-standard",
@@ -113364,6 +113385,13 @@
           "area_sqft": 1313.2,
           "psf": 533.0,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 730000.0,
+          "area_sqft": 1313.2,
+          "psf": 555.9,
+          "storey": "01 TO 03"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -113424,8 +113452,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 533.0,
-      "txn_count": 8
+      "latest_psf": 555.9,
+      "txn_count": 9
     },
     {
       "id": "hdb-425-tampines-st-41-5-room-improved",
@@ -114574,6 +114602,13 @@
           "area_sqft": 1302.4,
           "psf": 598.9,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 900000.0,
+          "area_sqft": 1302.4,
+          "psf": 691.0,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -114654,8 +114689,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 598.9,
-      "txn_count": 15
+      "latest_psf": 691.0,
+      "txn_count": 16
     },
     {
       "id": "hdb-44-marine-cres-5-room-standard",
@@ -156317,6 +156352,13 @@
           "area_sqft": 1291.7,
           "psf": 611.6,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 780888.0,
+          "area_sqft": 1280.9,
+          "psf": 609.6,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -156392,8 +156434,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 611.6,
-      "txn_count": 20
+      "latest_psf": 609.6,
+      "txn_count": 21
     },
     {
       "id": "hdb-716-tampines-st-71-5-room-improved",
@@ -159538,6 +159580,13 @@
           "area_sqft": 1291.7,
           "psf": 642.6,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 816000.0,
+          "area_sqft": 1280.9,
+          "psf": 637.0,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -159608,8 +159657,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 642.6,
-      "txn_count": 12
+      "latest_psf": 637.0,
+      "txn_count": 13
     },
     {
       "id": "hdb-731-tampines-st-71-5-room-improved",
@@ -187650,6 +187699,13 @@
           "area_sqft": 785.8,
           "psf": 2360.8,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 3683000.0,
+          "area_sqft": 1582.3,
+          "psf": 2327.6,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "Freehold",
@@ -187658,8 +187714,8 @@
       "top_year": null,
       "rents": [],
       "model": "Apartment",
-      "latest_psf": 2360.8,
-      "txn_count": 21
+      "latest_psf": 2327.6,
+      "txn_count": 22
     },
     {
       "id": "ura-avon-park",
@@ -193703,6 +193759,27 @@
           "area_sqft": 570.5,
           "psf": 1893.1,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1285000.0,
+          "area_sqft": 678.1,
+          "psf": 1894.9,
+          "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1150000.0,
+          "area_sqft": 570.5,
+          "psf": 2015.8,
+          "storey": "16-20"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2068000.0,
+          "area_sqft": 947.2,
+          "psf": 2183.2,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -193772,8 +193849,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1893.1,
-      "txn_count": 184
+      "latest_psf": 1996.8,
+      "txn_count": 187
     },
     {
       "id": "ura-intero",
@@ -200108,6 +200185,20 @@
           "area_sqft": 635.1,
           "psf": 2267.5,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1300000.0,
+          "area_sqft": 602.8,
+          "psf": 2156.7,
+          "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1060000.0,
+          "area_sqft": 462.9,
+          "psf": 2290.2,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -200177,8 +200268,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 2267.5,
-      "txn_count": 225
+      "latest_psf": 2238.1,
+      "txn_count": 227
     },
     {
       "id": "ura-platinum-edge",
@@ -202151,6 +202242,13 @@
           "area_sqft": 828.8,
           "psf": 2051.1,
           "storey": "11-15"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 4280888.0,
+          "area_sqft": 3390.6,
+          "psf": 1262.6,
+          "storey": "16-20"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -202220,8 +202318,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 2051.1,
-      "txn_count": 86
+      "latest_psf": 1656.8,
+      "txn_count": 87
     },
     {
       "id": "ura-sin-ming-centre",
@@ -211131,6 +211229,13 @@
           "area_sqft": 753.5,
           "psf": 2269.5,
           "storey": "16-20"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1870000.0,
+          "area_sqft": 839.6,
+          "psf": 2227.3,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -211200,8 +211305,8 @@
         }
       ],
       "model": "Apartment",
-      "latest_psf": 2155.8,
-      "txn_count": 218
+      "latest_psf": 2227.3,
+      "txn_count": 219
     },
     {
       "id": "ura-the-tre-ver",
@@ -221112,6 +221217,13 @@
           "area_sqft": 1270.1,
           "psf": 2267.5,
           "storey": "36-40"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1788888.0,
+          "area_sqft": 947.2,
+          "psf": 1888.6,
+          "storey": "36-40"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -221181,8 +221293,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 2188.7,
-      "txn_count": 133
+      "latest_psf": 1888.6,
+      "txn_count": 134
     },
     {
       "id": "ura-wan-tho-lodge",
