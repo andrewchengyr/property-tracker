@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-23T20:36:16Z",
+  "generated_at": "2026-08-30T22:46:25Z",
   "properties": [
     {
       "id": "hdb-1-beach-rd-5-room-adjoined-flat",
@@ -2608,6 +2608,13 @@
           "area_sqft": 1560.8,
           "psf": 756.0,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1350000.0,
+          "area_sqft": 1582.3,
+          "psf": 853.2,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -2648,8 +2655,8 @@
         }
       ],
       "model": "Apartment",
-      "latest_psf": 756.0,
-      "txn_count": 12
+      "latest_psf": 853.2,
+      "txn_count": 13
     },
     {
       "id": "hdb-101b-lor-2-toa-payoh-executive-apartment",
@@ -7285,6 +7292,13 @@
           "area_sqft": 1216.3,
           "psf": 1134.6,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1400000.0,
+          "area_sqft": 1216.3,
+          "psf": 1151.0,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -7300,8 +7314,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 1134.6,
-      "txn_count": 1
+      "latest_psf": 1142.8,
+      "txn_count": 2
     },
     {
       "id": "hdb-108-jln-rajah-executive-maisonette",
@@ -7467,6 +7481,13 @@
           "area_sqft": 1614.6,
           "psf": 619.4,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 968000.0,
+          "area_sqft": 1614.6,
+          "psf": 599.5,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -7552,8 +7573,8 @@
         }
       ],
       "model": "Maisonette",
-      "latest_psf": 619.4,
-      "txn_count": 22
+      "latest_psf": 599.5,
+      "txn_count": 23
     },
     {
       "id": "hdb-108-mcnair-rd-5-room-improved",
@@ -10720,6 +10741,13 @@
           "area_sqft": 1550.0,
           "psf": 658.1,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1128000.0,
+          "area_sqft": 1550.0,
+          "psf": 727.7,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -10780,8 +10808,8 @@
         }
       ],
       "model": "Maisonette",
-      "latest_psf": 658.1,
-      "txn_count": 13
+      "latest_psf": 727.7,
+      "txn_count": 14
     },
     {
       "id": "hdb-110-mcnair-rd-executive-apartment",
@@ -14265,6 +14293,13 @@
           "area_sqft": 1410.1,
           "psf": 535.4,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 890000.0,
+          "area_sqft": 1420.8,
+          "psf": 626.4,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -14290,8 +14325,8 @@
         }
       ],
       "model": "Model A",
-      "latest_psf": 535.4,
-      "txn_count": 8
+      "latest_psf": 626.4,
+      "txn_count": 9
     },
     {
       "id": "hdb-114-whampoa-rd-5-room-improved",
@@ -29810,6 +29845,13 @@
           "area_sqft": 1184.0,
           "psf": 827.7,
           "storey": "16 TO 18"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1065000.0,
+          "area_sqft": 1184.0,
+          "psf": 899.5,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -29965,8 +30007,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 827.7,
-      "txn_count": 26
+      "latest_psf": 899.5,
+      "txn_count": 27
     },
     {
       "id": "hdb-131c-kim-tian-rd-5-room-improved",
@@ -35116,6 +35158,13 @@
           "area_sqft": 1259.4,
           "psf": 1135.5,
           "storey": "28 TO 30"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1450000.0,
+          "area_sqft": 1259.4,
+          "psf": 1151.4,
+          "storey": "28 TO 30"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -35276,8 +35325,8 @@
         }
       ],
       "model": "DBSS",
-      "latest_psf": 1135.5,
-      "txn_count": 75
+      "latest_psf": 1151.4,
+      "txn_count": 76
     },
     {
       "id": "hdb-139-bishan-st-12-5-room-improved",
@@ -37294,6 +37343,13 @@
           "area_sqft": 1259.4,
           "psf": 714.6,
           "storey": "19 TO 21"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 910000.0,
+          "area_sqft": 1259.4,
+          "psf": 722.6,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -37449,8 +37505,8 @@
         }
       ],
       "model": "Standard",
-      "latest_psf": 714.6,
-      "txn_count": 10
+      "latest_psf": 722.6,
+      "txn_count": 11
     },
     {
       "id": "hdb-14-jln-bt-merah-5-room-improved",
@@ -47677,6 +47733,13 @@
           "area_sqft": 1302.4,
           "psf": 668.0,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1100000.0,
+          "area_sqft": 1367.0,
+          "psf": 804.7,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -47687,113 +47750,113 @@
       "rents": [
         {
           "date": "2021-03-01",
-          "psf": 2.303,
+          "psf": 2.195,
           "n": 1
         },
         {
           "date": "2021-07-01",
-          "psf": 1.958,
+          "psf": 1.865,
           "n": 1
         },
         {
           "date": "2021-08-01",
-          "psf": 1.919,
+          "psf": 1.829,
           "n": 1
         },
         {
           "date": "2021-10-01",
-          "psf": 2.227,
+          "psf": 2.121,
           "n": 1
         },
         {
           "date": "2021-11-01",
-          "psf": 2.073,
+          "psf": 1.975,
           "n": 1
         },
         {
           "date": "2022-06-01",
-          "psf": 1.843,
+          "psf": 1.756,
           "n": 1
         },
         {
           "date": "2022-09-01",
-          "psf": 1.843,
+          "psf": 1.756,
           "n": 1
         },
         {
           "date": "2022-10-01",
-          "psf": 2.303,
+          "psf": 2.195,
           "n": 1
         },
         {
           "date": "2023-01-01",
-          "psf": 3.455,
+          "psf": 3.292,
           "n": 1
         },
         {
           "date": "2023-04-01",
-          "psf": 3.225,
+          "psf": 3.072,
           "n": 1
         },
         {
           "date": "2023-10-01",
-          "psf": 2.841,
+          "psf": 2.707,
           "n": 1
         },
         {
           "date": "2023-12-01",
-          "psf": 3.225,
+          "psf": 3.072,
           "n": 1
         },
         {
           "date": "2024-03-01",
-          "psf": 3.225,
+          "psf": 3.072,
           "n": 1
         },
         {
           "date": "2024-05-01",
-          "psf": 2.15,
+          "psf": 2.048,
           "n": 1
         },
         {
           "date": "2024-09-01",
-          "psf": 2.611,
+          "psf": 2.487,
           "n": 1
         },
         {
           "date": "2024-12-01",
-          "psf": 2.918,
+          "psf": 2.78,
           "n": 1
         },
         {
           "date": "2025-03-01",
-          "psf": 3.225,
+          "psf": 3.072,
           "n": 1
         },
         {
           "date": "2025-04-01",
-          "psf": 3.225,
+          "psf": 3.072,
           "n": 1
         },
         {
           "date": "2025-12-01",
-          "psf": 2.994,
+          "psf": 2.853,
           "n": 1
         },
         {
           "date": "2026-03-01",
-          "psf": 2.994,
+          "psf": 2.853,
           "n": 1
         },
         {
           "date": "2026-05-01",
-          "psf": 2.303,
+          "psf": 2.195,
           "n": 1
         }
       ],
       "model": "Improved",
-      "latest_psf": 668.0,
-      "txn_count": 21
+      "latest_psf": 804.7,
+      "txn_count": 22
     },
     {
       "id": "hdb-158-simei-rd-5-room-improved",
@@ -60216,6 +60279,13 @@
           "area_sqft": 1302.4,
           "psf": 813.9,
           "storey": "13 TO 15"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1038000.0,
+          "area_sqft": 1302.4,
+          "psf": 797.0,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -60291,8 +60361,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 813.9,
-      "txn_count": 17
+      "latest_psf": 797.0,
+      "txn_count": 18
     },
     {
       "id": "hdb-194-bishan-st-13-executive-maisonette",
@@ -63230,6 +63300,13 @@
           "area_sqft": 1367.0,
           "psf": 508.4,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 968000.0,
+          "area_sqft": 1485.4,
+          "psf": 651.7,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -63239,8 +63316,8 @@
       "top_year": 1980,
       "rents": [],
       "model": "Improved",
-      "latest_psf": 508.4,
-      "txn_count": 2
+      "latest_psf": 651.7,
+      "txn_count": 3
     },
     {
       "id": "hdb-2-ghim-moh-rd-5-room-adjoined-flat",
@@ -67079,6 +67156,13 @@
           "area_sqft": 1603.8,
           "psf": 809.3,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1438000.0,
+          "area_sqft": 1679.2,
+          "psf": 856.4,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -67134,8 +67218,8 @@
         }
       ],
       "model": "Maisonette",
-      "latest_psf": 778.8,
-      "txn_count": 24
+      "latest_psf": 856.4,
+      "txn_count": 25
     },
     {
       "id": "hdb-213-bishan-st-23-5-room-model-a",
@@ -68781,6 +68865,13 @@
           "area_sqft": 1603.8,
           "psf": 765.7,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1248880.0,
+          "area_sqft": 1571.5,
+          "psf": 794.7,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -68816,8 +68907,8 @@
         }
       ],
       "model": "Maisonette",
-      "latest_psf": 765.7,
-      "txn_count": 15
+      "latest_psf": 794.7,
+      "txn_count": 16
     },
     {
       "id": "hdb-22-dover-cres-5-room-model-a",
@@ -76450,6 +76541,13 @@
           "area_sqft": 1603.8,
           "psf": 667.2,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1330000.0,
+          "area_sqft": 1603.8,
+          "psf": 829.3,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -76465,8 +76563,8 @@
         }
       ],
       "model": "Maisonette",
-      "latest_psf": 667.2,
-      "txn_count": 14
+      "latest_psf": 829.3,
+      "txn_count": 15
     },
     {
       "id": "hdb-238-lor-1-toa-payoh-5-room-improved",
@@ -76583,6 +76681,13 @@
           "area_sqft": 1291.7,
           "psf": 641.2,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 820000.0,
+          "area_sqft": 1291.7,
+          "psf": 634.8,
+          "storey": "19 TO 21"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -76633,8 +76738,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 672.9,
-      "txn_count": 15
+      "latest_psf": 634.8,
+      "txn_count": 16
     },
     {
       "id": "hdb-239-bishan-st-22-5-room-model-a",
@@ -90058,6 +90163,13 @@
           "area_sqft": 1324.0,
           "psf": 830.8,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1128000.0,
+          "area_sqft": 1324.0,
+          "psf": 852.0,
+          "storey": "25 TO 27"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -90133,8 +90245,8 @@
         }
       ],
       "model": "Premium Apartment",
-      "latest_psf": 830.8,
-      "txn_count": 21
+      "latest_psf": 852.0,
+      "txn_count": 22
     },
     {
       "id": "hdb-291-bishan-st-24-5-room-premium-apartment",
@@ -103407,6 +103519,56 @@
       "txn_count": 2
     },
     {
+      "id": "hdb-363-tampines-st-34-5-room-model-a",
+      "name": "363 TAMPINES ST 34",
+      "source": "HDB",
+      "type": "5 ROOM",
+      "segment": "TAMPINES",
+      "address": "363 TAMPINES ST 34",
+      "district_town": "TAMPINES",
+      "lat": 1.3555206788848,
+      "lng": 103.960860222796,
+      "txns": [
+        {
+          "date": "2026-08-01",
+          "price": 725000.0,
+          "area_sqft": 1410.1,
+          "psf": 514.2,
+          "storey": "01 TO 03"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1996,
+      "lease_years": 99,
+      "flat_model": "Model A",
+      "top_year": 1996,
+      "rents": [
+        {
+          "date": "2022-01-01",
+          "psf": 2.377,
+          "n": 1
+        },
+        {
+          "date": "2023-12-01",
+          "psf": 2.377,
+          "n": 1
+        },
+        {
+          "date": "2025-12-01",
+          "psf": 2.737,
+          "n": 1
+        },
+        {
+          "date": "2026-05-01",
+          "psf": 2.809,
+          "n": 1
+        }
+      ],
+      "model": "Model A",
+      "latest_psf": 514.2,
+      "txn_count": 1
+    },
+    {
       "id": "hdb-364-tampines-st-34-5-room-improved",
       "name": "364 TAMPINES ST 34",
       "source": "HDB",
@@ -108389,6 +108551,13 @@
           "area_sqft": 1367.0,
           "psf": 620.3,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 838000.0,
+          "area_sqft": 1367.0,
+          "psf": 613.0,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -108494,8 +108663,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 620.3,
-      "txn_count": 9
+      "latest_psf": 616.6,
+      "txn_count": 10
     },
     {
       "id": "hdb-394-tampines-ave-7-5-room-improved",
@@ -114358,6 +114527,13 @@
           "area_sqft": 1313.2,
           "psf": 559.7,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 741888.0,
+          "area_sqft": 1313.2,
+          "psf": 565.0,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -114398,8 +114574,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 559.7,
-      "txn_count": 15
+      "latest_psf": 565.0,
+      "txn_count": 16
     },
     {
       "id": "hdb-43a-sims-dr-5-room-improved",
@@ -115808,6 +115984,13 @@
           "area_sqft": 1324.0,
           "psf": 617.8,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1158000.0,
+          "area_sqft": 1313.2,
+          "psf": 881.8,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -115817,8 +116000,8 @@
       "top_year": 1990,
       "rents": [],
       "model": "Improved",
-      "latest_psf": 617.8,
-      "txn_count": 3
+      "latest_psf": 881.8,
+      "txn_count": 4
     },
     {
       "id": "hdb-446-bright-hill-dr-executive-maisonette",
@@ -124913,6 +125096,13 @@
           "area_sqft": 1334.7,
           "psf": 588.1,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 785000.0,
+          "area_sqft": 1356.2,
+          "psf": 578.8,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -124923,63 +125113,63 @@
       "rents": [
         {
           "date": "2021-11-01",
-          "psf": 1.486,
+          "psf": 1.475,
           "n": 1
         },
         {
           "date": "2022-03-01",
-          "psf": 1.486,
+          "psf": 1.475,
           "n": 1
         },
         {
           "date": "2022-06-01",
-          "psf": 1.635,
+          "psf": 1.622,
           "n": 1
         },
         {
           "date": "2022-09-01",
-          "psf": 1.858,
+          "psf": 1.843,
           "n": 1
         },
         {
           "date": "2023-11-01",
-          "psf": 2.973,
+          "psf": 2.949,
           "n": 1
         },
         {
           "date": "2024-02-01",
-          "psf": 2.23,
+          "psf": 2.212,
           "n": 1
         },
         {
           "date": "2024-05-01",
-          "psf": 2.601,
+          "psf": 2.581,
           "n": 1
         },
         {
           "date": "2024-10-01",
-          "psf": 2.973,
+          "psf": 2.949,
           "n": 1
         },
         {
           "date": "2025-05-01",
-          "psf": 2.601,
+          "psf": 2.581,
           "n": 1
         },
         {
           "date": "2025-12-01",
-          "psf": 2.601,
+          "psf": 2.581,
           "n": 1
         },
         {
           "date": "2026-02-01",
-          "psf": 2.23,
+          "psf": 2.212,
           "n": 1
         }
       ],
       "model": "Improved",
-      "latest_psf": 588.1,
-      "txn_count": 13
+      "latest_psf": 578.8,
+      "txn_count": 14
     },
     {
       "id": "hdb-491b-tampines-ave-9-5-room-improved",
@@ -128749,6 +128939,13 @@
           "area_sqft": 1334.7,
           "psf": 594.1,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 750000.0,
+          "area_sqft": 1367.0,
+          "psf": 548.6,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -128844,8 +129041,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 594.1,
-      "txn_count": 16
+      "latest_psf": 548.6,
+      "txn_count": 17
     },
     {
       "id": "hdb-496d-tampines-ave-9-5-room-model-a",
@@ -130304,6 +130501,13 @@
           "area_sqft": 1345.5,
           "psf": 505.4,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 660000.0,
+          "area_sqft": 1334.7,
+          "psf": 494.5,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -130354,8 +130558,8 @@
         }
       ],
       "model": "Premium Apartment",
-      "latest_psf": 503.7,
-      "txn_count": 3
+      "latest_psf": 494.5,
+      "txn_count": 4
     },
     {
       "id": "hdb-498e-tampines-st-45-5-room-premium-apartment",
@@ -137419,6 +137623,13 @@
           "area_sqft": 1162.5,
           "psf": 903.2,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1120000.0,
+          "area_sqft": 1173.3,
+          "psf": 954.6,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -137434,8 +137645,8 @@
         }
       ],
       "model": "DBSS",
-      "latest_psf": 903.2,
-      "txn_count": 17
+      "latest_psf": 954.6,
+      "txn_count": 18
     },
     {
       "id": "hdb-519d-tampines-ctrl-8-5-room-dbss",
@@ -137786,6 +137997,35 @@
       "model": "Improved",
       "latest_psf": 525.4,
       "txn_count": 2
+    },
+    {
+      "id": "hdb-52-sims-pl-5-room-adjoined-flat",
+      "name": "52 SIMS PL",
+      "source": "HDB",
+      "type": "5 ROOM",
+      "segment": "GEYLANG",
+      "address": "52 SIMS PL",
+      "district_town": "GEYLANG",
+      "lat": null,
+      "lng": null,
+      "txns": [
+        {
+          "date": "2026-08-01",
+          "price": 925888.0,
+          "area_sqft": 1517.7,
+          "psf": 610.1,
+          "storey": "07 TO 09"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 1977,
+      "lease_years": 99,
+      "flat_model": "Adjoined flat",
+      "top_year": 1977,
+      "rents": [],
+      "model": "Adjoined flat",
+      "latest_psf": 610.1,
+      "txn_count": 1
     },
     {
       "id": "hdb-52-strathmore-ave-5-room-improved",
@@ -143202,6 +143442,13 @@
           "area_sqft": 1313.2,
           "psf": 607.7,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 970000.0,
+          "area_sqft": 1313.2,
+          "psf": 738.7,
+          "storey": "04 TO 06"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -143287,8 +143534,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 607.7,
-      "txn_count": 4
+      "latest_psf": 738.7,
+      "txn_count": 5
     },
     {
       "id": "hdb-58-strathmore-ave-5-room-improved",
@@ -146106,6 +146353,13 @@
           "area_sqft": 1280.9,
           "psf": 659.7,
           "storey": "04 TO 06"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 850888.0,
+          "area_sqft": 1280.9,
+          "psf": 664.3,
+          "storey": "07 TO 09"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -146115,8 +146369,8 @@
       "top_year": 2020,
       "rents": [],
       "model": "3Gen",
-      "latest_psf": 659.7,
-      "txn_count": 3
+      "latest_psf": 662.0,
+      "txn_count": 4
     },
     {
       "id": "hdb-605a-tampines-st-61-5-room-improved",
@@ -147759,6 +148013,13 @@
           "area_sqft": 1216.3,
           "psf": 760.5,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 913131.0,
+          "area_sqft": 1216.3,
+          "psf": 750.7,
+          "storey": "10 TO 12"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -147784,8 +148045,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 760.5,
-      "txn_count": 19
+      "latest_psf": 750.7,
+      "txn_count": 20
     },
     {
       "id": "hdb-612a-tampines-nth-dr-1-5-room-improved",
@@ -148423,6 +148684,13 @@
           "area_sqft": 1216.3,
           "psf": 763.0,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 938000.0,
+          "area_sqft": 1216.3,
+          "psf": 771.2,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -148448,8 +148716,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 763.0,
-      "txn_count": 3
+      "latest_psf": 771.2,
+      "txn_count": 4
     },
     {
       "id": "hdb-619a-tampines-st-61-5-room-improved",
@@ -148941,6 +149209,13 @@
           "area_sqft": 1216.3,
           "psf": 785.1,
           "storey": "10 TO 12"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 880000.0,
+          "area_sqft": 1216.3,
+          "psf": 723.5,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -148950,8 +149225,8 @@
       "top_year": 2021,
       "rents": [],
       "model": "Improved",
-      "latest_psf": 776.9,
-      "txn_count": 4
+      "latest_psf": 723.5,
+      "txn_count": 5
     },
     {
       "id": "hdb-620b-tampines-st-61-5-room-improved",
@@ -149015,6 +149290,35 @@
       "rents": [],
       "model": "Improved",
       "latest_psf": 809.8,
+      "txn_count": 1
+    },
+    {
+      "id": "hdb-627b-tampines-st-61-5-room-improved",
+      "name": "627B TAMPINES ST 61",
+      "source": "HDB",
+      "type": "5 ROOM",
+      "segment": "TAMPINES",
+      "address": "627B TAMPINES ST 61",
+      "district_town": "TAMPINES",
+      "lat": null,
+      "lng": null,
+      "txns": [
+        {
+          "date": "2026-08-01",
+          "price": 1080000.0,
+          "area_sqft": 1248.6,
+          "psf": 865.0,
+          "storey": "10 TO 12"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 2022,
+      "lease_years": 99,
+      "flat_model": "Improved",
+      "top_year": 2022,
+      "rents": [],
+      "model": "Improved",
+      "latest_psf": 865.0,
       "txn_count": 1
     },
     {
@@ -150591,6 +150895,13 @@
           "area_sqft": 1130.2,
           "psf": 579.5,
           "storey": "16 TO 18"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 787000.0,
+          "area_sqft": 1130.2,
+          "psf": 696.3,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -150616,8 +150927,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 579.5,
-      "txn_count": 1
+      "latest_psf": 696.3,
+      "txn_count": 2
     },
     {
       "id": "hdb-672a-klang-lane-5-room-improved",
@@ -151729,6 +152040,13 @@
           "area_sqft": 1237.8,
           "psf": 1092.2,
           "storey": "16 TO 18"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1400000.0,
+          "area_sqft": 1237.8,
+          "psf": 1131.0,
+          "storey": "19 TO 21"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -151804,8 +152122,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 1092.2,
-      "txn_count": 10
+      "latest_psf": 1131.0,
+      "txn_count": 11
     },
     {
       "id": "hdb-7-boon-keng-rd-5-room-dbss",
@@ -153657,6 +153975,13 @@
           "area_sqft": 1184.0,
           "psf": 1161.3,
           "storey": "19 TO 21"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1338000.0,
+          "area_sqft": 1184.0,
+          "psf": 1130.0,
+          "storey": "13 TO 15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -153777,8 +154102,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 1161.3,
-      "txn_count": 23
+      "latest_psf": 1130.0,
+      "txn_count": 24
     },
     {
       "id": "hdb-7-toh-yi-dr-executive-maisonette",
@@ -158156,6 +158481,13 @@
           "area_sqft": 1280.9,
           "psf": 593.3,
           "storey": "07 TO 09"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 708000.0,
+          "area_sqft": 1291.7,
+          "psf": 548.1,
+          "storey": "01 TO 03"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -158191,8 +158523,8 @@
         }
       ],
       "model": "Improved",
-      "latest_psf": 593.3,
-      "txn_count": 20
+      "latest_psf": 548.1,
+      "txn_count": 21
     },
     {
       "id": "hdb-724-tampines-st-71-5-room-improved",
@@ -162888,6 +163220,13 @@
           "area_sqft": 1291.7,
           "psf": 711.5,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1160000.0,
+          "area_sqft": 1291.7,
+          "psf": 898.1,
+          "storey": "16 TO 18"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -162968,8 +163307,8 @@
         }
       ],
       "model": "Standard",
-      "latest_psf": 711.5,
-      "txn_count": 14
+      "latest_psf": 898.1,
+      "txn_count": 15
     },
     {
       "id": "hdb-77a-redhill-rd-5-room-improved",
@@ -163821,6 +164160,13 @@
           "area_sqft": 1291.7,
           "psf": 929.0,
           "storey": "22 TO 24"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1060000.0,
+          "area_sqft": 1291.7,
+          "psf": 820.6,
+          "storey": "19 TO 21"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -163926,8 +164272,8 @@
         }
       ],
       "model": "Standard",
-      "latest_psf": 901.2,
-      "txn_count": 22
+      "latest_psf": 820.6,
+      "txn_count": 23
     },
     {
       "id": "hdb-79a-toa-payoh-ctrl-5-room-improved",
@@ -171402,6 +171748,13 @@
           "area_sqft": 1431.6,
           "psf": 558.8,
           "storey": "01 TO 03"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 932000.0,
+          "area_sqft": 1420.8,
+          "psf": 656.0,
+          "storey": "16 TO 18"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -171472,8 +171825,8 @@
         }
       ],
       "model": "Model A",
-      "latest_psf": 558.8,
-      "txn_count": 7
+      "latest_psf": 656.0,
+      "txn_count": 8
     },
     {
       "id": "hdb-842c-tampines-st-82-5-room-improved",
@@ -178790,6 +179143,35 @@
       "model": "Improved",
       "latest_psf": 765.3,
       "txn_count": 6
+    },
+    {
+      "id": "hdb-874d-tampines-st-85-5-room-improved",
+      "name": "874D TAMPINES ST 85",
+      "source": "HDB",
+      "type": "5 ROOM",
+      "segment": "TAMPINES",
+      "address": "874D TAMPINES ST 85",
+      "district_town": "TAMPINES",
+      "lat": null,
+      "lng": null,
+      "txns": [
+        {
+          "date": "2026-08-01",
+          "price": 962000.0,
+          "area_sqft": 1216.3,
+          "psf": 790.9,
+          "storey": "13 TO 15"
+        }
+      ],
+      "tenure_label": "99-year leasehold",
+      "lease_start": 2021,
+      "lease_years": 99,
+      "flat_model": "Improved",
+      "top_year": 2021,
+      "rents": [],
+      "model": "Improved",
+      "latest_psf": 790.9,
+      "txn_count": 1
     },
     {
       "id": "hdb-875b-tampines-st-86-5-room-improved",
@@ -187769,6 +188151,13 @@
           "area_sqft": 1280.9,
           "psf": 1940.4,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2480000.0,
+          "area_sqft": 1270.1,
+          "psf": 1952.5,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "Freehold",
@@ -187803,8 +188192,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1940.4,
-      "txn_count": 6
+      "latest_psf": 1952.5,
+      "txn_count": 7
     },
     {
       "id": "ura-bartley-ridge",
@@ -191837,6 +192226,13 @@
           "area_sqft": 2174.3,
           "psf": 1343.0,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2580000.0,
+          "area_sqft": 1216.3,
+          "psf": 2121.2,
+          "storey": "26-30"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -191896,8 +192292,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1343.0,
-      "txn_count": 80
+      "latest_psf": 2121.2,
+      "txn_count": 81
     },
     {
       "id": "ura-country-esquire",
@@ -196347,6 +196743,13 @@
           "area_sqft": 764.2,
           "psf": 2170.7,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1730000.0,
+          "area_sqft": 764.2,
+          "psf": 2263.7,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -196416,8 +196819,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 2299.8,
-      "txn_count": 346
+      "latest_psf": 2287.7,
+      "txn_count": 347
     },
     {
       "id": "ura-leicester-lodge",
@@ -198154,6 +198557,13 @@
           "area_sqft": 861.1,
           "psf": 1579.3,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1880000.0,
+          "area_sqft": 1141.0,
+          "psf": 1647.7,
+          "storey": "11-15"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -198223,8 +198633,8 @@
         }
       ],
       "model": "Apartment",
-      "latest_psf": 1579.3,
-      "txn_count": 54
+      "latest_psf": 1647.7,
+      "txn_count": 55
     },
     {
       "id": "ura-one-leicester",
@@ -198404,6 +198814,13 @@
           "area_sqft": 1248.6,
           "psf": 1962.2,
           "storey": "11-15"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2380000.0,
+          "area_sqft": 1151.7,
+          "psf": 2066.4,
+          "storey": "06-10"
         }
       ],
       "tenure_label": "Freehold",
@@ -198423,8 +198840,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1962.2,
-      "txn_count": 24
+      "latest_psf": 2066.4,
+      "txn_count": 25
     },
     {
       "id": "ura-parc-aston",
@@ -213446,6 +213863,20 @@
           "area_sqft": 495.1,
           "psf": 1773.2,
           "storey": "11-15"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1500000.0,
+          "area_sqft": 742.7,
+          "psf": 2019.6,
+          "storey": "11-15"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 873000.0,
+          "area_sqft": 505.9,
+          "psf": 1725.6,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -213515,8 +213946,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1773.2,
-      "txn_count": 304
+      "latest_psf": 1839.5,
+      "txn_count": 306
     },
     {
       "id": "ura-the-venue-residences",
@@ -214268,6 +214699,13 @@
           "area_sqft": 1345.5,
           "psf": 1635.1,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2780000.0,
+          "area_sqft": 1657.6,
+          "psf": 1677.1,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "Freehold",
@@ -214276,8 +214714,8 @@
       "top_year": null,
       "rents": [],
       "model": "Condominium",
-      "latest_psf": 1635.1,
-      "txn_count": 18
+      "latest_psf": 1677.1,
+      "txn_count": 19
     },
     {
       "id": "ura-the-woodleigh-residences",
@@ -216585,6 +217023,13 @@
           "area_sqft": 958.0,
           "psf": 2922.8,
           "storey": "06-10"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1338000.0,
+          "area_sqft": 592.0,
+          "psf": 2260.1,
+          "storey": "06-10"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -216654,8 +217099,8 @@
         }
       ],
       "model": "Apartment",
-      "latest_psf": 2922.8,
-      "txn_count": 328
+      "latest_psf": 2591.4,
+      "txn_count": 329
     },
     {
       "id": "ura-thomson-grand",
@@ -217374,6 +217819,13 @@
           "area_sqft": 2066.7,
           "psf": 1379.0,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2710000.0,
+          "area_sqft": 1367.0,
+          "psf": 1982.4,
+          "storey": "16-20"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -217433,8 +217885,8 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1652.1,
-      "txn_count": 101
+      "latest_psf": 1762.2,
+      "txn_count": 102
     },
     {
       "id": "ura-thomson-imperial-court",
@@ -219334,6 +219786,13 @@
           "area_sqft": 441.3,
           "psf": 1518.2,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 1000000.0,
+          "area_sqft": 893.4,
+          "psf": 1119.3,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "99-year leasehold",
@@ -219342,8 +219801,8 @@
       "top_year": null,
       "rents": [],
       "model": "Apartment",
-      "latest_psf": 1518.2,
-      "txn_count": 9
+      "latest_psf": 1119.3,
+      "txn_count": 10
     },
     {
       "id": "ura-thomson-v-two",
@@ -219786,6 +220245,13 @@
           "area_sqft": 936.5,
           "psf": 2242.5,
           "storey": "01-05"
+        },
+        {
+          "date": "2026-08-01",
+          "price": 2275000.0,
+          "area_sqft": 1130.2,
+          "psf": 2012.9,
+          "storey": "01-05"
         }
       ],
       "tenure_label": "Freehold",
@@ -219794,8 +220260,8 @@
       "top_year": null,
       "rents": [],
       "model": "Apartment",
-      "latest_psf": 2210.6,
-      "txn_count": 25
+      "latest_psf": 2012.9,
+      "txn_count": 26
     },
     {
       "id": "ura-trellis-towers",
