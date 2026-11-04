@@ -544,6 +544,31 @@ body.filters-closed .filters--more { display: none; }
 
 .preset:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* A filter that does not apply to the current basis is dimmed rather than
+   hidden: the controls stay where the reader last saw them, and the note below
+   says why they are off. Hiding them would make the row jump on every toggle. */
+.filter--value.is-off { opacity: .45; }
+.filter--value.is-off .num-input { cursor: not-allowed; }
+.num-input:disabled { background: var(--page); color: var(--text-muted); }
+
+.filter-note {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* "not published" is a reason, not a value — it reads as prose, not as a
+   number, so it never gets mistaken for a count of zero. */
+.stat-na { font-size: 11.5px; font-weight: 400; color: var(--text-muted); }
+
+.p-table-note {
+  margin: 7px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
 /* ── Stage ───────────────────────────────────────────────────────────── */
 
 .stage { position: relative; flex: 1 1 auto; min-height: 0; }

@@ -12,7 +12,7 @@
 <!-- Bump ?v= whenever app.js or style.css changes. Without it a browser (or a
      Pages CDN edge) can serve a stale script against fresh markup, which fails
      in confusing ways rather than cleanly. -->
-<link rel="stylesheet" href="style.css?v=40">
+<link rel="stylesheet" href="style.css?v=41">
 </head>
 <body>
 
@@ -30,6 +30,19 @@
         <button type="button" class="chip is-on" data-source="ALL" aria-pressed="true">All</button>
         <button type="button" class="chip" data-source="URA" aria-pressed="false">Private</button>
         <button type="button" class="chip" data-source="HDB" aria-pressed="false">HDB</button>
+      </div>
+    </div>
+
+    <!-- Not a layer like Schools or Land use: this changes what every number
+         on screen means, so it sits beside Type as a mode rather than in the
+         action row as a toggle. -->
+    <div class="filter">
+      <span class="filter-label" id="basisLabel">Data</span>
+      <div class="chips" id="basisChips" role="group" aria-labelledby="basisLabel">
+        <button type="button" class="chip is-on" data-basis="sale" aria-pressed="true"
+                title="Transacted sale prices">Sale</button>
+        <button type="button" class="chip" data-basis="rent" aria-pressed="false"
+                title="Published median rents, per sqft per month">Rent</button>
       </div>
     </div>
 
@@ -102,7 +115,7 @@
       <div class="chips chips--wrap" id="modelChips" role="group" aria-labelledby="modelLabel"></div>
     </div>
 
-    <div class="filter">
+    <div class="filter filter--value">
       <span class="filter-label">Size <span class="filter-unit">sqft</span></span>
       <div class="pair">
         <input type="number" id="minSqft" class="num-input" min="0" step="50"
@@ -113,7 +126,7 @@
       </div>
     </div>
 
-    <div class="filter">
+    <div class="filter filter--value">
       <span class="filter-label">Price <span class="filter-unit">SGD</span></span>
       <div class="pair">
         <input type="number" id="minPrice" class="num-input num-input--wide" min="0" step="50000"
@@ -123,6 +136,13 @@
                placeholder="Any" inputmode="numeric" aria-label="Maximum transacted price">
       </div>
     </div>
+
+    <!-- Rent points carry no price and no floor area, so these two filters
+         have nothing to act on in rent mode. Disabled and explained rather
+         than left live and silently ignored. -->
+    <p class="filter-note" id="valueNote" hidden>
+      Size and price describe a sale, so they don't apply to rent data.
+    </p>
 
     <div class="filter filter--lease">
       <span class="filter-label">
@@ -148,7 +168,7 @@
   <div id="map" role="application" aria-label="Map of watched Singapore properties"></div>
 
   <div class="legend" id="legend" hidden>
-    <p class="legend-title">Median price per sqft</p>
+    <p class="legend-title" id="legendTitle">Median price per sqft</p>
     <div class="legend-scale" id="legendScale"></div>
     <div class="legend-shapes">
       <span class="legend-shape"><i class="mk mk--ura" aria-hidden="true"></i>Private</span>
@@ -213,6 +233,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>

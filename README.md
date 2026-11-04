@@ -139,10 +139,11 @@ opening `index.html` from the filesystem will fail on the `data.json` fetch.
 | Filter | Scope | Empty / zero means |
 |---|---|---|
 | Type | property | all sources |
+| Data | — | sale prices (the other option is rent) |
 | Model | property | all models |
 | Period | transaction | full history (opens on 1Y) |
-| Size (sqft) | transaction | no lower / upper bound |
-| Price (SGD) | transaction | no lower / upper bound |
+| Size (sqft) | transaction | no lower / upper bound — **off in rent mode** |
+| Price (SGD) | transaction | no lower / upper bound — **off in rent mode** |
 | Lease remaining | property | no minimum |
 
 **Size and price filter individual transactions**, so a property disappears
@@ -191,6 +192,36 @@ applied to it, but the model selection itself is not — otherwise picking one
 model would zero every other chip and leave nothing to navigate by. A model
 with nothing behind it dims to zero but stays selectable, so the empty state
 can explain itself.
+
+### Sale and rent
+
+The **Data** chips beside Type switch the whole map between transacted sale
+prices and published median rents. Markers recolour on rent psf, the legend
+changes to "Median rent per sqft, per month", and the panel, compare drawer and
+charts all follow. Rent coverage is actually wider than sale in recent periods
+— 973 of 1,491 properties against 829 in the opening 1-year window.
+
+Two numbers deliberately **don't** change when you flip it:
+
+- **Gross yield** is the ratio between the two, so it reads the same either way
+  — that is the point of it. (Reading its denominator from the active basis
+  would divide rent by rent and report 1200% on every marker.)
+- **Price phase** is fitted to sale prices and labelled as such.
+
+Three things to know about rent data:
+
+- **It starts later.** HDB rents run from 2021, URA's from 2023 and only
+  quarterly. A 5Y or 10Y period will be mostly empty in rent mode.
+- **Size and price filters switch off**, because a rent point carries a date
+  and a psf and nothing else — no price, no floor area. They're dimmed with a
+  note rather than left live and silently ignored.
+- **Counts are not transactions.** HDB publishes a monthly figure with the
+  contract count behind it; URA publishes a quarterly median and *not* the
+  number of leases. So the panel says **Months** or **Quarters**, and for URA
+  the contract row reads "not published" rather than showing a number.
+
+About 18% of properties have no published rent and never will; they drop off
+the map in rent mode and the header says how many.
 
 ### Schools and P1 distance
 

@@ -12,7 +12,7 @@ GitHub Actions (Mon 04:00 SGT).
 ## Quick orientation
 
 ```bash
-.venv/bin/python -m pytest tests/ -q          # 175 tests, offline, ~0.5s
+.venv/bin/python -m pytest tests/ -q          # 180 tests, offline, ~0.8s
 .venv/bin/python -m ingest.run --from-fixtures # offline run, no credentials
 .venv/bin/python -m ingest.run                 # live run
 python3 -m http.server 8123 --directory web    # then open localhost:8123
@@ -31,9 +31,15 @@ Add or remove properties by editing `config/watchlist.yaml` — no code changes.
   when nothing changed, because `data.json` carries a timestamp.
 - **Sources degrade, they never crash the run.** Keep it that way — this has
   been violated twice and both times took down unrelated sources.
+- **The Sale / Rent chip beside Type switches the basis of every number.**
+  Gross yield and the price phase stay sale-based in both modes on purpose —
+  reading yield from the active basis divides rent by rent and reports 1200%
+  on every marker. Everything that differs between the two lives in `BASES`;
+  keep it there rather than adding `isRent()` checks. §13.
 - **Anything that reads the filters must be added to `refreshDetailViews()`.**
   It refreshes the property panel, the compare drawer *and* the school
-  catchment table. A view left out of it silently shows stale numbers after a
+  catchment table, and all three filter paths end there — `applyFilters`,
+  `setSource` and `setBasis`. A view left out of it silently shows stale numbers after a
   filter change — this exact bug has shipped twice. §12.3.
 - **Rental coverage is partial and always will be** — ~18% of properties have
   no published rent. Yield shows an explicit reason, never a blank or a zero.

@@ -147,7 +147,7 @@ the git author address, which is normal but worth knowing.
 Buildless — `index.html`, `app.js`, `style.css`, CDN Leaflet + Chart.js.
 
 **Bump `?v=N` on both asset links whenever `app.js` or `style.css` changes.**
-Currently `v=29`. Without it a browser or CDN edge serves a stale script
+Currently `v=41`. Without it a browser or CDN edge serves a stale script
 against fresh markup, which fails confusingly rather than cleanly — this cost
 real debugging time twice.
 
@@ -547,10 +547,15 @@ that part still needs eyes.
   Removed on request for header space, along with all of its machinery — if it
   ever comes back, note that `applyPreset` and `resetView` used to call
   `stopPlay()` first so an explicit choice wouldn't fight the timer.
-- **`refreshDetailViews()`** is called by *both* filter paths (`applyFilters`
-  and `setSource`, where Reset ends). Reset left a stale detail view **twice**
-  because one path refreshed the drawer and forgot the panel. Add new detail
-  views there, not to one caller.
+- **The Sale / Rent chip group switches the basis of every number** — markers,
+  legend, charts, panel, compare, facet counts. It sits beside Type because it
+  is a mode, not a layer. Gross yield and the price phase deliberately stay
+  sale-based in both modes; reading yield from the active basis divides rent by
+  rent and reports 1200%. §13.
+- **`refreshDetailViews()`** is called by *all three* filter paths
+  (`applyFilters`, `setSource` and `setBasis`; Reset ends in `setSource`).
+  Reset left a stale detail view **twice** because one path refreshed the
+  drawer and forgot the panel. Add new detail views there, not to one caller.
 - **Compare**: number follows *position* (leftmost is #1), colour follows the
   *property* (stable until removed). Reorder by drag or ‹ › buttons.
 - **Growth mode** rebases each line to its own first month in the selected
@@ -587,7 +592,7 @@ that part still needs eyes.
 
 ## 8. Testing
 
-`.venv/bin/python -m pytest tests/ -q` — **118 tests, ~0.4s, all offline.**
+`.venv/bin/python -m pytest tests/ -q` — **180 tests, ~0.8s, all offline.**
 No test touches the network; fixtures live in `tests/fixtures/`.
 
 Fixture values are **synthetic** but field names and shapes mirror the real
@@ -832,3 +837,109 @@ admitted state gives up the green-means-good intuition, but the word carries
 that and the psf ramp never appears in this table. All three are existing role
 tokens, so no new hex entered the palette. Same lesson as §6.1 — the intuitive
 palette was rejected by measurement, not by taste.
+
+---
+
+## 13. The sale / rent basis
+
+One chip group beside **Type** switches every number on the map between
+transacted sale prices and published median rents. The data for it was already
+in `data.json` — `rents` is exported per property with the same `{date, psf}`
+shape as `txns`, which is the only reason a toggle this cheap was possible at
+all. No ingest change, no extra fetch.
+
+### 13.1 Why it is called `basis`
+
+`state.measure` was taken: it is the psf / %-growth chart toggle, and the two
+are independent — *growth in rent* is a sensible thing to look at. `basis`
+names the series everything is read from, `measure` names what the chart does
+with it.
+
+### 13.2 `BASES` is the only place the two differ
+
+Labels, units, decimal places, legend wording, chart titles and the noun used
+in the meta line all live in one table. The alternative — `isRent()` checks
+scattered through fifteen render functions — is how the next person misses one
+and ships a rent map captioned "price". Adding a third basis should be a table
+entry, not an audit.
+
+Everything downstream funnels through four functions (`matchingTxns`,
+`medianPsf`, `monthlyMedians`, `psfColour`), so the markers, the sparkline, the
+growth figure, the compare chart, the facet counts and the lease histogram all
+switched for free.
+
+### 13.3 Two things deliberately do *not* switch
+
+- **Gross yield.** It is the *ratio* between the two bases, so reading its
+  denominator from the active one would divide rent by rent and report **1200%
+  on every marker** the moment the toggle moved. `rentalYield` now derives sale
+  transactions itself via `saleTxns()` rather than trusting the caller's
+  series. The yield is identical in both modes, which is the correct answer and
+  the fastest way to spot a regression: flip the toggle, the number must not
+  move.
+- **Price phase.** Fitted to log(sale psf), and §12.2's wording is specific to
+  prices ("describes prices already transacted"). It stays sale-based in both
+  modes and is labelled "Price phase", so it reads correctly either way. A rent
+  phase is a reasonable future feature; it is not this one silently renamed.
+
+### 13.4 The threshold ladder had to reach below $5
+
+`buildThresholds` rounds band edges to a sensible step, and the ladder stopped
+at 5 — fine for sale psf at $300–3,200, useless for rent at $0.38–7.35. It
+returned `[0, 5]`: **one colour band for the whole map**, and it failed
+silently because a legend with one swatch still renders. The ladder now reaches
+0.1, and the band edges are re-rounded through `toFixed(2)` because 0.25-steps
+in binary floating point land on `2.4500000000000002` and print as that.
+
+Found by running the real numbers through the function, not by reading it —
+the same way §5.4 and §5.12 were found.
+
+Worth knowing: rent spreads across the five bands *better* than sale does
+(15/491/440/20/7 against 640/130/38/21/1 in the default period). The sale ramp
+is the skewed one; that is the data, not the scale.
+
+### 13.5 The time axis stays the sale months
+
+Rents begin 2021-01, URA's only 2023Q3, against sales from 2017-01. Rebuilding
+the slider per basis would resize the control under the reader on every toggle,
+so the axis is always the sale months and the early years simply hold no rent.
+The empty state names that reason first, because an empty rent map in a 5Y
+period is far more likely to be "rents start in 2021" than any filter.
+
+### 13.6 Counts in rent mode are not transactions
+
+HDB publishes a monthly figure *with* the contract count behind it; URA
+publishes a quarterly median and **not** the number of leases (§12.1). So the
+stat is labelled **Months** for HDB and **Quarters** for URA, the contract row
+reads "not published" for URA rather than showing a number, and the URA rent
+table has no Contracts column at all — an empty column invites the reader to
+assume a count. Calling URA's twelve quarters "12 transactions" was wrong in
+the first cut of the yield card and would have been wrong again here.
+
+### 13.7 Size and price are disabled, not ignored
+
+A rent point has a date and a psf and nothing else. Applying a price or size
+bound to it would reject every row for failing a test it has no field for, so
+in rent mode the four inputs are `disabled`, dimmed as a pair, and carry a note
+saying why. They also stop counting toward the filter badge — whatever is still
+typed into a disabled box is not narrowing anything.
+
+### 13.8 `setBasis` is a filter path, so it ends at `refreshDetailViews()`
+
+Like `setSource`, it does not go through `applyFilters`, so it repeats the same
+work by hand: swap the threshold set, re-render the legend, re-sync the badge,
+the model counts and the lease histogram, refit the markers, and *then* refresh
+the detail views. Without that last call an open panel keeps showing sale
+figures under a rent heading — the exact bug class §7 and §12.3 both exist to
+prevent, which has now shipped twice.
+
+It refits rather than keeping the viewport, because rent coverage is a
+different set of properties (973 against 829 in the default period) and the old
+viewport can leave the map parked over blank ground.
+
+### 13.9 272 properties have no rent and never will
+
+~18% of the watchlist (§5.12). They drop off the map in rent mode, so the meta
+line says `272 with no published rent` beside the mapped count rather than
+letting the number quietly fall. Same rule the yield card already follows:
+state the reason, never a blank or a zero.

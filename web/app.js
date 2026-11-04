@@ -27,6 +27,7 @@
     minLease: $("minLease"), leaseLabel: $("leaseLabel"), leaseFill: $("leaseFill"),
     leaseHist: $("leaseHist"), leaseFh: $("leaseFh"),
     modelChips: $("modelChips"), sourceChips: $("sourceChips"),
+    basisChips: $("basisChips"), legendTitle: $("legendTitle"), valueNote: $("valueNote"),
     schoolsToggle: $("schoolsToggle"), legendSchool: $("legendSchool"),
     landToggle: $("landToggle"), legendLand: $("legendLand"), legendLu: $("legendLu"),
     compareToggle: $("compareToggle"), compareBar: $("compareBar"),
@@ -42,6 +43,11 @@
 
   const state = {
     properties: [], months: [], thresholds: [],
+    // Which series every number on screen is read from: transacted sale
+    // prices, or published median rents. Named `basis` rather than `measure`
+    // because `measure` is already the psf/%-growth chart toggle, and the two
+    // are independent — you can look at growth in rent.
+    basis: "sale", thresholdsBy: {},
     source: "ALL", startIdx: 0, endIdx: 0,
     // null means unbounded — an empty box is "no limit", not zero.
     minSqft: null, maxSqft: null, minPrice: null, maxPrice: null,
@@ -102,6 +108,79 @@
     { id: "all", label: "All" },
   ];
 
+  // ── the two bases ─────────────────────────────────────────────────────
+
+  /** Sale and rent are the same shape — a dated series with a `psf` on each
+   *  point — which is why one toggle can switch the whole map. Everything that
+   *  differs between them lives here rather than in a scatter of `if` checks,
+   *  so adding a third basis later is a table entry, not an audit.
+   *
+   *  What does *not* switch: gross yield and the price phase. Yield is the
+   *  ratio between the two bases, so it is meaningless to read it from one of
+   *  them; phase is fitted to sale prices and its wording is specific to them
+   *  (§12.2). Both stay sale-based in either mode and are labelled as such. */
+  const BASES = {
+    sale: {
+      label: "Sale",
+      series: (p) => p.txns || [],
+      // Sale psf runs $300–3,200, rent $0.40–7.40 a month. Same ramp, same
+      // five steps, different thresholds and different precision — a shared
+      // `$673` formatter would print rent as `$3`.
+      decimals: 0,
+      unit: "psf",
+      heroUnit: "per sqft",
+      legendTitle: "Median price per sqft",
+      chartTitle: "Price per sqft over time",
+      growthTitle: "Growth in price per sqft",
+      noun: "transactions",
+    },
+    rent: {
+      label: "Rent",
+      series: (p) => p.rents || [],
+      decimals: 2,
+      unit: "psf/mo",
+      heroUnit: "per sqft, per month",
+      legendTitle: "Median rent per sqft, per month",
+      chartTitle: "Rent per sqft over time",
+      growthTitle: "Growth in rent per sqft",
+      noun: "rent figures",
+    },
+  };
+
+  const basis = () => BASES[state.basis];
+  const isRent = () => state.basis === "rent";
+
+  /** The active series for a property, before any filtering. */
+  const seriesOf = (prop) => basis().series(prop);
+
+  /** Sale transactions regardless of the active basis.
+   *
+   *  Yield divides rent by *sale* psf, so feeding it the active series would
+   *  make it divide rent by rent and report 1200% the moment the toggle moved.
+   *  Phase is sale-only for the same reason it always was. */
+  function saleTxns(prop) {
+    const [from, to] = rangeBounds();
+    return (prop.txns || []).filter((t) => t.date >= from && t.date <= to);
+  }
+
+  /** How many points a property's rent series carries, said honestly.
+   *
+   *  HDB publishes a monthly figure with the contract count behind it; URA
+   *  publishes a quarterly median and *not* the number of leases (§12.1).
+   *  Calling URA's twelve quarters "12 transactions" overstates what is known
+   *  — that was in the first cut of the yield card and was wrong then too. */
+  function countLabel(prop) {
+    if (!isRent()) return "Transactions";
+    return prop.source === "HDB" ? "Months" : "Quarters";
+  }
+
+  /** Contracts behind the series, where the source actually publishes them. */
+  function contractsOf(prop, points) {
+    if (!isRent() || prop.source !== "HDB") return null;
+    const n = points.reduce((a, r) => a + (r.n || 0), 0);
+    return n || null;
+  }
+
   // ── formatting ────────────────────────────────────────────────────────
 
   const sgd = new Intl.NumberFormat("en-SG", {
@@ -110,7 +189,14 @@
   const num = new Intl.NumberFormat("en-SG");
 
   const money = (v) => (v == null ? "—" : sgd.format(v));
-  const psfText = (v) => (v == null ? "—" : "$" + num.format(Math.round(v)));
+  /** `b` overrides the active basis, for the places that deliberately mix the
+   *  two — the yield note prints a rent and a sale psf in one sentence. */
+  const psfText = (v, b = state.basis) => {
+    if (v == null) return "—";
+    const d = BASES[b].decimals;
+    return "$" + v.toLocaleString("en-SG",
+      { minimumFractionDigits: d, maximumFractionDigits: d });
+  };
 
   function monthLabel(iso) {
     const [y, m] = iso.split("-");
@@ -211,8 +297,12 @@
    *  has no rent to pair with its early years. Rather than silently blending
    *  2019 prices with 2024 rents, the rent is taken from the overlap and the
    *  span actually used is reported back for the caption to state. */
-  function rentalYield(prop, txns) {
+  function rentalYield(prop) {
     const rents = prop.rents || [];
+    // Deliberately the sale series, not the active one. Reading the
+    // denominator from the toggle would divide rent by rent the moment the
+    // map switched to rent and report a 1200% yield on every marker.
+    const txns = saleTxns(prop);
     if (!rents.length || !txns.length) return null;
 
     const psf = medianPsf(txns);
@@ -355,10 +445,20 @@
     const min = Math.min(...allPsf), max = Math.max(...allPsf);
     if (min === max) return [];
     const width = (max - min) / PSF_STEPS;
-    const round = width > 400 ? 100 : width > 150 ? 50 : width > 40 ? 10 : 5;
+    // The ladder has to reach rent as well as sale. Sale psf bands are
+    // hundreds wide; rent bands are fractions of a dollar, and stopping the
+    // ladder at 5 collapsed every rent threshold onto 0 and 5 — one band for
+    // the whole map, failing silently because a legend with one swatch still
+    // renders. Found by running the real numbers through it, not by reading.
+    const round =
+      width > 400 ? 100 : width > 150 ? 50 : width > 40 ? 10
+      : width > 4 ? 5 : width > 2 ? 1 : width > 0.8 ? 0.5
+      : width > 0.4 ? 0.25 : 0.1;
     const out = [];
     for (let i = 1; i < PSF_STEPS; i++) {
-      out.push(Math.round((min + width * i) / round) * round);
+      // Re-rounded through a fixed number of places: 0.25-steps in binary
+      // floating point land on 2.4500000000000002 and print as that.
+      out.push(+(Math.round((min + width * i) / round) * round).toFixed(2));
     }
     return [...new Set(out)];
   }
@@ -382,6 +482,7 @@
                </div>`;
     }
     el.legendScale.innerHTML = html;
+    if (el.legendTitle) el.legendTitle.textContent = basis().legendTitle;
     el.legend.hidden = false;
   }
 
@@ -395,8 +496,15 @@
   function matchingTxns(prop) {
     const [from, to] = rangeBounds();
     const { minSqft, maxSqft, minPrice, maxPrice } = state;
+    const points = seriesOf(prop);
 
-    return prop.txns.filter((t) => {
+    // A rent point has a date and a psf and nothing else — no price, no floor
+    // area. The value filters are disabled in rent mode rather than applied to
+    // fields that don't exist, which would drop every row for failing a bound
+    // it has no way to satisfy.
+    if (isRent()) return points.filter((t) => t.date >= from && t.date <= to);
+
+    return points.filter((t) => {
       if (t.date < from || t.date > to) return false;
       if (minPrice != null && !(t.price >= minPrice)) return false;
       if (maxPrice != null && !(t.price <= maxPrice)) return false;
@@ -479,10 +587,14 @@
   function activeFilterCount() {
     let n = 0;
     if (state.source !== "ALL") n++;
-    if (state.minSqft != null) n++;
-    if (state.maxSqft != null) n++;
-    if (state.minPrice != null) n++;
-    if (state.maxPrice != null) n++;
+    // Size and price are disabled in rent mode, so whatever is still typed in
+    // them is not narrowing anything and must not be counted as though it is.
+    if (!isRent()) {
+      if (state.minSqft != null) n++;
+      if (state.maxSqft != null) n++;
+      if (state.minPrice != null) n++;
+      if (state.maxPrice != null) n++;
+    }
     if (state.minLease > 0) n++;
     if (state.models.size) n++;
     if (state.startIdx > 0 || state.endIdx < state.months.length - 1) n++;
@@ -606,7 +718,6 @@
    *  render so it always reflects the current period. */
   function hoverCard(prop, txns, psf) {
     const g = growth(txns);
-    const prices = txns.map((t) => t.price).filter(Boolean);
     const series = monthlyMedians(txns);
     const shape = prop.source === "HDB" ? "mk--hdb" : "mk--ura";
 
@@ -625,22 +736,55 @@
 
       <div class="hc-hero">
         <span class="hc-psf">${psfText(psf)}</span>
-        <span class="hc-psf-unit">psf median</span>
+        <span class="hc-psf-unit">${isRent() ? "psf/mo median" : "psf median"}</span>
         ${growthLine}
       </div>
 
       ${series.length > 1
         ? `<div class="hc-spark">${sparkline(series)}</div>`
-        : `<div class="hc-spark hc-spark--empty">single month of data</div>`}
+        : `<div class="hc-spark hc-spark--empty">single period of data</div>`}
 
-      <dl class="hc-stats">
-        <div><dt>Transactions</dt><dd>${num.format(txns.length)}</dd></div>
-        <div><dt>Median price</dt><dd>${prices.length ? compactMoney(median(prices)) : "—"}</dd></div>
-        <div><dt>Latest</dt><dd>${txns.length ? monthLabel(txns[txns.length - 1].date) : "—"}</dd></div>
+      <dl class="hc-stats">${seriesStats(prop, txns).map(([k, v]) =>
+        `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}
       </dl>
 
       <p class="hc-hint">Click for full history</p>
     </div>`;
+  }
+
+  /** The three stats under the hero number, in whichever basis is showing.
+   *
+   *  One implementation so the hover card and the panel can't drift — they are
+   *  meant to be the same numbers with and without the interaction. In rent
+   *  mode "Transactions" would be a lie: the points are monthly or quarterly
+   *  medians, and only HDB publishes the contract count behind them (§12.1). */
+  function seriesStats(prop, points) {
+    const latest = points.length
+      ? monthLabel(points[points.length - 1].date) : "—";
+
+    if (!isRent()) {
+      const prices = points.map((t) => t.price).filter(Boolean);
+      return [
+        ["Transactions", num.format(points.length)],
+        ["Median price", prices.length ? compactMoney(median(prices)) : "—"],
+        ["Latest", latest],
+      ];
+    }
+
+    const contracts = contractsOf(prop, points);
+    return [
+      [countLabel(prop), num.format(points.length)],
+      ["Contracts", contracts != null
+        ? num.format(contracts)
+        : `<span class="stat-na">not published</span>`],
+      ["Latest", latest],
+    ];
+  }
+
+  /** What one point in the active series actually is. */
+  function cadence(prop) {
+    if (!isRent()) return "Monthly median";
+    return prop.source === "HDB" ? "Monthly median rent" : "Quarterly median rent";
   }
 
   function markerIcon(prop, psf, showLabel) {
@@ -730,11 +874,18 @@
     const total = props.reduce((n, p) => n + matchingTxns(p).length, 0);
     const missing = props.length - geocoded;
     const bits = [
-      `${num.format(total)} transactions`,
+      `${num.format(total)} ${basis().noun}`,
       `${shown} of ${state.properties.length} mapped`,
       `${monthLabel(from)} – ${monthLabel(to)}`,
     ];
     if (missing) bits.push(`${missing} without coordinates`);
+    if (isRent()) {
+      // ~18% of properties have no published rent and never will (§5.12).
+      // They drop off the map in rent mode, so say how many and why rather
+      // than letting the mapped count quietly fall.
+      const noRent = props.filter((p) => !(p.rents || []).length).length;
+      if (noRent) bits.push(`${noRent} with no published rent`);
+    }
     if (state.generatedAt) bits.push(`updated ${state.generatedAt}`);
     el.meta.textContent = bits.join(" · ");
 
@@ -743,7 +894,12 @@
       el.emptyNote.textContent = props.length === 0
         ? "No properties match these filters. Try clearing the type or model, "
           + "or lowering the lease minimum."
-        : "No transactions match these filters. Try widening the size, price or period.";
+        : isRent()
+          // Rents start in 2021 and URA's only in 2023, so an early period is
+          // the likeliest reason a rent map is empty — name it first.
+          ? "No published rent in this period. Rents start in 2021 (2023 for "
+            + "private projects), so try a later or wider period."
+          : "No transactions match these filters. Try widening the size, price or period.";
       el.emptyNote.hidden = false;
     } else {
       el.emptyNote.hidden = true;
@@ -956,7 +1112,6 @@
     const txns = matchingTxns(prop);
     const g = growth(txns);
     const l = lease(prop);
-    const prices = txns.map((t) => t.price).filter(Boolean);
     const shape = prop.source === "HDB" ? "mk--hdb" : "mk--ura";
 
     // A compared property filtered out of view keeps its slot and says so —
@@ -971,15 +1126,21 @@
           <button type="button" class="cmp-drop" data-drop="${prop.id}"
                   aria-label="Remove ${escapeHtml(prop.name)}">&times;</button>
         </header>
-        <p class="cmp-empty">No transactions match the current filters.</p>
+        <p class="cmp-empty">${isRent()
+          ? "No published rent for this property in the selected period."
+          : "No transactions match the current filters."}</p>
       </article>`;
     }
 
-    const ph = phase(txns);
-    const y = rentalYield(prop, txns);
+    // Both read the sale series whichever basis is showing: a price phase is
+    // about prices, and a yield is the ratio between the two bases.
+    const ph = phase(saleTxns(prop));
+    const y = rentalYield(prop);
+
+    const [countRow, depthRow] = seriesStats(prop, txns);
 
     const rows = [
-      ["Median psf", psfText(medianPsf(txns))],
+      [isRent() ? "Median rent psf" : "Median psf", psfText(medianPsf(txns))],
       ["Growth", g ? `${pct(g.annual != null ? g.annual : g.total)}` +
         `<span class="cmp-sub">${g.annual != null ? "per year" : "over period"}</span>` : "—"],
       // Same two metrics as the panel, on the same period — the whole point of
@@ -992,8 +1153,8 @@
         ? `${(y.value * 100).toFixed(2)}%<span class="cmp-sub">` +
           `${y.rentPsf.toFixed(2)} psf/mo rent</span>`
         : `—<span class="cmp-sub">no rent published</span>`],
-      ["Transactions", num.format(txns.length)],
-      ["Median price", prices.length ? compactMoney(median(prices)) : "—"],
+      countRow,
+      depthRow,
       ["Latest", monthLabel(txns[txns.length - 1].date)],
       ["Type", escapeHtml([prop.type, prop.model].filter(Boolean)
         .filter((v, k, a) => a.indexOf(v) === k).join(" · "))],
@@ -1089,12 +1250,12 @@
     // say so rather than let the reader assume a shared starting line.
     const bases = [...new Set(series.map((s) => s.baseMonth).filter(Boolean))];
     el.cmpChartTitle.textContent = growthMode
-      ? "Growth in price per sqft" : "Price per sqft over time";
+      ? basis().growthTitle : basis().chartTitle;
     el.cmpChartSub.textContent = growthMode
       ? (bases.length === 1
           ? `Change since ${monthLabel(bases[0])}, each line from its own first month`
           : "Change since each property's first month in the selected period")
-      : "Monthly median, one line per property";
+      : `${isRent() ? "Median rent" : "Monthly median"}, one line per property`;
 
     const grid = cssVar("--gridline");
     const muted = cssVar("--text-muted");
@@ -1182,7 +1343,7 @@
               color: muted, font: { size: 10 }, padding: 6, maxTicksLimit: 5,
               callback: (v) => (growthMode
                 ? (v > 0 ? "+" : "") + v + "%"
-                : "$" + num.format(v)),
+                : psfText(v)),
             },
           },
         },
@@ -1827,7 +1988,6 @@
 
     const txns = matchingTxns(prop);
     const psf = medianPsf(txns);
-    const prices = txns.map((t) => t.price).filter(Boolean);
     const shape = prop.source === "HDB" ? "mk--hdb" : "mk--ura";
     const kind = prop.source === "HDB" ? "HDB Resale" : "Private";
 
@@ -1846,45 +2006,42 @@
 
       <div class="p-hero">
         <span class="p-hero-value">${psfText(psf)}</span>
-        <span class="p-hero-unit">per sqft</span>
+        <span class="p-hero-unit">${basis().heroUnit}</span>
       </div>
       <p class="p-hero-label">Median across the selected period</p>
 
-      <div class="p-stats">
-        <div class="p-stat"><div class="p-stat-k">Transactions</div>
-          <div class="p-stat-v">${num.format(txns.length)}</div></div>
-        <div class="p-stat"><div class="p-stat-k">Median price</div>
-          <div class="p-stat-v">${prices.length ? compactMoney(median(prices)) : "—"}</div></div>
-        <div class="p-stat"><div class="p-stat-k">Latest</div>
-          <div class="p-stat-v">${txns.length ? monthLabel(txns[txns.length - 1].date) : "—"}</div></div>
+      <div class="p-stats">${seriesStats(prop, txns).map(([k, v]) =>
+        `<div class="p-stat"><div class="p-stat-k">${k}</div>
+          <div class="p-stat-v">${v}</div></div>`).join("")}
       </div>
 
       ${growthHtml(growth(txns))}
-      ${phaseHtml(phase(txns))}
-      ${yieldHtml(rentalYield(prop, txns), prop)}
+      ${phaseHtml(phase(saleTxns(prop)))}
+      ${yieldHtml(rentalYield(prop), prop)}
       ${factsHtml(prop)}
 
       <div class="cmp-chart-head">
         <div class="cmp-chart-titles">
           <h3 class="p-h3" id="panelChartTitle">${growthView
-            ? "Growth in price per sqft" : "Price per sqft over time"}</h3>
+            ? basis().growthTitle : basis().chartTitle}</h3>
           <p class="p-h3-sub" id="panelChartSub">${txns.length
             ? (growthView ? "Change since the first month in the selected period"
-                          : "Monthly median")
-            : "Monthly median — no data in range"}</p>
+                          : cadence(prop))
+            : `${cadence(prop)} — no data in range`}</p>
         </div>
         <div class="chips" id="panelModeChips" role="group" aria-label="Chart measure">
           <button type="button" class="chip${growthView ? "" : " is-on"}"
-                  data-cmpmode="psf" aria-pressed="${!growthView}">Price psf</button>
+                  data-cmpmode="psf" aria-pressed="${!growthView}">${
+                    isRent() ? "Rent psf" : "Price psf"}</button>
           <button type="button" class="chip${growthView ? " is-on" : ""}"
                   data-cmpmode="growth" aria-pressed="${growthView}">% growth</button>
         </div>
       </div>
       <div class="chart-box"><canvas id="psfChart"></canvas></div>
 
-      <h3 class="p-h3">Recent transactions</h3>
+      <h3 class="p-h3">${isRent() ? "Recent rents" : "Recent transactions"}</h3>
       <p class="p-h3-sub">Newest first${txns.length > 12 ? ", latest 12 of " + txns.length : ""}</p>
-      ${transactionsTable(txns)}
+      ${transactionsTable(prop, txns)}
     `;
 
     el.panel.hidden = false;
@@ -1901,7 +2058,7 @@
   function growthHtml(g) {
     if (!g) {
       return `<div class="p-growth p-growth--empty">
-        Not enough transactions in this period to measure growth.</div>`;
+        Not enough ${basis().noun} in this period to measure growth.</div>`;
     }
     const annual = g.annual != null;
     const value = annual ? g.annual : g.total;
@@ -1973,7 +2130,7 @@
         <span class="p-yield-value">${(y.value * 100).toFixed(2)}%</span>
       </div>
       <p class="p-yield-note">
-        ${y.rentPsf.toFixed(2)} psf/month × 12 ÷ ${psfText(y.psf)} ·
+        ${y.rentPsf.toFixed(2)} psf/month × 12 ÷ ${psfText(y.psf, "sale")} ·
         ${src} · ${monthLabel(y.firstDate)} – ${monthLabel(y.lastDate)}${depth}
       </p>
       <p class="p-yield-caveat">Before maintenance, tax, agent fees and vacancy.${
@@ -2014,8 +2171,13 @@
     return v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1e3) + "k";
   }
 
-  function transactionsTable(txns) {
-    if (!txns.length) return `<p class="p-empty">No transactions in the selected period.</p>`;
+  function transactionsTable(prop, txns) {
+    if (!txns.length) {
+      return `<p class="p-empty">${isRent()
+        ? "No published rent in the selected period."
+        : "No transactions in the selected period."}</p>`;
+    }
+    if (isRent()) return rentTable(prop, txns);
     const rows = [...txns].reverse().slice(0, 12).map((t) => `
       <tr>
         <td>${monthLabel(t.date)}</td>
@@ -2028,6 +2190,30 @@
       <thead><tr><th>Month</th><th class="num">Price</th><th class="num">Sqft</th>
       <th class="num">PSF</th><th>Storey</th></tr></thead>
       <tbody>${rows}</tbody></table></div>`;
+  }
+
+  /** A rent point carries a date, a psf and — for HDB only — the number of
+   *  contracts behind it. No price, no floor area, no storey, so those columns
+   *  are dropped rather than filled with dashes. URA gets no count column at
+   *  all: it publishes a quarterly median and not the leases behind it, and an
+   *  empty "Contracts" column invites the reader to assume one (§12.1). */
+  function rentTable(prop, points) {
+    const hdb = prop.source === "HDB";
+    const rows = [...points].reverse().slice(0, 12).map((r) => `
+      <tr>
+        <td>${monthLabel(r.date)}</td>
+        <td class="num">${psfText(r.psf)}</td>
+        ${hdb ? `<td class="num">${r.n ? num.format(r.n) : "—"}</td>` : ""}
+      </tr>`).join("");
+
+    return `<div class="p-table-wrap"><table class="p-table">
+      <thead><tr><th>${hdb ? "Month" : "Quarter"}</th>
+      <th class="num">Rent psf</th>
+      ${hdb ? `<th class="num">Contracts</th>` : ""}</tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <p class="p-table-note">${hdb
+        ? "HDB approved rentals, converted to psf using this block's median floor area."
+        : "URA publishes a median per quarter, not the number of leases behind it."}</p>`;
   }
 
   // ── chart ─────────────────────────────────────────────────────────────
@@ -2092,7 +2278,7 @@
             callbacks: {
               title: (items) => monthLabel(items[0].label),
               label: (item) => {
-                if (!growthMode) return psfText(item.parsed.y) + " psf";
+                if (!growthMode) return psfText(item.parsed.y) + " " + basis().unit;
                 const raw = series[item.dataIndex][1];
                 const g = growthAt(base, raw, labels[0], labels[item.dataIndex]);
                 return [
@@ -2100,7 +2286,7 @@
                   g.annual != null
                     ? `${pct(g.annual)} a year (CAGR)`
                     : `under a year — no annual rate yet`,
-                  `${psfText(raw)} psf`,
+                  `${psfText(raw)} ${basis().unit}`,
                 ];
               },
             },
@@ -2126,7 +2312,7 @@
               color: muted, font: { size: 10 }, padding: 6, maxTicksLimit: 5,
               callback: (v) => (growthMode
                 ? (v > 0 ? "+" : "") + v + "%"
-                : "$" + num.format(v)),
+                : psfText(v)),
             },
           },
         },
@@ -2487,6 +2673,49 @@
     refreshDetailViews();
   }
 
+  /** Switch which series the whole map reads.
+   *
+   *  Modelled on `setSource`, and like it this is a filter path that does not
+   *  go through `applyFilters` — so it has to do the same five things by hand
+   *  and finish at `refreshDetailViews()` (§7, §12.3), or an open panel keeps
+   *  showing sale figures under a rent heading. */
+  function setBasis(next) {
+    if (next !== "sale" && next !== "rent") return;
+    state.basis = next;
+    state.thresholds = state.thresholdsBy[next] || [];
+
+    for (const chip of el.basisChips.querySelectorAll(".chip")) {
+      const on = chip.dataset.basis === next;
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", String(on));
+    }
+
+    syncValueFilters();
+    renderLegend();
+    syncFilterBadge();
+    updateModelCounts();
+    renderLeaseHistogram();
+    // Refit: rent coverage is a different set of properties from sales, and
+    // keeping the old viewport can leave the map parked over blank ground.
+    renderMarkers({ fit: true });
+    refreshDetailViews();
+  }
+
+  /** Size and price describe a sale. A rent point has neither field, so in
+   *  rent mode the inputs are disabled and told why rather than left live and
+   *  quietly ignored — an input that accepts a number and changes nothing is
+   *  worse than one that is visibly off. */
+  function syncValueFilters() {
+    const off = isRent();
+    for (const input of [el.minSqft, el.maxSqft, el.minPrice, el.maxPrice]) {
+      input.disabled = off;
+    }
+    for (const node of document.querySelectorAll(".filter--value")) {
+      node.classList.toggle("is-off", off);
+    }
+    if (el.valueNote) el.valueNote.hidden = !off;
+  }
+
   function resetView() {
     // Back to how the page opens, which is the default period — not the full
     // range. "Reset" means "as I found it".
@@ -2503,6 +2732,17 @@
     syncLeaseUI();
     syncRangeUI();
     syncPresets();
+    // Back to sale first: it owns the colour scale, the legend and whether the
+    // value filters are live, and setSource below does the single re-render.
+    state.basis = "sale";
+    state.thresholds = state.thresholdsBy.sale || [];
+    for (const chip of el.basisChips.querySelectorAll(".chip")) {
+      const on = chip.dataset.basis === "sale";
+      chip.classList.toggle("is-on", on);
+      chip.setAttribute("aria-pressed", String(on));
+    }
+    syncValueFilters();
+    renderLegend();
     setSource("ALL");                 // renders and refits
   }
 
@@ -2532,15 +2772,34 @@
 
     const months = new Set();
     const allPsf = [];
+    const allRent = [];
     for (const p of state.properties) {
       p.txns.sort((a, b) => a.date.localeCompare(b.date));
       for (const t of p.txns) {
         months.add(t.date);
         if (t.psf != null) allPsf.push(t.psf);
       }
+      if (p.rents) {
+        p.rents.sort((a, b) => a.date.localeCompare(b.date));
+        for (const r of p.rents) if (r.psf != null) allRent.push(r.psf);
+      }
     }
     state.months = [...months].sort();
-    state.thresholds = buildThresholds(allPsf);
+
+    // One scale per basis, both computed from the whole dataset and then held
+    // fixed. Switching basis legitimately changes what a colour means — which
+    // is exactly why the legend title changes with it — but moving the time
+    // slider still must not.
+    //
+    // The time axis stays the sale months throughout. Rents start in 2021 and
+    // URA's are quarterly, so a rent-only axis would resize the slider under
+    // the reader every time they flipped the toggle; instead the early years
+    // simply hold no rent, which the empty state says out loud.
+    state.thresholdsBy = {
+      sale: buildThresholds(allPsf),
+      rent: buildThresholds(allRent),
+    };
+    state.thresholds = state.thresholdsBy[state.basis];
 
     const last = state.months.length - 1;
     for (const input of [el.rangeStart, el.rangeEnd]) input.max = String(last);
@@ -2556,6 +2815,7 @@
     el.minLease.max = String(state.leaseMax);
 
     renderLegend();
+    syncValueFilters();
     buildModelChips();
     renderLeaseHistogram();
     buildPresets();
@@ -2590,6 +2850,9 @@
     el.scrim.addEventListener("click", closePanel);
     for (const chip of el.sourceChips.querySelectorAll(".chip")) {
       chip.addEventListener("click", () => setSource(chip.dataset.source));
+    }
+    for (const chip of el.basisChips.querySelectorAll(".chip")) {
+      chip.addEventListener("click", () => setBasis(chip.dataset.basis));
     }
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !el.panel.hidden) closePanel();
