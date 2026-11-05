@@ -94,11 +94,41 @@ hdb:
   # 398, Premium Apartment 92, 3Gen 9, Adjoined flat 5), so it also brings
   # `3Gen` onto the model chips for the first time.
   #
-  # Note this town sits outside the two planning areas the land-use overlay
-  # covers, so Tampines markers have no parcels beneath them until the overlay
-  # is rebuilt — see PLAN §11 and `--refresh-masterplan`.
+  # This was true when the entry was added and no longer is: the overlay has
+  # since been rebuilt to include Tampines, so these markers do have parcels
+  # beneath them. PLAN §5.11.
   - town: "TAMPINES"
     flat_type: "5 ROOM"
+
+  # Every executive flat in Tampines — 1,694 transactions across 115 blocks,
+  # which is more executive stock than Bishan (421), Geylang (217) and Toa
+  # Payoh (183) put together. Five models are present: Maisonette 893,
+  # Apartment 708, Premium Apartment 70, Premium Maisonette 16, Adjoined
+  # flat 7.
+  #
+  # Asked for as "EM and EA". Neither is a flat_type — see the note at the
+  # top of this section; `flat_type: EXECUTIVE` fetches both and the models
+  # separate themselves client-side. Left unnarrowed, so the three smaller
+  # models come along too; add `flat_model: "Maisonette"` (or "Apartment")
+  # to split it into two strict entries instead.
+  #
+  # No lease_from: HDB stopped building executive flats in the mid-90s, so
+  # this stock is all 1982-1997 and any bound at 2000 excludes all of it.
+  #
+  # "Premium Maisonette" arrives on the model chips for the first time here.
+  # It is deliberately NOT folded into the "Maisonette" chip group in
+  # web/app.js — a premium unit is a different product at a measurably
+  # higher psf ($520 median vs $496), so collapsing them would hide that.
+  #
+  # Rental coverage is unusually good: 98 of the 115 blocks have approved
+  # rentals (85%, against ~82% site-wide), so most of these carry a real
+  # gross yield rather than the no-published-rent note.
+  #
+  # The land-use overlay does cover Tampines (BISHAN + TAMPINES + TOA PAYOH,
+  # 8,695 parcels), so these markers sit on real parcels with no rebuild
+  # needed. PLAN §5.11.
+  - town: "TAMPINES"
+    flat_type: "EXECUTIVE"
 
   # ── Central Region: every 5-room and executive ─────────────────────────
   #
@@ -124,9 +154,10 @@ hdb:
   # up 7 "Adjoined flat" executives across Bukit Merah, Central Area and
   # Kallang — add `flat_model` to an entry to exclude them.
   #
-  # These towns sit outside the two planning areas the land-use overlay
-  # covers, so their markers have no parcels beneath them until it is rebuilt
-  # with --refresh-masterplan — same situation as Tampines. PLAN §11.
+  # These towns sit outside the three planning areas the land-use overlay
+  # covers (Bishan, Tampines, Toa Payoh), so their markers have no parcels
+  # beneath them until it is rebuilt with --refresh-masterplan. Tampines is
+  # no longer an example of this — it was folded into the overlay. PLAN §11.
 
   - town: "BUKIT MERAH"          # 1,927 five-room across 164 blocks
     flat_type: "5 ROOM"

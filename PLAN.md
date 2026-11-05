@@ -9,7 +9,7 @@ that recurred because a rule was applied in one place and not another. The code
 tells you *what*; this tells you *why*, and which mistakes have already been
 made once.
 
-Last updated: 2026-07-31. Live at <https://andrewchengyr.github.io/property-tracker/>
+Last updated: 2026-11-05. Live at <https://andrewchengyr.github.io/property-tracker/>
 
 ---
 
@@ -40,9 +40,9 @@ web/data.json + web/schools.json ──► Leaflet + Chart.js on GitHub Pages
 GitHub Actions (weekly cron) ───────┘
 ```
 
-**Current state:** 904 properties, 12,107 transactions (Jan 2017 – Jul 2026),
-179 primary schools, 8,695 land-use parcels, 1,121 cached geocodes. 118 tests,
-all offline. 50 commits (24 of them automated refreshes).
+**Current state:** 1,661 properties, 20,487 transactions (Jan 2017 – Nov 2026),
+182 primary schools, 8,695 land-use parcels, 1,771 cached geocodes. 180 tests,
+all offline. 83 commits (45 of them automated refreshes).
 
 ---
 
@@ -106,6 +106,8 @@ conversationally.
 | — | Compare Schools | — | Multi-school catchment intersection; §12.3 |
 | — | Central Region HDB | — | 7 towns added; exposed §5.13 and §5.14 |
 | — | P1 balloting | — | MOE vacancies/balloting per school; §5.15, §5.16, §12.4 |
+| — | Sale / Rent basis | `6602fb4` | Toggle switching the basis of every number; §13 |
+| — | Tampines executives | — | EM + EA, 159 blocks / 1,692 txns; first `Premium Maisonette` |
 
 ---
 
@@ -937,9 +939,11 @@ It refits rather than keeping the viewport, because rent coverage is a
 different set of properties (973 against 829 in the default period) and the old
 viewport can leave the map parked over blank ground.
 
-### 13.9 272 properties have no rent and never will
+### 13.9 Several hundred properties have no rent and never will
 
-~18% of the watchlist (§5.12). They drop off the map in rent mode, so the meta
-line says `272 with no published rent` beside the mapped count rather than
+~18% of the watchlist (§5.12) — 294 at the time of writing, and the figure moves
+with every watchlist addition, so read it off the meta line rather than from
+here. They drop off the map in rent mode, so that line says `N with no
+published rent` beside the mapped count rather than
 letting the number quietly fall. Same rule the yield card already follows:
 state the reason, never a blank or a zero.
