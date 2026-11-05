@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-05T06:38:52Z",
+  "generated_at": "2026-11-05T06:46:01Z",
   "properties": [
     {
       "id": "hdb-1-beach-rd-5-room-adjoined-flat",
@@ -245491,7 +245491,7 @@
         }
       ],
       "model": "Condominium",
-      "latest_psf": 1819.3,
+      "latest_psf": 1819.4,
       "txn_count": 103
     },
     {
